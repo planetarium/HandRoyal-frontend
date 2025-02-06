@@ -1,0 +1,128 @@
+.join-session {
+  text-align: center;
+  padding: 2rem;
+}
+
+.join-form {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.join-form input {
+  padding: 0.5rem;
+  width: 300px;
+}
+
+.create-session-link {
+  color: #666;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 1rem;
+}
+
+.create-session-link:hover {
+  color: #007bff;
+}
+
+.game-board {
+  padding: 2rem;
+}
+
+.progress-bar {
+  height: 20px;
+  background: #eee;
+  margin-bottom: 2rem;
+}
+
+.battle-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.hand-selection {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.hand-selection button {
+  font-size: 2rem;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hand-selection button.selected {
+  border-color: #007bff;
+}
+
+.submit-button {
+  display: block;
+  margin: 0 auto;
+  padding: 0.5rem 2rem;
+}
+
+.create-session {
+  text-align: center;
+  padding: 2rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.session-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.create-session button {
+  padding: 0.75rem 2rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.create-session button:hover {
+  background-color: #0056b3;
+}
+
+.session-info {
+  text-align: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-family: monospace;
+  font-size: 1.1rem;
+} 
