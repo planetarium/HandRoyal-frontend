@@ -1,6 +1,5 @@
 export interface Session {
   id: string;
-  startAt: Date;
   rule: string;
   prize: string;
 }
