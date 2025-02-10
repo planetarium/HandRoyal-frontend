@@ -39,7 +39,8 @@ i18n
           "participants": "Participants",
           "winner": "Winner",
           "matches": "Matches",
-          "backToMain": "Back to Main"
+          "backToMain": "Back to Main",
+          "logoutButton": "Logout"
         }
       },
 
@@ -78,9 +79,11 @@ i18n
           "participants": "참가자",
           "winner": "승자",
           "matches": "경기",
-          "backToMain": "메인으로 돌아가기"
+          "backToMain": "메인으로 돌아가기",
+          "logoutButton": "로그아웃"
         }
       }
+
 
 
 

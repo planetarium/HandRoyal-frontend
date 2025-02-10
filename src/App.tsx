@@ -1,10 +1,17 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { JoinSession } from './components/JoinSession';
 import { CreateSession } from './components/CreateSession';
 import { GameBoard } from './components/GameBoard';
 import { ResultPage } from './components/ResultPage';
+import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
+import { AccountProvider, useAccount } from './context/AccountContext';
+
+const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
+  const { privateKey } = useAccount();
+  return privateKey ? children : <Navigate to="/login" />;
+};
 
 const AppContent: React.FC = () => {
   return (
@@ -12,10 +19,11 @@ const AppContent: React.FC = () => {
       <Navbar />
       <main>
         <Routes>
-          <Route element={<JoinSession />} path="/" />
-          <Route element={<CreateSession />} path="/create" />
-          <Route element={<GameBoard />} path="/game/:sessionId" />
-          <Route element={<ResultPage />} path="/result/:sessionId" />
+          <Route element={<LoginPage />} path="/login" />
+          <Route element={<ProtectedRoute><JoinSession /></ProtectedRoute>} path="/" />
+          <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
+          <Route element={<ProtectedRoute><GameBoard /></ProtectedRoute>} path="/game/:sessionId" />
+          <Route element={<ProtectedRoute><ResultPage /></ProtectedRoute>} path="/result/:sessionId" />
         </Routes>
       </main>
     </div>
@@ -24,9 +32,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AccountProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AccountProvider>
   );
 };
 
