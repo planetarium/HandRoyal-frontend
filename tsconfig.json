@@ -23,7 +23,8 @@
   "include": [
     "src",
     ".prettierrc.cjs",
-    "eslint.config.js"
+    "eslint.config.js",
+    "codegen.ts"
   ]
 
 } 
