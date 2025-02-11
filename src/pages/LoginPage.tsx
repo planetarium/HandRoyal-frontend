@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RawPrivateKey } from '@planetarium/account';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { request } from 'graphql-request';
+import { graphql } from '../gql/gql'
 import { useAccount } from '../context/AccountContext';
 
 const TEST_ACCOUNTS = [
@@ -19,24 +22,78 @@ const TEST_ACCOUNTS = [
   }
 ];
 
+const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
+const checkUserDocument = graphql(/* GraphQL */ `
+  query CheckUser($address: Address!) {
+    stateQuery {
+      user(userAddress: $address) {
+        id
+        gloves
+      }
+    }
+  }
+`);
+
+const createUserDocument = graphql(/* GraphQL */ `
+  mutation CreateUser($privateKey: PrivateKey) {
+    createUser(privateKey: $privateKey)
+  }
+`);
+
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
-  const { setPrivateKey } = useAccount();
+  const { privateKey, setPrivateKey } = useAccount();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const handleLogin = async () => {
-    try {
-      const privateKey = RawPrivateKey.fromHex(privateKeyInput);
-      setPrivateKey(privateKey);
+  const createUserMutation = useMutation({
+    mutationFn: async () => {
+      const response = await request(GRAPHQL_ENDPOINT, createUserDocument, { privateKey: privateKeyInput });
+      return response.createUser;
+    },
+    onSuccess: () => {
       setErrorMessage(null);
+      setPrivateKey(privateKey);
       navigate('/');
+    },
+    onError: (error) => {
+      console.error('Failed to create session:', error);
+      setErrorMessage(error.message);
+    }
+  });
+
+  const handleLogin = useCallback(async () => {
+    try {
+      setIsFetching(true);
+      const privateKey = RawPrivateKey.fromHex(privateKeyInput);
+      const address = (await privateKey?.getAddress())?.toHex();
+      const data = await queryClient.fetchQuery({
+        queryKey: ['checkUser', address],
+        queryFn: async () => {
+          const response = await request(GRAPHQL_ENDPOINT, checkUserDocument, { address: address });
+          return response;
+        }
+      });
+      
+      if (data?.stateQuery?.user) {
+        setErrorMessage(null);
+        setPrivateKey(privateKey);
+        navigate('/');
+      } else {
+        setErrorMessage(null);
+        createUserMutation.mutate();
+      }
+      
     } catch (error) {
       console.error('Invalid private key format:', error);
       setErrorMessage('' + error);
+    } finally {
+      setIsFetching(false);
     }
-  };
+  }, [queryClient, privateKeyInput, setPrivateKey, navigate, createUserMutation]);
 
   return (
     <div className="login-page p-4 max-w-4xl mx-auto">
@@ -55,7 +112,8 @@ const LoginPage: React.FC = () => {
           </div>
         )}
         <button
-          className="bg-blue-500 text-white p-2 rounded w-full"
+          className={`p-2 rounded w-full cursor-pointer ${(isFetching) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          disabled={isFetching}
           onClick={handleLogin}
         >
           {t('loginButton')}
