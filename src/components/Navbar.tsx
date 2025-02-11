@@ -59,6 +59,11 @@ const Navbar: React.FC = () => {
           <option value="en">English</option>
           <option value="ko">한국어</option>
         </select>
+        {address && (
+          <li>
+            <Link to={`/user/${address}`}>User Page</Link>
+          </li>
+        )}
       </div>
     </nav>
   );
