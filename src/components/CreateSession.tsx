@@ -129,6 +129,10 @@ export const CreateSession: React.FC = () => {
     createSessionMutation.mutate();
   };
 
+  const truncateAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
   return (
     <div className="create-session p-4 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">{t('createSession')}</h1>

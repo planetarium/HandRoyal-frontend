@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RawPrivateKey } from '@planetarium/account';
@@ -6,6 +6,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { graphql } from '../gql/gql'
 import { useAccount } from '../context/AccountContext';
+import { useTip } from '../context/TipContext';
 
 const TEST_ACCOUNTS = [
   {
@@ -19,6 +20,18 @@ const TEST_ACCOUNTS = [
   {
     privateKey: 'a487c5a2cf88e00a4dd57f60baadb0ba4ec24caa52d01ae21dd2f79bef52795c',
     address: '0xF17D2337858EcD8e4e9DFEa8953f7a38109799fe'
+  },
+  {
+    privateKey: '330524c8f5d3040c3c54619f36e9c226c3368f0af390615599542e7cd230d853',
+    address: '0xE8F6027e487Ef52d261663099061dF9c6E159188'
+  },
+  {
+    privateKey: '4ce92198f27d05f80a318f34ad9d0cd43ef7d2a138e022bc66770acdd53f716a',
+    address: '0xfdc4eE76d810635eC932E57de386DC0ef3C9e7e9'
+  },
+  {
+    privateKey: '74f101e78bf0ac924298f4d9b2dfed69ae84114fd7ac7bdc012bb4a66329f43b',
+    address: '0x17fB691ac6B3793871d3b1c06B806C75C60240d0'
   }
 ];
 
@@ -46,8 +59,10 @@ const LoginPage: React.FC = () => {
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { tip } = useTip();
 
   const createUserMutation = useMutation({
     mutationFn: async () => {
@@ -57,10 +72,10 @@ const LoginPage: React.FC = () => {
     onSuccess: () => {
       setErrorMessage(null);
       setPrivateKey(privateKey);
-      navigate('/');
+      setIsPolling(true);
     },
     onError: (error) => {
-      console.error('Failed to create session:', error);
+      console.error('Failed to create user:', error);
       setErrorMessage(error.message);
     }
   });
@@ -69,6 +84,7 @@ const LoginPage: React.FC = () => {
     try {
       setIsFetching(true);
       const privateKey = RawPrivateKey.fromHex(privateKeyInput);
+      setPrivateKey(privateKey);
       const address = (await privateKey?.getAddress())?.toHex();
       const data = await queryClient.fetchQuery({
         queryKey: ['checkUser', address],
@@ -80,7 +96,6 @@ const LoginPage: React.FC = () => {
       
       if (data?.stateQuery?.user) {
         setErrorMessage(null);
-        setPrivateKey(privateKey);
         navigate('/');
       } else {
         setErrorMessage(null);
@@ -95,6 +110,30 @@ const LoginPage: React.FC = () => {
     }
   }, [queryClient, privateKeyInput, setPrivateKey, navigate, createUserMutation]);
 
+  useEffect(() => {
+    const pollUser = async () => {
+      if (isPolling && privateKey) {
+        const address = (await privateKey.getAddress())?.toHex();
+        const data = await queryClient.fetchQuery({
+          queryKey: ['checkUser', address],
+          queryFn: async () => {
+            const response = await request(GRAPHQL_ENDPOINT, checkUserDocument, { address: address });
+            return response;
+          }
+        });
+
+        if (data?.stateQuery?.user) {
+          setIsPolling(false);
+          navigate('/');
+        }
+      }
+    };
+
+    if (tip) {
+      pollUser();
+    }
+  }, [tip, isPolling, privateKey, queryClient, navigate]);
+
   return (
     <div className="login-page p-4 max-w-4xl mx-auto">
       <div className="login-form max-w-md mx-auto mb-12">
@@ -105,6 +144,7 @@ const LoginPage: React.FC = () => {
           type="password"
           value={privateKeyInput}
           onChange={(e) => setPrivateKeyInput(e.target.value)}
+          disabled={isFetching || isPolling}
         />
         {errorMessage && (
           <div className="text-red-500 italic mb-4">
@@ -112,8 +152,8 @@ const LoginPage: React.FC = () => {
           </div>
         )}
         <button
-          className={`p-2 rounded w-full cursor-pointer ${(isFetching) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-          disabled={isFetching}
+          className={`p-2 rounded w-full cursor-pointer ${(isFetching || isPolling) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          disabled={isFetching || isPolling}
           onClick={handleLogin}
         >
           {t('loginButton')}
