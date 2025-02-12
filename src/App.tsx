@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { JoinSession } from './components/JoinSession';
 import { CreateSession } from './components/CreateSession';
 import { GameBoard } from './components/GameBoard';
@@ -8,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
 import { AccountProvider, useAccount } from './context/AccountContext';
 import UserPage from './components/UserPage';
+import { TipProvider } from './context/TipContext';
 
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { privateKey } = useAccount();
@@ -32,13 +34,19 @@ const AppContent: React.FC = () => {
   );
 };
 
+const queryClient = new QueryClient();
+
 const App: React.FC = () => {
   return (
-    <AccountProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AccountProvider>
+    <QueryClientProvider client={queryClient}>
+      <AccountProvider>
+        <TipProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </TipProvider>
+      </AccountProvider>
+    </QueryClientProvider>
   );
 };
 

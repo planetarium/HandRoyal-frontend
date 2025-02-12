@@ -2,33 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAccount } from '../context/AccountContext';
-import useSubscription from '../useSubscription';
-
-const ON_TIP_CHANGED_SUBSCRIPTION = `
-  subscription OnTipChanged {
-    onTipChanged {
-      height
-      hash
-    }
-  }
-`;
-
-interface TipData {
-  height: number;
-  hash: string;
-}
+import { useTip } from '../context/TipContext';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { privateKey, setPrivateKey } = useAccount();
   const [address, setAddress] = useState<string | null>(null);
-  const [tipData, setTipData] = useState<TipData | null>(null);
-
-  useSubscription(ON_TIP_CHANGED_SUBSCRIPTION, {}, (newData) => {
-    if (newData?.onTipChanged) {
-      setTipData({height: newData?.onTipChanged?.height, hash: newData?.onTipChanged?.hash}); // 기존 메시지에 추가
-    }
-  });
+  const { tip } = useTip();
 
   useEffect(() => {
     const fetchAddress = async () => {
@@ -59,9 +39,9 @@ const Navbar: React.FC = () => {
         HandRoyal
       </Link>
       <div className="flex items-center">
-        {tipData && (
+        {tip && (
           <div className="ml-4 mr-4 text-sm">
-            Tip: #{tipData.height} 0x{tipData.hash.substring(0, 6)}
+            Tip: #{tip.index} 0x{tip.hash.substring(0, 6)}
           </div>
         )}
         {address && (
