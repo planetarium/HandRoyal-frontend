@@ -8,9 +8,9 @@ import { useParams } from 'react-router-dom';
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
 const getUserDocument = graphql(/* GraphQL */ `
-  query GetUser($userAddress: Address!) {
+  query GetUser($userId: Address!) {
     stateQuery {
-      user(userAddress: $userAddress) {
+      user(userId: $userId) {
         id
         gloves
       }
@@ -25,7 +25,7 @@ const UserPage: React.FC = () => {
   const { data, error, isLoading } = useQuery<{ stateQuery: { user: { id: string; gloves: string[] } } }>({
     queryKey: ['getUser', userAddress],
     queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { userAddress });
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { userId: userAddress });
       return response as { stateQuery: { user: { id: string; gloves: string[] } } };
     }
   });

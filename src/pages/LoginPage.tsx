@@ -26,7 +26,7 @@ const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 const checkUserDocument = graphql(/* GraphQL */ `
   query CheckUser($address: Address!) {
     stateQuery {
-      user(userAddress: $address) {
+      user(userId: $address) {
         id
         gloves
       }
