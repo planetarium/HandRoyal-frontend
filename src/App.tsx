@@ -7,6 +7,7 @@ import { ResultPage } from './components/ResultPage';
 import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
 import { AccountProvider, useAccount } from './context/AccountContext';
+import UserPage from './components/UserPage';
 
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { privateKey } = useAccount();
@@ -24,6 +25,7 @@ const AppContent: React.FC = () => {
           <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
           <Route element={<ProtectedRoute><GameBoard /></ProtectedRoute>} path="/game/:sessionId" />
           <Route element={<ProtectedRoute><ResultPage /></ProtectedRoute>} path="/result/:sessionId" />
+          <Route element={<UserPage />} path="/user/:userAddress" />
         </Routes>
       </main>
     </div>
