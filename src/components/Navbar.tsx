@@ -2,15 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAccount } from '../context/AccountContext';
+import useSubscription from '../useSubscription';
+
+const ON_TIP_CHANGED_SUBSCRIPTION = `
+  subscription OnTipChanged {
+    onTipChanged {
+      height
+      hash
+    }
+  }
+`;
+
+interface TipData {
+  height: number;
+  hash: string;
+}
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { privateKey, setPrivateKey } = useAccount();
   const [address, setAddress] = useState<string | null>(null);
+  const [tipData, setTipData] = useState<TipData | null>(null);
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
+  useSubscription(ON_TIP_CHANGED_SUBSCRIPTION, {}, (newData) => {
+    if (newData?.onTipChanged) {
+      setTipData({height: newData?.onTipChanged?.height, hash: newData?.onTipChanged?.hash}); // 기존 메시지에 추가
+    }
+  });
 
   useEffect(() => {
     const fetchAddress = async () => {
@@ -31,12 +49,21 @@ const Navbar: React.FC = () => {
     setPrivateKey(null);
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <nav className="bg-gray-800 p-4 text-white flex justify-between items-center">
       <Link className="text-lg font-bold text-white" to="/">
         HandRoyal
       </Link>
       <div className="flex items-center">
+        {tipData && (
+          <div className="ml-4 mr-4 text-sm">
+            Tip: #{tipData.height} 0x{tipData.hash.substring(0, 6)}
+          </div>
+        )}
         {address && (
           <div className="flex items-center mr-4">
             <div className="text-sm">

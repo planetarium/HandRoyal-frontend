@@ -12,6 +12,7 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.3.4",
     "graphql-request": "^7.1.2",
+    "graphql-ws": "^6.0.3",
     "i18next": "^21.6.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -24,7 +25,9 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "codegen": "graphql-codegen --config codegen.ts",
+    "lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\"",
+    "lint:fix": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\""
   },
   "eslintConfig": {
     "extends": [

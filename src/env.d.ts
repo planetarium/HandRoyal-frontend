@@ -1,4 +1,4 @@
-/// <reference types="vite/client" />
+// / <reference types="vite/client" />
 
 interface ImportMetaEnv {
   readonly VITE_GRAPHQL_ENDPOINT: string
@@ -6,4 +6,4 @@ interface ImportMetaEnv {
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
-} 
+}
