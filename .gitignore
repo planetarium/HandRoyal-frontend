@@ -49,3 +49,6 @@ yarn-error.log*
 
 # GraphQL generated file
 src/gql/
+
+# tsc
+dist/
