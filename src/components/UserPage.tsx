@@ -1,16 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { graphql } from '../gql/gql';
-import { request } from 'graphql-request';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { request } from 'graphql-request';
+import { graphql } from '../gql/gql';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
 const getUserDocument = graphql(/* GraphQL */ `
-  query GetUser($userAddress: Address!) {
+  query GetUser($address: Address!) {
     stateQuery {
-      user(userAddress: $userAddress) {
+      user(userId: $address) {
         id
         gloves
       }
@@ -25,7 +25,7 @@ const UserPage: React.FC = () => {
   const { data, error, isLoading } = useQuery<{ stateQuery: { user: { id: string; gloves: string[] } } }>({
     queryKey: ['getUser', userAddress],
     queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { userAddress });
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: userAddress });
       return response as { stateQuery: { user: { id: string; gloves: string[] } } };
     }
   });

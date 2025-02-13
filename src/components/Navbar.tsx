@@ -2,15 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAccount } from '../context/AccountContext';
+import { useTip } from '../context/TipContext';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { privateKey, setPrivateKey } = useAccount();
   const [address, setAddress] = useState<string | null>(null);
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
+  const { tip } = useTip();
 
   useEffect(() => {
     const fetchAddress = async () => {
@@ -31,12 +29,21 @@ const Navbar: React.FC = () => {
     setPrivateKey(null);
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <nav className="bg-gray-800 p-4 text-white flex justify-between items-center">
       <Link className="text-lg font-bold text-white" to="/">
         HandRoyal
       </Link>
       <div className="flex items-center">
+        {tip && (
+          <div className="ml-4 mr-4 text-sm">
+            Tip: #{tip.index} 0x{tip.hash.substring(0, 6)}
+          </div>
+        )}
         {address && (
           <div className="flex items-center mr-4">
             <div className="text-sm">
