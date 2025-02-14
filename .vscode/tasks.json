@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "codegen",
+      "problemMatcher": [],
+      "label": "npm: codegen",
+      "detail": "graphql-codegen --config codegen.ts"
+    },
+    {
+      "type": "typescript",
+      "tsconfig": "tsconfig.json",
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": "build",
+      "label": "tsc: build"
+    }
+  ]
+}

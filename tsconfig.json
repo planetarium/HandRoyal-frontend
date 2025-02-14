@@ -17,8 +17,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
+    "noEmit": false,
+    "jsx": "react-jsx",
+    "sourceMap": true,
+    "outDir": "./dist"
   },
   "include": [
     "src",
@@ -26,5 +28,4 @@
     "eslint.config.js",
     "codegen.ts"
   ]
-
-} 
+}
