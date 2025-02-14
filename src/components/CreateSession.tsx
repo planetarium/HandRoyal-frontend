@@ -5,6 +5,7 @@ import { request } from 'graphql-request';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { graphql } from '../gql/gql'
 import { useAccount } from '../context/AccountContext';
+import { Scalars, TxStatus } from '../gql/graphql';
 
 
 interface GameRules {
@@ -26,18 +27,32 @@ const createSessionDocument = graphql(/* GraphQL */ `
   }
 `);
 
+const transactionResultDocument = graphql(/* GraphQL */ `
+  query TransactionResult($txId: TxId!) {
+    transaction
+    {
+      transactionResult(txId: $txId) {
+        txStatus
+      }
+    }
+  }
+`);
+
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState<string>('0000000000000000000000000000000000000000');
   const [isSessionIdValid, setIsSessionIdValid] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isPolling, setIsPolling] = useState<boolean>(false);
   const [gameRules, setGameRules] = useState<GameRules>({
     minPlayers: 10,
     maxPlayers: 100,
     blocksPerRound: 10
   });
   const [prize, setPrize] = useState('0000000000000000000000000000000000000000');
+  const [txId, setTxId] = useState<string | null>(null);
+  const [pollingError, setPollingError] = useState<string | null>(null);
   const isFirstMount = useRef(true);
   const queryClient = useQueryClient();
   const { privateKey } = useAccount();
@@ -117,13 +132,45 @@ export const CreateSession: React.FC = () => {
     },
     onSuccess: (data) => {
       console.error('txId: ' + data)
-      navigate(`/game/${sessionId}`);
+      setTxId(data);
+      setIsPolling(true);
     },
     onError: (error) => {
       console.error('Failed to create session:', error);
       // TODO: 에러 처리
     }
   });
+
+  useEffect(() => {
+    const pollTransactionResult = async () => {
+      if (txId) {
+        try {
+          const data = await queryClient.fetchQuery({
+            queryKey: ['transactionResult', txId],
+            queryFn: async () => {
+              const response = await request(GRAPHQL_ENDPOINT, transactionResultDocument, { txId: txId as Scalars['TxId']['output'] });
+              return response.transaction?.transactionResult;
+            }
+          });
+
+          if (data?.txStatus === TxStatus.Success) {
+            setIsPolling(false);
+            navigate(`/game/${sessionId}`);
+          } else if (data?.txStatus === TxStatus.Failure) {
+            setIsPolling(false);
+            setPollingError('Session creation failed.');
+          }
+        } catch (error) {
+          console.error('Polling error:', error);
+        }
+      }
+    };
+
+    if (isPolling) {
+      const interval = setInterval(pollTransactionResult, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [txId, queryClient, navigate, sessionId, isPolling]);
 
   const handleCreateSession = () => {
     createSessionMutation.mutate();
@@ -132,6 +179,8 @@ export const CreateSession: React.FC = () => {
   return (
     <div className="create-session p-4 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">{t('createSession')}</h1>
+      {pollingError && <p className="text-red-500">{pollingError}</p>}
+      {isPolling && <p className="text-blue-500">{t('creatingSession')}</p>}
       <div className="session-form space-y-4">
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">{t('sessionId')}</label>
@@ -145,7 +194,7 @@ export const CreateSession: React.FC = () => {
             <button
               aria-label={t('refresh')}
               className="text-blue-500 text-2xl cursor-pointer"
-              disabled={!isSessionIdValid || isFetching}
+              disabled={!isSessionIdValid || isFetching || isPolling}
               onClick={generateAndValidateSessionId}
             >
               🔄
@@ -163,6 +212,7 @@ export const CreateSession: React.FC = () => {
               type="number"
               value={gameRules.minPlayers}
               onChange={(e) => handleGameRulesChange('minPlayers', e.target.value)}
+              disabled={isPolling}
             />
           </div>
 
@@ -174,6 +224,7 @@ export const CreateSession: React.FC = () => {
               type="number"
               value={gameRules.maxPlayers}
               onChange={(e) => handleGameRulesChange('maxPlayers', e.target.value)}
+              disabled={isPolling}
             />
           </div>
 
@@ -185,6 +236,7 @@ export const CreateSession: React.FC = () => {
               type="number"
               value={gameRules.blocksPerRound}
               onChange={(e) => handleGameRulesChange('blocksPerRound', e.target.value)}
+              disabled={isPolling}
             />
           </div>
         </div>
@@ -197,19 +249,20 @@ export const CreateSession: React.FC = () => {
             type="text"
             value={prize}
             onChange={(e) => setPrize(e.target.value)}
+            disabled={isPolling}
           />
         </div>
         <div className="flex justify-center space-x-4 mt-4">
           <button 
             className="bg-gray-500 text-white p-2 rounded cursor-pointer"
-            disabled={createSessionMutation.isPending}
+            disabled={createSessionMutation.isPending || isPolling}
             onClick={() => navigate('/')}
           >
             {t('cancel')}
           </button>
           <button
-            className={`p-2 rounded cursor-pointer ${(!isSessionIdValid || createSessionMutation.isPending) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-            disabled={!isSessionIdValid || createSessionMutation.isPending}
+            className={`p-2 rounded cursor-pointer ${(!isSessionIdValid || createSessionMutation.isPending || isPolling) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+            disabled={!isSessionIdValid || createSessionMutation.isPending || isPolling}
             onClick={handleCreateSession}
           >
             {createSessionMutation.isPending ? t('creating') : t('createSessionButton')}
