@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { graphql } from '../gql/gql';
 import { request } from 'graphql-request';
+import { graphql } from '../gql/gql';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 
@@ -121,8 +121,8 @@ export const JoinSession: React.FC = () => {
   };
 
   return (
-    <div className="join-session p-4 max-w-md mx-auto text-center">
-      <h1 className="text-4xl font-bold mb-8">HandRoyal</h1>
+    <div className="join-session-page p-4 max-w-5xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">{t('joinSession')}</h1>
       <div className="join-form flex items-center space-x-2 mb-4">
         <input
           className="flex-grow p-2 border border-gray-300 rounded"
@@ -141,20 +141,42 @@ export const JoinSession: React.FC = () => {
       {error && <p className="text-red-500">{error}</p>}
       {isLoading && <p>{t('loading')}</p>}
       {queryError && <p className="text-red-500">{t('error')}: {queryError.message}</p>}
-      <div className="session-list grid grid-cols-1 gap-4 mb-4">
-        {data && data.map((session) => {
-          if (!session || !session.metadata) return null;
-          const sessionMetadata = session.metadata as { id: string };
-          return (
-            <button
-              key={sessionMetadata.id}
-              className="bg-blue-500 text-white p-2 rounded cursor-pointer"
-              onClick={() => handleJoin(sessionMetadata.id)}
-            >
-              {t('Join Session')} {truncateAddress(sessionMetadata.id)}
-            </button>
-          );
-        })}
+      <div className="session-list bg-white shadow-md rounded-lg overflow-hidden">
+        <p className="text-xl mb-2 text-center">{t('sessionList')}</p>
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="px-6 py-3 border-b text-left">{t('sessionId')}</th>
+              <th className="px-6 py-3 border-b text-left">{t('prize')}</th>
+              <th className="px-6 py-3 border-b text-left">{t('players')}</th>
+              <th className="px-6 py-3 border-b text-left">{t('startAfter')}</th>
+              <th className="px-6 py-3 border-b text-left"> </th>
+            </tr>
+          </thead>
+          <tbody>
+            {data && data.map((session) => {
+              if (!session || !session.metadata || !(session.state === 'READY')) return null;
+              const sessionMetadata = session.metadata as { id: string };
+              return (
+                <tr key={sessionMetadata.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 border-b">{truncateAddress(sessionMetadata.id)}</td>
+                  <td className="px-6 py-4 border-b">{session.metadata.prize}</td>
+                  <td className="px-6 py-4 border-b">{session.players?.length}/{session.metadata.maximumUser}</td>
+                  <td className="px-6 py-4 border-b">{session.startHeight - (tip?.index ?? 0)}</td>
+                  <td className="px-6 py-4 border-b">
+                    <button
+                      className="bg-blue-500 text-white p-2 rounded cursor-pointer"
+                      disabled={(session.players?.length ?? session.metadata.maximumUser) >= session.metadata.maximumUser}
+                      onClick={() => handleJoin(sessionMetadata.id)}
+                    >
+                      {t('join')}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
       <p className="create-session-link mt-4 text-center text-gray-500 cursor-pointer" onClick={handleCreate}>
         <i>{t('createNewSession')}</i>
