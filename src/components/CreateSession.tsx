@@ -5,13 +5,16 @@ import { request } from 'graphql-request';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { graphql } from '../gql/gql'
 import { useAccount } from '../context/AccountContext';
-import { Scalars, TxStatus } from '../gql/graphql';
+import { TxStatus } from '../gql/graphql';
+import type { Scalars} from '../gql/graphql';
 
 
 interface GameRules {
-  minPlayers: number;
-  maxPlayers: number;
-  blocksPerRound: number;
+  maximumUser: number,
+  minimumUser: number,
+  remainingUser: number,
+  roundInterval: number,
+  waitingInterval: number
 }
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
@@ -22,8 +25,8 @@ const isValidSessionIdDocument = graphql(/* GraphQL */ `
 `)
 
 const createSessionDocument = graphql(/* GraphQL */ `
-  mutation CreateSession($privateKey: PrivateKey, $sessionId: Address!, $prize: Address!) {
-    createSession(privateKey: $privateKey, sessionId: $sessionId, prize: $prize)
+  mutation CreateSession($privateKey: PrivateKey, $sessionId: Address!, $prize: Address!, $maximumUser: Int!, $minimumUser: Int!, $remainingUser: Int!, $roundInterval: Long!, $waitingInterval: Long!) {
+    createSession(privateKey: $privateKey, sessionId: $sessionId, prize: $prize, maximumUser: $maximumUser, minimumUser: $minimumUser, remainingUser: $remainingUser, roundInterval: $roundInterval, waitingInterval: $waitingInterval)
   }
 `);
 
@@ -46,9 +49,11 @@ export const CreateSession: React.FC = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isPolling, setIsPolling] = useState<boolean>(false);
   const [gameRules, setGameRules] = useState<GameRules>({
-    minPlayers: 10,
-    maxPlayers: 100,
-    blocksPerRound: 10
+    maximumUser: 8,
+    minimumUser: 2,
+    remainingUser: 1,
+    roundInterval: 5,
+    waitingInterval: 10
   });
   const [prize, setPrize] = useState('0000000000000000000000000000000000000000');
   const [txId, setTxId] = useState<string | null>(null);
@@ -126,7 +131,12 @@ export const CreateSession: React.FC = () => {
       const response = await request(GRAPHQL_ENDPOINT, createSessionDocument, {
         privateKey: privateKeyHex,
         sessionId,
-        prize
+        prize,
+        maximumUser: gameRules.maximumUser,
+        minimumUser: gameRules.minimumUser,
+        remainingUser: gameRules.remainingUser,
+        roundInterval: gameRules.roundInterval,
+        waitingInterval: gameRules.waitingInterval
       });
       return response.createSession;
     },
@@ -205,38 +215,62 @@ export const CreateSession: React.FC = () => {
         <div className="rules-section mt-8 mb-8">
           <h2 className="text-xl font-semibold mb-2">{t('gameRules')}</h2>
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('minPlayers')}</label>
+            <label className="block text-sm font-medium text-gray-700">{t('maximumUser')}</label>
             <input
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              disabled={isPolling}
               min="1"
               type="number"
-              value={gameRules.minPlayers}
-              onChange={(e) => handleGameRulesChange('minPlayers', e.target.value)}
-              disabled={isPolling}
+              value={gameRules.maximumUser}
+              onChange={(e) => handleGameRulesChange('maximumUser', e.target.value)}
             />
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('maxPlayers')}</label>
+            <label className="block text-sm font-medium text-gray-700">{t('minimumUser')}</label>
             <input
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              disabled={isPolling}
               min="1"
               type="number"
-              value={gameRules.maxPlayers}
-              onChange={(e) => handleGameRulesChange('maxPlayers', e.target.value)}
-              disabled={isPolling}
+              value={gameRules.minimumUser}
+              onChange={(e) => handleGameRulesChange('minimumUser', e.target.value)}
             />
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('blocksPerRound')}</label>
+            <label className="block text-sm font-medium text-gray-700">{t('remainingUser')}</label>
             <input
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              disabled={isPolling}
               min="1"
               type="number"
-              value={gameRules.blocksPerRound}
-              onChange={(e) => handleGameRulesChange('blocksPerRound', e.target.value)}
+              value={gameRules.remainingUser}
+              onChange={(e) => handleGameRulesChange('remainingUser', e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="block text-sm font-medium text-gray-700">{t('roundInterval')}</label>
+            <input
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
               disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.roundInterval}
+              onChange={(e) => handleGameRulesChange('roundInterval', e.target.value)}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="block text-sm font-medium text-gray-700">{t('waitingInterval')}</label>
+            <input
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.waitingInterval}
+              onChange={(e) => handleGameRulesChange('waitingInterval', e.target.value)}
             />
           </div>
         </div>
@@ -245,11 +279,11 @@ export const CreateSession: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700">{t('prize')}</label>
           <input
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            disabled={isPolling}
             placeholder={t('enterPrize')}
             type="text"
             value={prize}
             onChange={(e) => setPrize(e.target.value)}
-            disabled={isPolling}
           />
         </div>
         <div className="flex justify-center space-x-4 mt-4">
@@ -265,7 +299,7 @@ export const CreateSession: React.FC = () => {
             disabled={!isSessionIdValid || createSessionMutation.isPending || isPolling}
             onClick={handleCreateSession}
           >
-            {createSessionMutation.isPending ? t('creating') : t('createSessionButton')}
+            {createSessionMutation.isPending ? t('creatingSession') : t('createSessionButton')}
           </button>
         </div>
       </div>

@@ -2,13 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { graphql } from '../gql/gql';
 import { request } from 'graphql-request';
+import { Address } from '@planetarium/account';
+import { graphql } from '../gql/gql';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { HandType } from '../types/types';
 import { MoveType, SessionState, PlayerState, Move } from '../gql/graphql';
-import { Address } from '@planetarium/account';
+import type { HandType } from '../types/types';
+
+interface GameBoardProps {
+  myMove: MoveType;
+  opponentMove: MoveType;
+  opponentAddress: string | null;
+}
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
@@ -65,11 +71,11 @@ export const GameBoard: React.FC = () => {
   const { privateKey } = useAccount();
   const { tip } = useTip();
   const [userAddress, setUserAddress] = useState<Address | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedHand, setSelectedHand] = useState<HandType | null>(null);
-  const [displayedEmoji, setDisplayedEmoji] = useState<string | null>(null);
-  const [opponentEmoji, setOpponentEmoji] = useState<string | null>(null);
   const [showNoSessionMessage, setShowNoSessionMessage] = useState(false);
   const [playerStatus, setPlayerStatus] = useState<PlayerState | null>(null);
+  const [gameBoardProps, setGameBoardProps] = useState<GameBoardProps>({myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null});
 
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['getSession', sessionId],
@@ -87,11 +93,7 @@ export const GameBoard: React.FC = () => {
   }, [tip, refetch]);
 
   useEffect(() => {
-    const useUserAddress = async () => {
-      const address = await privateKey?.getAddress();
-      setUserAddress(address ?? null);
-    }
-    useUserAddress();
+    privateKey?.getAddress().then(address => setUserAddress(address ?? null));
   }, [privateKey]);
 
   useEffect(() => {
@@ -103,14 +105,16 @@ export const GameBoard: React.FC = () => {
     }
   }, [data, userAddress]);
 
+  const emojiMap: Record<MoveType, string> = {
+    [MoveType.Rock]: '✊',
+    [MoveType.Paper]: '✋',
+    [MoveType.Scissors]: '✌️',
+    [MoveType.None]: '?',
+  };
+
   useEffect(() => {
-    const updateOpponentEmoji = async () => {
-      const emojiMap: Record<MoveType, string> = {
-        [MoveType.Rock]: '✊',
-        [MoveType.Paper]: '✋',
-        [MoveType.Scissors]: '✌️',
-        [MoveType.None]: '',
-      };
+    const updateGameBoardProps = async () => {
+      const props: GameBoardProps = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null};
       if (data?.rounds && data.players) {
         const userAddress = await privateKey?.getAddress();
         const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === userAddress?.toHex());
@@ -121,27 +125,29 @@ export const GameBoard: React.FC = () => {
                     (match?.move2 && match.move2.playerIndex === currentPlayerIndex);
           });  
           if (match && match.move1 && match.move2) {
-            const opponentMoveType = match.move1.playerIndex === currentPlayerIndex ? match.move2.type : match.move1.type;
-            setOpponentEmoji(emojiMap[opponentMoveType]);
-          } else {
-            setOpponentEmoji(null);
+            const opponentMove = match.move1.playerIndex === currentPlayerIndex ? match.move2 : match.move1;
+            props.myMove = match.move1.playerIndex === currentPlayerIndex ? match.move1.type : match.move2.type;
+            if (props.myMove !== gameBoardProps.myMove) {
+              // Should be fixed when mutation result is implemented
+              setSelectedHand(null);
+              setSubmitting(false);
+            }
+            props.opponentAddress = data.players[opponentMove.playerIndex]?.id;
+            props.opponentMove = opponentMove.type;
           }
-        } else {
-          setOpponentEmoji(null);
         }
-      } else {
-        setOpponentEmoji(null);
       }
+
+      setGameBoardProps(props);
     };
-    updateOpponentEmoji();
-  }, [data]);
+
+    updateGameBoardProps();
+  }, [data, privateKey, gameBoardProps]);
 
   const submitMoveMutation = useMutation({
     mutationFn: async (move: HandType) => {
       const privateKeyBytes = privateKey?.toBytes();
       const privateKeyHex = privateKeyBytes ? Array.from(privateKeyBytes).map(b => b.toString(16).padStart(2, '0')).join('') : undefined;
-      console.error('privateKeyHex: ' + privateKeyHex);
-
       const moveType = move === 'rock' ? MoveType.Rock : move === 'paper' ? MoveType.Paper : MoveType.Scissors;
       const response = await request(GRAPHQL_ENDPOINT, submitMoveDocument, {
         privateKey: privateKeyHex,
@@ -152,7 +158,6 @@ export const GameBoard: React.FC = () => {
     },
     onSuccess: (data) => {
       console.error('Move submitted successfully: ' + data);
-      // 추가적인 성공 처리 로직을 여기에 추가할 수 있습니다.
     },
     onError: (error) => {
       console.error('Failed to submit move:', error);
@@ -182,18 +187,44 @@ export const GameBoard: React.FC = () => {
 
   const handleSubmit = () => {
     if (selectedHand) {
-      const emojiMap: Record<HandType, string> = {
-        rock: '✊',
-        paper: '✋',
-        scissors: '✌️',
-      };
-      setDisplayedEmoji(emojiMap[selectedHand]);
+      setSubmitting(true);
       submitMoveMutation.mutate(selectedHand);
     }
   };
 
+  const canSubmit = () => {
+    return data?.state === SessionState.Active && selectedHand && !submitting;
+  };
+
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const getFuseWidth = () => {
+    if (!data?.metadata) return '0%';
+    
+    const maxInterval = data.state === SessionState.Ready 
+      ? (data.startHeight - (data.creationHeight ?? 0))
+      : data.metadata.roundInterval;
+    
+    const remainingBlocks = blocksLeft;
+    const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
+    return `${percentage}%`;
+  };
+
+  const getFuseColor = () => {
+    if (!data?.metadata) return 'bg-gray-300';
+    
+    const maxInterval = data.state === SessionState.Ready 
+      ? (data.startHeight - (data.creationHeight ?? 0))
+      : data.metadata.roundInterval;
+    
+    const remainingBlocks = blocksLeft;
+    const percentage = (remainingBlocks / maxInterval) * 100;
+
+    if (percentage > 66) return 'bg-green-500';
+    if (percentage > 33) return 'bg-yellow-500';
+    return 'bg-red-500';
   };
 
   if (isLoading) return <p>{t('loading')}</p>;
@@ -203,7 +234,7 @@ export const GameBoard: React.FC = () => {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">You have lost the game.</p>
+        <p className="text-2xl">{t('lose')}</p>
       </div>
     );
   }
@@ -212,7 +243,7 @@ export const GameBoard: React.FC = () => {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">Waiting for the session to be created...</p>
+        <p className="text-2xl">{t('waitingForSession')}</p>
       </div>
     );
   }
@@ -221,17 +252,15 @@ export const GameBoard: React.FC = () => {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)}</h2>
-          {winner ? (
-            <>
-              <p className="text-xl mb-2">Winner: <span className="font-bold" title={winner.id}>{truncateAddress(winner.id)}</span></p>
-              <p className="text-xl">Prize: <span className="font-bold" title={data?.metadata?.prize}>{truncateAddress(data?.metadata?.prize)}</span></p>
-            </>
-          ) : (
-            <p className="text-xl">The session ended without a winner.</p>
-          )}
-        </div>
+        <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)}</h2>
+        {winner ? (
+          <>
+            <p className="text-xl mb-2">Winner: <span className="font-bold" title={winner.id}>{truncateAddress(winner.id)}</span></p>
+            <p className="text-xl">Prize: <span className="font-bold" title={data?.metadata?.prize}>{truncateAddress(data?.metadata?.prize)}</span></p>
+          </>
+        ) : (
+          <p className="text-xl">{t('sessionEndedWithoutWinner')}</p>
+        )}
       </div>
     );
   }
@@ -240,7 +269,7 @@ export const GameBoard: React.FC = () => {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">Waiting for the game to start...</p>
+        <p className="text-2xl">{t('waitingForGameToStart')}</p>
         <p className="text-2xl">{t('blocksLeft', { count: blocksLeft })}</p>
       </div>
     );
@@ -250,7 +279,7 @@ export const GameBoard: React.FC = () => {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">You are the session organizer.</p>
+        <p className="text-2xl">{t('youAreTheSessionOrganizer')}</p>
         <div className="mt-4">
           {data.rounds?.map((round, index) => (
             <div key={index} className="mb-4">
@@ -270,41 +299,80 @@ export const GameBoard: React.FC = () => {
   }
 
   return (
-    <div className="game-board p-4 max-w-md mx-auto">
+    <div className="game-board p-4 max-w-xl mx-auto">
       {showNoSessionMessage ? (
         <p className="text-red-500 text-center mb-4">{t('noSessionFound')}</p>
       ) : (
         <>
-          <h1 className="text-2xl font-bold mb-4">{t('gameBoardTitle')}</h1>
-          <p className="mb-2">{t('sessionId')}: {sessionId}</p>
-          <p className="mb-4">{t('round', { count: round })}</p>
-          <p className="mb-4">{t('blocksLeft', { count: blocksLeft })}</p>          
-          <div className="bg-gray-100 h-64 mb-4 flex items-center justify-center space-x-4">
-            {displayedEmoji ? (
-              <>
-                <span className="text-6xl">{displayedEmoji}</span>
-                <span className="text-2xl text-gray-700">VS</span>
-                <span className="text-6xl">{opponentEmoji}</span>
-              </>
-            ) : (
-              <span className="text-gray-500">Image Placeholder</span>
-            )}
+          <h1 className="text-2xl font-bold mb-4 text-center">{t('gameBoardTitle')}</h1>
+          <p className="mb-2 text-center">{t('sessionId')}: {sessionId}</p>
+          <p className="mb-4 text-center">{t('round', { count: round })}</p>
+          
+          {/* blocks left */}
+          <div className="relative h-12 mb-8">
+            <p className="text-center mb-4">
+              {t('blocksLeft', { count: blocksLeft })}
+            </p>
+            <div className="w-full max-w-sm mx-auto relative mt-2">
+              <div className="absolute -left-8 translate-y-[-50%]">
+                {blocksLeft > 0 && (
+                  <span className="inline-block text-2xl">
+                    💣
+                  </span>
+                )}
+              </div>
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-1000 ease-linear ${getFuseColor()}`}
+                  style={{ width: getFuseWidth() }}
+                />
+              </div>
+              <div 
+                className="absolute top-1/2 transition-all duration-1000 ease-linear"
+                style={{ left: getFuseWidth(), transform: 'translate(-50%, -70%)' }}
+              >
+                {blocksLeft > 0 && (
+                  <span className="inline-block animate-pulse text-2xl">
+                    🔥
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-100 h-64 mb-4 flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <span className="text-6xl">{emojiMap[gameBoardProps.myMove]}</span>
+              <span className="mt-2 text-sm text-gray-600">{t('you')}</span>
+            </div>
+            <span className="text-2xl text-gray-700 mx-8">VS</span>
+            <div className="flex flex-col items-center">
+              <span className="text-6xl">{emojiMap[gameBoardProps.opponentMove]}</span>
+              {gameBoardProps.opponentAddress && (
+                <span className="mt-2 text-sm text-gray-600" title={gameBoardProps.opponentAddress}>
+                  {truncateAddress(gameBoardProps.opponentAddress)}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex justify-center space-x-4 mb-4">
             <button
-              className={`p-2 rounded cursor-pointer ${selectedHand === 'rock' ? 'bg-blue-500 text-white' : 'bg-white text-black'}`}
+              className={`p-2 rounded cursor-pointer ${selectedHand === 'rock' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
+              disabled={submitting}
               onClick={() => setSelectedHand('rock')}
             >
               ✊ {t('rock')}
             </button>
             <button
-              className={`p-2 rounded cursor-pointer ${selectedHand === 'paper' ? 'bg-blue-500 text-white' : 'bg-white text-black'}`}
+              className={`p-2 rounded cursor-pointer ${selectedHand === 'paper' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
+              disabled={submitting}
               onClick={() => setSelectedHand('paper')}
             >
               ✋ {t('paper')}
             </button>
             <button
-              className={`p-2 rounded cursor-pointer ${selectedHand === 'scissors' ? 'bg-blue-500 text-white' : 'bg-white text-black'}`}
+              className={`p-2 rounded cursor-pointer ${selectedHand === 'scissors' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
+              disabled={submitting}
               onClick={() => setSelectedHand('scissors')}
             >
               ✌️ {t('scissors')}
@@ -312,8 +380,8 @@ export const GameBoard: React.FC = () => {
           </div>
           <div className="flex justify-center">
             <button
-              className="bg-blue-500 text-white p-2 rounded cursor-pointer"
-              disabled={!selectedHand}
+              className={`text-white p-2 rounded ${canSubmit() ? 'bg-blue-500 cursor-pointer' : 'bg-gray-300'}`}
+              disabled={!canSubmit()}
               onClick={handleSubmit}
             >
               {t('submit')}

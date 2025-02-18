@@ -134,17 +134,21 @@ const LoginPage: React.FC = () => {
     }
   }, [tip, isPolling, privateKey, queryClient, navigate]);
 
+  const isDisabled = () => {
+    return isFetching || isPolling;
+  }
+
   return (
     <div className="login-page p-4 max-w-4xl mx-auto">
       <div className="login-form max-w-md mx-auto mb-12">
         <h1 className="text-2xl font-bold mb-4">{t('login')}</h1>
         <input
-          className="w-full p-2 border border-gray-300 rounded mb-4"
+          className={`w-full p-2 border border-gray-300 rounded mb-4 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+          disabled={isDisabled()}
           placeholder={t('enterPrivateKey')}
           type="password"
           value={privateKeyInput}
           onChange={(e) => setPrivateKeyInput(e.target.value)}
-          disabled={isFetching || isPolling}
         />
         {errorMessage && (
           <div className="text-red-500 italic mb-4">
@@ -152,8 +156,8 @@ const LoginPage: React.FC = () => {
           </div>
         )}
         <button
-          className={`p-2 rounded w-full cursor-pointer ${(isFetching || isPolling) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-          disabled={isFetching || isPolling}
+          className={`p-2 rounded w-full ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : 'bg-blue-500 text-white cursor-pointer'}`}
+          disabled={isDisabled()}
           onClick={handleLogin}
         >
           {t('loginButton')}
