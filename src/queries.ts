@@ -19,6 +19,47 @@ export const createUserDocument = graphql(/* GraphQL */ `
   }
 `);
 
+export const getSessionsDocument = graphql(/* GraphQL */ `
+  query GetSessions {
+    stateQuery {
+      sessions {
+        metadata {
+          id
+          organizer
+          prize
+          maximumUser
+          minimumUser
+          remainingUser
+        }
+        state
+        players {
+          id
+          glove
+        }
+        rounds {
+          height
+          matches {
+            move1 {
+              type
+            }
+            move2 {
+              type
+            }
+          }
+        }
+        creationHeight
+        startHeight
+      }
+    }
+  }
+`);
+
+export const joinSessionDocument = graphql(/* GraphQL */ `
+  mutation JoinSession($privateKey: PrivateKey, $sessionId: Address!) {
+    joinSession(privateKey: $privateKey, sessionId: $sessionId)
+  }
+`);
+
 export const isValidSessionIdDocument = graphql(/* GraphQL */ `
   query IsValidSessionId($sessionId: Address!) {
     isValidSessionId(sessionId: $sessionId)
