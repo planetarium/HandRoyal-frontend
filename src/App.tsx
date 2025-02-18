@@ -26,7 +26,7 @@ const AppContent: React.FC = () => {
           <Route element={<ProtectedRoute><JoinSession /></ProtectedRoute>} path="/" />
           <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
           <Route element={<ProtectedRoute><GameBoard /></ProtectedRoute>} path="/game/:sessionId" />
-          <Route element={<ProtectedRoute><ResultPage /></ProtectedRoute>} path="/result/:sessionId" />
+          <Route element={<ResultPage />} path="/result/:sessionId" />
           <Route element={<UserPage />} path="/user/:userAddress" />
         </Routes>
       </main>

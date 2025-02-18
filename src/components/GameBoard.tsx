@@ -4,10 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Address } from '@planetarium/account';
-import { graphql } from '../gql/gql';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { MoveType, SessionState, PlayerState, Move } from '../gql/graphql';
+import { MoveType, SessionState, PlayerState } from '../gql/graphql';
+import { GRAPHQL_ENDPOINT, getSessionDocument, submitMoveDocument } from '../queries';
 import type { HandType } from '../types/types';
 
 interface GameBoardProps {
@@ -15,54 +15,6 @@ interface GameBoardProps {
   opponentMove: MoveType;
   opponentAddress: string | null;
 }
-
-const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
-
-const getSessionDocument = graphql(/* GraphQL */ `
-  query GetSession($sessionId: Address!) {
-    stateQuery {
-      session(sessionId: $sessionId) {
-        metadata {
-          id
-          organizer
-          prize
-          maximumUser
-          minimumUser
-          remainingUser
-          waitingInterval
-          roundInterval
-        }
-        state
-        players {
-          id
-          glove
-          state
-        }
-        rounds {
-          height
-          matches {
-            move1 {
-              playerIndex
-              type
-            }
-            move2 {
-              playerIndex
-              type
-            }
-          }
-        }
-        creationHeight
-        startHeight
-      }
-    }
-  }
-`);
-
-const submitMoveDocument = graphql(/* GraphQL */ `
-  mutation SubmitMove($privateKey: PrivateKey, $sessionId: Address!, $move: MoveType!) {
-    submitMove(privateKey: $privateKey, sessionId: $sessionId, move: $move)
-  }
-`);
 
 export const GameBoard: React.FC = () => {
   const { t } = useTranslation();
@@ -235,6 +187,12 @@ export const GameBoard: React.FC = () => {
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
         <p className="text-2xl">{t('lose')}</p>
+        <button
+          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
+          onClick={() => navigate('/')}
+        >
+          {t('backToMain')}
+        </button>
       </div>
     );
   }
@@ -252,7 +210,7 @@ export const GameBoard: React.FC = () => {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)}</h2>
+        <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended, redirecting to result page...</h2>
         {winner ? (
           <>
             <p className="text-xl mb-2">Winner: <span className="font-bold" title={winner.id}>{truncateAddress(winner.id)}</span></p>

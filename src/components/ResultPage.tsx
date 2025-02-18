@@ -1,50 +1,122 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { request } from 'graphql-request';
+import { getSessionDocument, GRAPHQL_ENDPOINT } from '../queries';
+import { PlayerState, type Match, type MoveType } from '../gql/graphql';
 
 export const ResultPage: React.FC = () => {
   const { t } = useTranslation();
-  const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const host = 'Alice';
-  const prize = '0x0000000000000000000000000000000000000010';
-  const participants = ['Alice', 'Bob', 'Charlie'];
-  const matches = [
-    { player1: 'Alice', player2: 'Bob', winner: 'Alice' },
-    { player1: 'Bob', player2: 'Charlie', winner: 'Charlie' },
-    { player1: 'Alice', player2: 'Charlie', winner: 'Alice' },
-  ];
+  const { sessionId } = useParams<{ sessionId: string }>();
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['getSession', sessionId],
+    queryFn: async () => {
+      const response = await request(GRAPHQL_ENDPOINT, getSessionDocument, { sessionId });
+      return response.stateQuery?.session;
+    },
+    enabled: !!sessionId,
+  });
+
+  const getAddressByIndex = (index: number) => {
+    if (index === -1) {
+      return 'UNKNOWN';
+    }
+    return data?.players?.[index]?.id;
+  };
+
+  const getWinner = () => {
+    if (!data?.players) return 'UNKNOWN';
+    const winner = data.players.find(player => player?.state === PlayerState.Won);
+    return winner ? winner.id : 'UNKNOWN';
+  };
+
+  const handleUserClick = (userId: string) => {
+    navigate(`/user/${userId}`);
+  };
+
+  const renderMatches = (matches: Match[]) => {
+    return matches.map((match, index) => (
+      <div key={index} className="flex items-center justify-between p-2 border-b">
+        <div className="flex justify-start text-left w-90">
+          <span className="font-mono text-sm cursor-pointer hover:underline" onClick={() => handleUserClick(getAddressByIndex(match.move1?.playerIndex ?? -1))}>
+            {getAddressByIndex(match.move1?.playerIndex ?? -1)}
+          </span>
+        </div>
+        <div className="flex justify-center text-center">
+          <span className="text-2xl text-center font-bold w-8">{getEmoji(match.move1?.type)}</span>
+          <span className="mt-1 mx-2 text-center font-bold">vs</span>
+          <span className="text-2xl text-center font-bold w-8">{getEmoji(match.move2?.type)}</span>
+        </div>
+        <div className="flex justify-end text-right w-90">
+          <span className="font-mono text-sm cursor-pointer hover:underline" onClick={() => handleUserClick(getAddressByIndex(match.move2?.playerIndex ?? -1))}>
+            {getAddressByIndex(match.move2?.playerIndex ?? -1)}
+          </span>
+        </div>
+      </div>
+    ));
+  };
+
+  const getEmoji = (moveType: MoveType | undefined) => {
+    switch (moveType) {
+      case 'ROCK':
+        return '✊';
+      case 'PAPER':
+        return '✋';
+      case 'SCISSORS':
+        return '✌️';
+      default:
+        return '?';
+    }
+  };
+
+  if (isLoading) {
+    return <p className="text-center">{t('loading')}</p>;
+  }
+
+  if (error || !data) {
+    return (
+      <div className="text-center">
+        <p>{t('invalidSession')}</p>
+        <button className="bg-blue-500 text-white p-2 rounded mt-4" onClick={() => navigate('/')}>{t('backToMain')}</button>
+      </div>
+    );
+  }
+
+  if (data.state !== 'ENDED') {
+    return (
+      <div className="text-center">
+        <p>{t('sessionInProgress')}</p>
+        <button className="bg-blue-500 text-white p-2 rounded mt-4" onClick={() => navigate('/')}>{t('backToMain')}</button>
+      </div>
+    );
+  }
 
   return (
-    <div className="result-page p-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">{t('sessionResults')}</h1>
-      <p className="mb-2">{t('sessionId')}: {sessionId}</p>
-      <p className="mb-2">{t('host')}: {host}</p>
-      <p className="mb-2">{t('prize')}: {prize}</p>
-      <h2 className="text-xl font-semibold mt-4 mb-2">{t('participants')}</h2>
-      <ul className="list-disc list-inside">
-        {participants.map((participant, index) => (
-          <li key={index}>{participant}</li>
-        ))}
-      </ul>
-      <h2 className="text-xl font-semibold mt-4 mb-2">{t('winner')}</h2>
-      <p className="mb-2">{t('winner')}: {'나'}</p>
-      <h2 className="text-xl font-semibold mt-4 mb-2">{t('matches')}</h2>
-      <ul className="list-disc list-inside">
-        {matches.map((match, index) => (
-          <li key={index}>
-            {match.player1} vs {match.player2} - {t('winner')}: {match.winner}
-          </li>
-        ))}
-      </ul>
-      <div className="flex justify-center mt-4">
-        <button
-          className="bg-blue-500 text-white p-2 rounded cursor-pointer"
-          onClick={() => navigate('/')}
-        >
-          {t('backToMain')}
-        </button>
+    <div className="max-w-4xl mx-auto p-4">
+      <h1 className="text-4xl font-bold mb-4 text-center">{t('sessionResults')}</h1>
+      <div className="mb-4">
+        <p className='text-xl'><strong>{t('sessionId')}:</strong> <span className="font-mono">{sessionId}</span></p>
+        <p className='text-xl'><strong>{t('organizer')}:</strong> <span className="font-mono cursor-pointer hover:underline" onClick={() => handleUserClick(data.metadata?.organizer ?? 'UNKNOWN')}>{data.metadata?.organizer}</span></p>
+        <p className='text-xl'><strong>{t('prize')}:</strong> <span className="font-mono">{data.metadata?.prize}</span></p>
+        <p className='text-xl'><strong>{t('winner')}:</strong> <span className="font-mono cursor-pointer hover:underline" onClick={() => handleUserClick(getWinner())}>{getWinner()}</span></p>
+      </div>
+      <p className='text-xl'><strong>{t('matches')}:</strong> {data.rounds?.length}</p>
+      {data.rounds?.map((round, index) => (
+        <div key={index} className="mb-4">
+          <span className="font-semibold mb-2">{t('round', { count: index + 1 })}</span>
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            {renderMatches(round?.matches?.filter((match): match is Match => match !== null) ?? [])}
+          </div>
+        </div>
+      ))}
+      <div className="text-center mt-6">
+        <button className="bg-blue-500 text-white p-2 rounded cursor-pointer" onClick={() => navigate('/')}>{t('backToMain')}</button>
       </div>
     </div>
   );
-}; 
+};
+
+export default ResultPage; 

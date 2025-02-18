@@ -3,11 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { request } from 'graphql-request';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { graphql } from '../gql/gql'
 import { useAccount } from '../context/AccountContext';
 import { TxStatus } from '../gql/graphql';
-import type { Scalars} from '../gql/graphql';
-
+import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, transactionResultDocument } from '../queries';
+import type { Scalars } from '../gql/graphql';
 
 interface GameRules {
   maximumUser: number,
@@ -16,30 +15,6 @@ interface GameRules {
   roundInterval: number,
   waitingInterval: number
 }
-
-const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
-const isValidSessionIdDocument = graphql(/* GraphQL */ `
-  query IsValidSessionId($sessionId: Address!) {
-    isValidSessionId(sessionId: $sessionId)
-  }
-`)
-
-const createSessionDocument = graphql(/* GraphQL */ `
-  mutation CreateSession($privateKey: PrivateKey, $sessionId: Address!, $prize: Address!, $maximumUser: Int!, $minimumUser: Int!, $remainingUser: Int!, $roundInterval: Long!, $waitingInterval: Long!) {
-    createSession(privateKey: $privateKey, sessionId: $sessionId, prize: $prize, maximumUser: $maximumUser, minimumUser: $minimumUser, remainingUser: $remainingUser, roundInterval: $roundInterval, waitingInterval: $waitingInterval)
-  }
-`);
-
-const transactionResultDocument = graphql(/* GraphQL */ `
-  query TransactionResult($txId: TxId!) {
-    transaction
-    {
-      transactionResult(txId: $txId) {
-        txStatus
-      }
-    }
-  }
-`);
 
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
