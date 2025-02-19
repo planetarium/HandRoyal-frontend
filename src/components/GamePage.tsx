@@ -6,7 +6,7 @@ import { Address } from '@planetarium/account';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { SessionState, PlayerState } from '../gql/graphql';
+import { SessionState, PlayerState, Session } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
 import GameBoard from './GameBoard';
 
@@ -88,6 +88,9 @@ export const GamePage: React.FC = () => {
       </div>
     );
   }
+
+  // Ensure data is of type Session
+  const sessionData = data as Session;
 
   if (playerStatus === PlayerState.Lose) {
     return (
@@ -174,7 +177,7 @@ export const GamePage: React.FC = () => {
           <p className="mb-2 text-center">{t('sessionId')}: {<span className="font-mono">{sessionId}</span>}</p>
           <p className="mb-4 text-center">{t('round', { count: round })}</p>
           
-          <GameBoard blocksLeft={blocksLeft} data={data} />
+          <GameBoard blocksLeft={blocksLeft} data={sessionData} />
         </>
       )}
     </div>
