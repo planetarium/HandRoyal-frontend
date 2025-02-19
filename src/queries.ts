@@ -128,3 +128,19 @@ export const submitMoveDocument = graphql(/* GraphQL */ `
     submitMove(privateKey: $privateKey, sessionId: $sessionId, move: $move)
   }
 `);
+
+export const USER_SUBSCRIPTION = `
+  subscription OnUserChanged($userId: Address!) {
+    onUserChanged(userId: $userId) {
+      id
+    }
+  }
+`;
+
+export const SESSION_SUBSCRIPTION = `
+  subscription OnSessionChanged($sessionId: Address!, $userId: Address!) {
+    onSessionChanged(sessionId: $sessionId, userId: $userId) {
+      state
+    }
+  }
+`;
