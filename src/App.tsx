@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { JoinSession } from './components/JoinSession';
 import { CreateSession } from './components/CreateSession';
-import { GameBoard } from './components/GameBoard';
+import { GamePage } from './components/GamePage';
 import { ResultPage } from './components/ResultPage';
 import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
@@ -25,8 +25,8 @@ const AppContent: React.FC = () => {
           <Route element={<LoginPage />} path="/login" />
           <Route element={<ProtectedRoute><JoinSession /></ProtectedRoute>} path="/" />
           <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
-          <Route element={<ProtectedRoute><GameBoard /></ProtectedRoute>} path="/game/:sessionId" />
-          <Route element={<ProtectedRoute><ResultPage /></ProtectedRoute>} path="/result/:sessionId" />
+          <Route element={<ProtectedRoute><GamePage /></ProtectedRoute>} path="/game/:sessionId" />
+          <Route element={<ResultPage />} path="/result/:sessionId" />
           <Route element={<UserPage />} path="/user/:userAddress" />
         </Routes>
       </main>

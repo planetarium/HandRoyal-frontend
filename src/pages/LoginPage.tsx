@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RawPrivateKey } from '@planetarium/account';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { request } from 'graphql-request';
-import { graphql } from '../gql/gql'
+import { request } from 'graphql-request'
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
+import { GRAPHQL_ENDPOINT, checkUserDocument, createUserDocument } from '../queries';
 
 const TEST_ACCOUNTS = [
   {
@@ -34,24 +34,6 @@ const TEST_ACCOUNTS = [
     address: '0x17fB691ac6B3793871d3b1c06B806C75C60240d0'
   }
 ];
-
-const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
-const checkUserDocument = graphql(/* GraphQL */ `
-  query CheckUser($address: Address!) {
-    stateQuery {
-      user(userId: $address) {
-        id
-        gloves
-      }
-    }
-  }
-`);
-
-const createUserDocument = graphql(/* GraphQL */ `
-  mutation CreateUser($privateKey: PrivateKey) {
-    createUser(privateKey: $privateKey)
-  }
-`);
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();

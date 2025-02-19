@@ -3,52 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
-import { graphql } from '../gql/gql';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-
-const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
-
-const getSessionsDocument = graphql(/* GraphQL */ `
-  query GetSessions {
-    stateQuery {
-      sessions {
-        metadata {
-          id
-          organizer
-          prize
-          maximumUser
-          minimumUser
-          remainingUser
-        }
-        state
-        players {
-          id
-          glove
-        }
-        rounds {
-          height
-          matches {
-            move1 {
-              type
-            }
-            move2 {
-              type
-            }
-          }
-        }
-        creationHeight
-        startHeight
-      }
-    }
-  }
-`);
-
-const joinSessionDocument = graphql(/* GraphQL */ `
-  mutation JoinSession($privateKey: PrivateKey, $sessionId: Address!) {
-    joinSession(privateKey: $privateKey, sessionId: $sessionId)
-  }
-`);
+import { GRAPHQL_ENDPOINT, getSessionsDocument, joinSessionDocument } from '../queries';
 
 export const JoinSession: React.FC = () => {
   const { t } = useTranslation();
@@ -178,7 +135,7 @@ export const JoinSession: React.FC = () => {
           </tbody>
         </table>
       </div>
-      <p className="create-session-link mt-4 text-center text-gray-500 cursor-pointer" onClick={handleCreate}>
+      <p className="create-session-link mt-4 text-center text-gray-500 cursor-pointer mt-10" onClick={handleCreate}>
         <i>{t('createNewSession')}</i>
       </p>
     </div>
