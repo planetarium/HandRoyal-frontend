@@ -7,6 +7,7 @@ i18n
     resources: {
       en: {
         translation: {
+          "alreadyJoinedSession": "Already joined session: {{sessionId}}",
           "backToMain": "Back to Main",
           "blocksLeft": "Blocks left: {{count}}",
           "cancel": "Cancel",
@@ -23,6 +24,7 @@ i18n
           "gameRules": "Game Rules",
           "host": "Host",
           "invalidSessionIdLength": "Length of the session ID must be 40 characters.",
+          "invalidSession": "Invalid session: {{sessionId}}",
           "join": "Join",
           "joinSession": "Join Session",
           "language": "Language",
@@ -53,6 +55,7 @@ i18n
           "sessionInProgress": "Session is in progress.",
           "startAfter": "Start After",
           "submit": "Submit",
+          "viewResults": "Results",
           "waitingForGameToStart": "Waiting for the game to start...",
           "waitingForSession": "Waiting for the session to be created...",
           "waitingInterval": "Number of blocks before starting session",
@@ -63,6 +66,7 @@ i18n
       },
       ko: {
         translation: {
+          "alreadyJoinedSession": "이미 다음 세션에 참가중입니다: {{sessionId}}",
           "backToMain": "메인으로 돌아가기",
           "blocksLeft": "남은 블록: {{count}}",
           "cancel": "취소",
@@ -79,6 +83,7 @@ i18n
           "gameRules": "게임 규칙",
           "host": "호스트",
           "invalidSessionIdLength": "세션 ID의 길이는 40자여야 합니다.",
+          "invalidSession": "잘못된 세션: {{sessionId}}",
           "join": "참가",
           "joinSession": "세션 참가",
           "language": "언어",
@@ -109,6 +114,7 @@ i18n
           "sessionInProgress": "세션이 아직 진행중입니다.",
           "startAfter": "시작까지 남은 블록",
           "submit": "제출",
+          "viewResults": "결과",
           "waitingForGameToStart": "게임이 시작될 때까지 기다리는 중...",
           "waitingForSession": "세션이 생성되기를 기다리는 중...",
           "waitingInterval": "세션 시작까지 걸리는 블록 수",

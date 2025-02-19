@@ -58,7 +58,7 @@ export const ResultPage: React.FC = () => {
 
   const renderMatches = (matches: Match[]) => {
     return matches.map((match, index) => (
-      <div key={index} className="flex items-center justify-between p-2 border-b">
+      <div key={index} className="flex items-center justify-between p-1 border-b">
         <div className="flex justify-start text-left w-90 text-sm">
           {displayUser(getAddressByIndex(match.move1?.playerIndex))}
         </div>
@@ -101,9 +101,12 @@ export const ResultPage: React.FC = () => {
 
   if (error || !data) {
     return (
-      <div className="text-center">
-        <p>{t('invalidSession')}</p>
-        <button className="bg-blue-500 text-white p-2 rounded mt-4" onClick={() => navigate('/')}>{t('backToMain')}</button>
+      <div className="max-w-4xl mx-auto p-4">
+        <h1 className="text-4xl font-bold mb-4 text-center">{t('sessionResults')}</h1>
+        <div className="text-center">
+          <p>{t('invalidSession', { sessionId: sessionId })}</p>
+          <button className="bg-blue-500 text-white p-2 rounded mt-4" onClick={() => navigate('/')}>{t('backToMain')}</button>
+        </div>
       </div>
     );
   }
@@ -125,16 +128,16 @@ export const ResultPage: React.FC = () => {
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-4xl font-bold mb-4 text-center">{t('sessionResults')}</h1>
       <div className="mb-4">
-        <p className='text-xl'><strong>{t('sessionId')}:</strong> <span className="font-mono">{sessionId}</span></p>
-        <p className='text-xl'><strong>{t('organizer')}:</strong> {displayUser(data.metadata?.organizer)}</p>
-        <p className='text-xl'><strong>{t('prize')}:</strong> <span className="font-mono">{data.metadata?.prize}</span></p>
-        <p className='text-xl'><strong>{t('participants')}: {data.players?.length}</strong></p>
+        <p className='text-xl mb-2'><strong>{t('sessionId')}:</strong> <span className="font-mono">{sessionId}</span></p>
+        <p className='text-xl mb-2'><strong>{t('organizer')}:</strong> {displayUser(data.metadata?.organizer)}</p>
+        <p className='text-xl mb-2'><strong>{t('prize')}:</strong> <span className="font-mono">{data.metadata?.prize}</span></p>
+        <p className='text-xl mb-2'><strong>{t('participants')}: {data.players?.length}</strong></p>
         {data.players?.map((player, index) => (
           <p key={index} className='text-sm'>{displayUser(player?.id)}</p>
         ))}
         {data.state === SessionState.Ended ?
-          <p className='text-xl'><strong>{t('winner')}:</strong> {displayUser(getWinner())}</p> :
-          <p className='text-xl'><strong>{t('remainingUser')}:</strong> {data.players?.filter(player => player?.state !== PlayerState.Lose).length}</p>}
+          <p className='text-xl mt-2'><strong>{t('winner')}:</strong> {displayUser(getWinner())}</p> :
+          <p className='text-xl mt-2'><strong>{t('remainingUser')}:</strong> {data.players?.filter(player => player?.state !== PlayerState.Lose).length}</p>}
       </div>
       <p className='text-xl'><strong>{t('matches')}:</strong> {data.rounds?.length}</p>
       {data.rounds?.map((round, index) => (

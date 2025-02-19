@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { request } from 'graphql-request';
-import { useAccount } from '../context/AccountContext';
 import { RawPrivateKey } from '@planetarium/account';
+import { useAccount } from '../context/AccountContext';
 import subscriptionClient from '../subscriptionClient';
-import { GRAPHQL_ENDPOINT, checkUserDocument, createUserDocument, USER_SUBSCRIPTION } from '../queries';
+import { GRAPHQL_ENDPOINT, createUserDocument, USER_SUBSCRIPTION, getUserDocument } from '../queries';
 
 const TEST_ACCOUNTS = [
   {
@@ -37,7 +37,7 @@ const TEST_ACCOUNTS = [
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
-  const { privateKey, address, setPrivateKey } = useAccount();
+  const { address, setPrivateKey } = useAccount();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
           console.error('Subscription error:', err);
         },
         complete: () => {
-          console.log('Subscription completed');
+          console.error('Subscription completed');
         },
       }
     );
@@ -105,7 +105,7 @@ const LoginPage: React.FC = () => {
       const data = await queryClient.fetchQuery({
         queryKey: ['checkUser', address],
         queryFn: async () => {
-          const response = await request(GRAPHQL_ENDPOINT, checkUserDocument, { address: address!.toString() });
+          const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: address!.toString() });
           return response;
         }
       });
@@ -121,7 +121,7 @@ const LoginPage: React.FC = () => {
       setErrorMessage('Invalid private key format.');
       setIsLoggingIn(false);
     }
-  }, [queryClient, privateKeyInput, createUserMutation, navigate]);
+  }, [queryClient, privateKeyInput, createUserMutation, navigate, setPrivateKey]);
 
   const isDisabled = () => {
     return isLoggingIn;

@@ -6,13 +6,14 @@ import { Address } from '@planetarium/account';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { SessionState, PlayerState, Session } from '../gql/graphql';
+import { SessionState, PlayerState } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
 import GameBoard from './GameBoard';
+import type { Session } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
   const { t } = useTranslation();
-  const { privateKey, address, setPrivateKey } = useAccount();
+  const { address } = useAccount();
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { tip } = useTip();
@@ -42,12 +43,6 @@ export const GamePage: React.FC = () => {
       }
     }
   }, [data, address]);
-
-  useEffect(() => {
-    if (data?.state === SessionState.Ended) {
-      navigate(`/result/${sessionId}`);
-    }
-  }, [data, navigate, sessionId]);
 
   useEffect(() => {
     if (!sessionId) {
@@ -92,25 +87,27 @@ export const GamePage: React.FC = () => {
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
         <p className="text-2xl">{t('lose')}</p>
-        <button
-          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
-          onClick={() => navigate(`/result/${sessionId}`)}
-        >
-          {t('viewResults')}
-        </button>
-        <button
-          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
-          onClick={() => navigate('/')}
-        >
-          {t('backToMain')}
-        </button>
+        <div className="flex justify-center space-x-4 mt-5">
+          <button
+            className="bg-blue-500 text-white p-2 rounded cursor-pointer"
+            onClick={() => navigate(`/result/${sessionId}`)}
+          >
+            {t('viewResults')}
+          </button>
+          <button
+            className="bg-blue-500 text-white p-2 rounded cursor-pointer"
+            onClick={() => navigate('/')}
+          >
+            {t('backToMain')}
+          </button>
+        </div>
       </div>
     );
   }
 
   if (data?.state === SessionState.Ended) {
     return (
-      <div className="game-board p-4 max-w-md mx-auto text-center">
+      <div className="game-board p-4 max-w-md mx-auto text-center space-x-4">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
         <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended</h2>
         <button

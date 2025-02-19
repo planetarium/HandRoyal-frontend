@@ -5,7 +5,7 @@ import { useTip } from '../context/TipContext';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { privateKey, address, setPrivateKey } = useAccount();
+  const { address, setPrivateKey } = useAccount();
   const { tip } = useTip();
 
   const handleLogout = () => {
