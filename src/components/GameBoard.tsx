@@ -16,7 +16,7 @@ interface GameBoardProps {
 
 const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
   const { t } = useTranslation();
-  const { privateKey } = useAccount();
+  const { privateKey, address, setPrivateKey } = useAccount();
   const emojiMap: Record<MoveType, string> = {
     [MoveType.Rock]: '✊',
     [MoveType.Paper]: '✋',
@@ -86,8 +86,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
     const updateGameBoardState = async () => {
       const props: GameBoardState = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null};
       if (data?.rounds && data.players) {
-        const userAddress = await privateKey?.getAddress();
-        const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === userAddress?.toHex());
+        const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === address?.toHex());
         const currentRound = data.rounds[data.rounds.length - 1];
         if (currentRound?.matches) {
           const match = currentRound.matches.find(match => {

@@ -13,7 +13,7 @@ export const JoinSession: React.FC = () => {
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState('');
   const [error, setError] = useState('');
-  const { privateKey } = useAccount();
+  const { privateKey, address, setPrivateKey } = useAccount();
   const { tip } = useTip();
 
   const bytesToHex = (bytes: Uint8Array): string => {

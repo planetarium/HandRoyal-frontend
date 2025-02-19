@@ -4,9 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { request } from 'graphql-request';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
-import { TxStatus } from '../gql/graphql';
-import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, transactionResultDocument } from '../queries';
-import type { Scalars } from '../gql/graphql';
+import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, SESSION_SUBSCRIPTION } from '../queries';
+import subscriptionClient from '../subscriptionClient';
 
 interface GameRules {
   maximumUser: number,
@@ -19,7 +18,9 @@ interface GameRules {
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [sessionId, setSessionId] = useState<string>('0000000000000000000000000000000000000000');
+  const { privateKey, address, setPrivateKey } = useAccount();
+  const [sessionIdCandidate, setSessionIdCandidate] = useState<string>('0000000000000000000000000000000000000000');
+  const [sessionId, setSessionId] = useState<string>('');
   const [isSessionIdValid, setIsSessionIdValid] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isPolling, setIsPolling] = useState<boolean>(false);
@@ -31,11 +32,38 @@ export const CreateSession: React.FC = () => {
     waitingInterval: 10
   });
   const [prize, setPrize] = useState('0000000000000000000000000000000000000000');
-  const [txId, setTxId] = useState<string | null>(null);
   const [pollingError, setPollingError] = useState<string | null>(null);
   const isFirstMount = useRef(true);
   const queryClient = useQueryClient();
-  const { privateKey } = useAccount();
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const unsubscribe = subscriptionClient.subscribe(
+      {
+        query: SESSION_SUBSCRIPTION, // Define this query in your queries file
+        variables: { sessionId: sessionId, userId: address!.toString() },
+      },
+      {
+        next: (result) => {
+          const data = result.data as { onSessionChanged: { state: string } };
+          if (data.onSessionChanged.state === 'READY') {
+            navigate(`/game/${sessionId}`);
+          }
+        },
+        error: (err) => {
+          console.error('Subscription error:', err);
+        },
+        complete: () => {
+          console.log('Subscription completed');
+        },
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [sessionId, navigate]);
 
   const generateRandomAddress = () => {
     let address = '';
@@ -49,7 +77,7 @@ export const CreateSession: React.FC = () => {
     setIsSessionIdValid(false);
     setIsFetching(true);
     const newSessionId = generateRandomAddress();
-    setSessionId(newSessionId);
+    setSessionIdCandidate(newSessionId);
     
     try {
       const data = await queryClient.fetchQuery({
@@ -104,7 +132,7 @@ export const CreateSession: React.FC = () => {
       
       const response = await request(GRAPHQL_ENDPOINT, createSessionDocument, {
         privateKey: privateKeyHex,
-        sessionId,
+        sessionId: sessionIdCandidate,
         prize,
         maximumUser: gameRules.maximumUser,
         minimumUser: gameRules.minimumUser,
@@ -115,48 +143,19 @@ export const CreateSession: React.FC = () => {
       return response.createSession;
     },
     onSuccess: (data) => {
-      setTxId(data);
       setIsPolling(true);
     },
     onError: (error) => {
       console.error('Failed to create session:', error);
-      // TODO: 에러 처리
     }
   });
 
-  useEffect(() => {
-    const pollTransactionResult = async () => {
-      if (txId) {
-        try {
-          const data = await queryClient.fetchQuery({
-            queryKey: ['transactionResult', txId],
-            queryFn: async () => {
-              const response = await request(GRAPHQL_ENDPOINT, transactionResultDocument, { txId: txId as Scalars['TxId']['output'] });
-              return response.transaction?.transactionResult;
-            }
-          });
-
-          if (data?.txStatus === TxStatus.Success) {
-            setIsPolling(false);
-            navigate(`/game/${sessionId}`);
-          } else if (data?.txStatus === TxStatus.Failure) {
-            setIsPolling(false);
-            setPollingError('Session creation failed.');
-          }
-        } catch (error) {
-          console.error('Polling error:', error);
-        }
-      }
-    };
-
-    if (isPolling) {
-      const interval = setInterval(pollTransactionResult, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [txId, queryClient, navigate, sessionId, isPolling]);
-
   const handleCreateSession = () => {
+    setSessionId(sessionIdCandidate);
     createSessionMutation.mutate();
+    setTimeout(() => {
+      setPollingError('Session creation timed out. Please try again.');
+    }, 30000); // 30 seconds timeout
   };
 
   return (
@@ -172,7 +171,7 @@ export const CreateSession: React.FC = () => {
               readOnly
               className="flex-grow mt-1 block text-gray-400 w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100"
               type="text"
-              value={(!isSessionIdValid || isFetching) ? 'Checking...' : sessionId}
+              value={(!isSessionIdValid || isFetching) ? 'Checking...' : sessionIdCandidate}
             />
             <button
               aria-label={t('refresh')}

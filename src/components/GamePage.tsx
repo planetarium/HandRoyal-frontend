@@ -6,17 +6,16 @@ import { Address } from '@planetarium/account';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { SessionState, PlayerState } from '../gql/graphql';
+import { SessionState, PlayerState, Session } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
 import GameBoard from './GameBoard';
 
 export const GamePage: React.FC = () => {
   const { t } = useTranslation();
+  const { privateKey, address, setPrivateKey } = useAccount();
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { privateKey } = useAccount();
   const { tip } = useTip();
-  const [userAddress, setUserAddress] = useState<Address | null>(null);
   const [showNoSessionMessage, setShowNoSessionMessage] = useState(false);
   const [playerStatus, setPlayerStatus] = useState<PlayerState | null>(null);
 
@@ -36,17 +35,13 @@ export const GamePage: React.FC = () => {
   }, [tip, refetch]);
 
   useEffect(() => {
-    privateKey?.getAddress().then(address => setUserAddress(address ?? null));
-  }, [privateKey]);
-
-  useEffect(() => {
-    if (data?.players && userAddress) {
-      const currentPlayer = data.players.find(player => Address.fromHex(player!.id).toHex() === userAddress.toHex());
+    if (data?.players && address) {
+      const currentPlayer = data.players.find(player => Address.fromHex(player!.id).toHex() === address.toHex());
       if (currentPlayer) {
         setPlayerStatus(currentPlayer.state);
       }
     }
-  }, [data, userAddress]);
+  }, [data, address]);
 
   useEffect(() => {
     if (data?.state === SessionState.Ended) {
@@ -88,6 +83,9 @@ export const GamePage: React.FC = () => {
       </div>
     );
   }
+
+  // Ensure data is of type Session
+  const sessionData = data as Session;
 
   if (playerStatus === PlayerState.Lose) {
     return (
@@ -141,7 +139,7 @@ export const GamePage: React.FC = () => {
     );
   }
 
-  if (userAddress && data?.metadata?.organizer && Address.fromHex(data.metadata.organizer).toHex() === userAddress.toHex()) {
+  if (address && data?.metadata?.organizer && Address.fromHex(data.metadata.organizer).toHex() === address.toHex()) {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
@@ -174,7 +172,7 @@ export const GamePage: React.FC = () => {
           <p className="mb-2 text-center">{t('sessionId')}: {<span className="font-mono">{sessionId}</span>}</p>
           <p className="mb-4 text-center">{t('round', { count: round })}</p>
           
-          <GameBoard blocksLeft={blocksLeft} data={data} />
+          <GameBoard blocksLeft={blocksLeft} data={sessionData} />
         </>
       )}
     </div>

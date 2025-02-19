@@ -1,12 +1,12 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { RawPrivateKey } from '@planetarium/account';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { request } from 'graphql-request'
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { request } from 'graphql-request';
 import { useAccount } from '../context/AccountContext';
-import { useTip } from '../context/TipContext';
-import { GRAPHQL_ENDPOINT, checkUserDocument, createUserDocument } from '../queries';
+import { RawPrivateKey } from '@planetarium/account';
+import subscriptionClient from '../subscriptionClient';
+import { GRAPHQL_ENDPOINT, checkUserDocument, createUserDocument, USER_SUBSCRIPTION } from '../queries';
 
 const TEST_ACCOUNTS = [
   {
@@ -37,24 +37,57 @@ const TEST_ACCOUNTS = [
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
-  const { privateKey, setPrivateKey } = useAccount();
+  const { privateKey, address, setPrivateKey } = useAccount();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
-  const [isPolling, setIsPolling] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { tip } = useTip();
+
+  useEffect(() => {
+    if (!address) return;
+
+    const unsubscribe = subscriptionClient.subscribe(
+      {
+        query: USER_SUBSCRIPTION,
+        variables: { userId: address.toString() },
+      },
+      {
+        next: (result) => {
+          const data = result.data as { onUserChanged: { id: string } };
+          if (data.onUserChanged.id) {
+            setIsLoggingIn(false);
+            navigate('/');
+          }
+        },
+        error: (err) => {
+          console.error('Subscription error:', err);
+        },
+        complete: () => {
+          console.log('Subscription completed');
+        },
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [address, navigate]);
 
   const createUserMutation = useMutation({
     mutationFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, createUserDocument, { privateKey: privateKeyInput });
       return response.createUser;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setErrorMessage(null);
-      setPrivateKey(privateKey);
-      setIsPolling(true);
+      setIsLoggingIn(true);
+      const timeoutId = setTimeout(() => {
+        setIsLoggingIn(false);
+        setErrorMessage('Login timed out. Please try again.');
+      }, 30000);
+
+      return () => clearTimeout(timeoutId);
     },
     onError: (error) => {
       console.error('Failed to create user:', error);
@@ -63,61 +96,35 @@ const LoginPage: React.FC = () => {
   });
 
   const handleLogin = useCallback(async () => {
+    setIsLoggingIn(true);
     try {
-      setIsFetching(true);
       const privateKey = RawPrivateKey.fromHex(privateKeyInput);
+      const address = (await privateKey.getAddress()).toHex();
       setPrivateKey(privateKey);
-      const address = (await privateKey?.getAddress())?.toHex();
+
       const data = await queryClient.fetchQuery({
         queryKey: ['checkUser', address],
         queryFn: async () => {
-          const response = await request(GRAPHQL_ENDPOINT, checkUserDocument, { address: address });
+          const response = await request(GRAPHQL_ENDPOINT, checkUserDocument, { address: address!.toString() });
           return response;
         }
       });
-      
+
       if (data?.stateQuery?.user) {
         setErrorMessage(null);
         navigate('/');
       } else {
-        setErrorMessage(null);
         createUserMutation.mutate();
       }
-      
     } catch (error) {
       console.error('Invalid private key format:', error);
-      setErrorMessage('' + error);
-    } finally {
-      setIsFetching(false);
+      setErrorMessage('Invalid private key format.');
+      setIsLoggingIn(false);
     }
-  }, [queryClient, privateKeyInput, setPrivateKey, navigate, createUserMutation]);
-
-  useEffect(() => {
-    const pollUser = async () => {
-      if (isPolling && privateKey) {
-        const address = (await privateKey.getAddress())?.toHex();
-        const data = await queryClient.fetchQuery({
-          queryKey: ['checkUser', address],
-          queryFn: async () => {
-            const response = await request(GRAPHQL_ENDPOINT, checkUserDocument, { address: address });
-            return response;
-          }
-        });
-
-        if (data?.stateQuery?.user) {
-          setIsPolling(false);
-          navigate('/');
-        }
-      }
-    };
-
-    if (tip) {
-      pollUser();
-    }
-  }, [tip, isPolling, privateKey, queryClient, navigate]);
+  }, [queryClient, privateKeyInput, createUserMutation, navigate]);
 
   const isDisabled = () => {
-    return isFetching || isPolling;
+    return isLoggingIn;
   }
 
   return (
@@ -138,11 +145,11 @@ const LoginPage: React.FC = () => {
           </div>
         )}
         <button
-          className={`p-2 rounded w-full ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : 'bg-blue-500 text-white cursor-pointer'}`}
+          className={`p-2 rounded w-full ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
           disabled={isDisabled()}
           onClick={handleLogin}
         >
-          {t('loginButton')}
+          {isLoggingIn ? 'Logging in...' : t('loginButton')}
         </button>
       </div>
 
