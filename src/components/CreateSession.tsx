@@ -101,7 +101,6 @@ export const CreateSession: React.FC = () => {
     mutationFn: async () => {
       const privateKeyBytes = privateKey?.toBytes();
       const privateKeyHex = privateKeyBytes ? bytesToHex(privateKeyBytes) : undefined;
-      console.error('privateKeyHex: ' + privateKeyHex);
       
       const response = await request(GRAPHQL_ENDPOINT, createSessionDocument, {
         privateKey: privateKeyHex,
@@ -116,7 +115,6 @@ export const CreateSession: React.FC = () => {
       return response.createSession;
     },
     onSuccess: (data) => {
-      console.error('txId: ' + data)
       setTxId(data);
       setIsPolling(true);
     },
