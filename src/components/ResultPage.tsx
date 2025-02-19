@@ -37,7 +37,7 @@ export const ResultPage: React.FC = () => {
     : 0);
 
   const getAddressByIndex = (index: number | undefined) => {
-    if (index) {
+    if (index !== undefined) {
       return data?.players?.[index]?.id;
     }
 
