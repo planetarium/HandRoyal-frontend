@@ -6,6 +6,7 @@ import { request } from 'graphql-request';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { GRAPHQL_ENDPOINT, getSessionsDocument, joinSessionDocument } from '../queries';
+import { SessionState } from '../gql/graphql';
 
 export const JoinSession: React.FC = () => {
   const { t } = useTranslation();
@@ -39,7 +40,6 @@ export const JoinSession: React.FC = () => {
     mutationFn: async (sessionId: string) => {
       const privateKeyBytes = privateKey?.toBytes();
       const privateKeyHex = privateKeyBytes ? bytesToHex(privateKeyBytes) : undefined;
-      console.error('privateKeyHex: ' + privateKeyHex);
       
       const response = await request(GRAPHQL_ENDPOINT, joinSessionDocument, {
         privateKey: privateKeyHex,
@@ -47,8 +47,7 @@ export const JoinSession: React.FC = () => {
       });
       return response.joinSession;
     },
-    onSuccess: (data) => {
-      console.error('txId: ' + data)
+    onSuccess: () => {
     },
     onError: (error) => {
       console.error('Failed to join session:', error);
@@ -63,6 +62,15 @@ export const JoinSession: React.FC = () => {
 
     joinSessionMutation.mutate(id);
     navigate(`/game/${id}`);
+  };
+
+  const handleSpectate = (id: string) => {
+    if (!validateSessionIdLength(id)) {
+      setError(t('invalidSessionIdLength'));
+      return;
+    }
+
+    navigate(`/result/${id}`);
   };
 
   const handleCreate = () => {
@@ -112,22 +120,31 @@ export const JoinSession: React.FC = () => {
           </thead>
           <tbody>
             {data && data.map((session) => {
-              if (!session || !session.metadata || !(session.state === 'READY')) return null;
+              if (!session || !session.metadata || !(session.state === SessionState.Ready || session.state === SessionState.Active)) return null;
               const sessionMetadata = session.metadata as { id: string };
               return (
                 <tr key={sessionMetadata.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 border-b">{truncateAddress(sessionMetadata.id)}</td>
                   <td className="px-6 py-4 border-b">{session.metadata.prize}</td>
                   <td className="px-6 py-4 border-b">{session.players?.length}/{session.metadata.maximumUser}</td>
-                  <td className="px-6 py-4 border-b">{session.startHeight - (tip?.index ?? 0)}</td>
+                  <td className="px-6 py-4 border-b">{session.state === SessionState.Ready ? session.startHeight - (tip?.index ?? 0) : "Playing..."}</td>
                   <td className="px-6 py-4 border-b">
-                    <button
-                      className="bg-blue-500 text-white p-2 rounded cursor-pointer"
-                      disabled={(session.players?.length ?? session.metadata.maximumUser) >= session.metadata.maximumUser}
-                      onClick={() => handleJoin(sessionMetadata.id)}
-                    >
-                      {t('join')}
-                    </button>
+                    {session.state === SessionState.Ready ? (
+                      <button
+                        className="bg-blue-500 text-white p-2 rounded cursor-pointer"
+                        disabled={(session.players?.length ?? session.metadata.maximumUser) >= session.metadata.maximumUser}
+                        onClick={() => handleJoin(sessionMetadata.id)}
+                      >
+                          {t('join')}
+                        </button>
+                    ) : (
+                      <button
+                        className="bg-blue-500 text-white p-2 rounded cursor-pointer"
+                        onClick={() => handleSpectate(sessionMetadata.id)}
+                      >
+                        {t('spectate')}
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

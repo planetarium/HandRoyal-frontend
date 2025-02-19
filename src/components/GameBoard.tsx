@@ -40,16 +40,18 @@ const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
       const moveType = move === 'rock' ? MoveType.Rock : move === 'paper' ? MoveType.Paper : MoveType.Scissors;
       const response = await request(GRAPHQL_ENDPOINT, submitMoveDocument, {
         privateKey: privateKeyHex,
-        sessionId,
+        sessionId: data?.metadata?.id,
         move: moveType,
       });
       return response.submitMove;
     },
     onSuccess: (data) => {
       console.error('Move submitted successfully: ' + data);
+      setSubmitting(false);
     },
     onError: (error) => {
       console.error('Failed to submit move:', error);
+      setSubmitting(false);
     }
   });
 
@@ -82,7 +84,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
 
   useEffect(() => {
     const updateGameBoardState = async () => {
-      console.error('update game board props');
       const props: GameBoardState = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null};
       if (data?.rounds && data.players) {
         const userAddress = await privateKey?.getAddress();

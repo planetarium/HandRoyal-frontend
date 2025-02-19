@@ -66,14 +66,12 @@ export const GamePage: React.FC = () => {
   const blocksLeft = data?.state === SessionState.Ready
     ? (data?.startHeight && tip 
       ? data.startHeight - tip.index
-      : 0) 
+      : 0)
     : (data?.rounds && data.metadata && tip
       ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundInterval) - tip.index
       : 0);
 
   const round = data?.rounds ? data.rounds.length : 0;
-
-  const winner = data?.players?.find(player => player?.state === PlayerState.Won);
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -81,21 +79,6 @@ export const GamePage: React.FC = () => {
 
   if (isLoading) return <p>{t('loading')}</p>;
   if (error) return <p>{t('error')}: {error.message}</p>;
-
-  if (playerStatus === PlayerState.Lose) {
-    return (
-      <div className="game-board p-4 max-w-md mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">{t('lose')}</p>
-        <button
-          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
-          onClick={() => navigate('/')}
-        >
-          {t('backToMain')}
-        </button>
-      </div>
-    );
-  }
 
   if (data === null) {
     return (
@@ -106,19 +89,44 @@ export const GamePage: React.FC = () => {
     );
   }
 
+  if (playerStatus === PlayerState.Lose) {
+    return (
+      <div className="game-board p-4 max-w-md mx-auto text-center">
+        <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
+        <p className="text-2xl">{t('lose')}</p>
+        <button
+          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
+          onClick={() => navigate(`/result/${sessionId}`)}
+        >
+          {t('viewResults')}
+        </button>
+        <button
+          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
+          onClick={() => navigate('/')}
+        >
+          {t('backToMain')}
+        </button>
+      </div>
+    );
+  }
+
   if (data?.state === SessionState.Ended) {
     return (
       <div className="game-board p-4 max-w-md mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended, redirecting to result page...</h2>
-        {winner ? (
-          <>
-            <p className="text-xl mb-2">Winner: <span className="font-bold" title={winner.id}>{truncateAddress(winner.id)}</span></p>
-            <p className="text-xl">Prize: <span className="font-bold" title={data?.metadata?.prize}>{truncateAddress(data?.metadata?.prize)}</span></p>
-          </>
-        ) : (
-          <p className="text-xl">{t('sessionEndedWithoutWinner')}</p>
-        )}
+        <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended</h2>
+        <button
+          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
+          onClick={() => navigate(`/result/${sessionId}`)}
+        >
+          {t('viewResults')}
+        </button>
+        <button
+          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
+          onClick={() => navigate('/')}
+        >
+          {t('backToMain')}
+        </button>
       </div>
     );
   }
@@ -162,8 +170,8 @@ export const GamePage: React.FC = () => {
         <p className="text-red-500 text-center mb-4">{t('noSessionFound')}</p>
       ) : (
         <>
-          <h1 className="text-2xl font-bold mb-4 text-center">{t('gameBoardTitle')}</h1>
-          <p className="mb-2 text-center">{t('sessionId')}: {sessionId}</p>
+          <h1 className="text-4xl font-bold mb-4 text-center">{t('gameBoardTitle')}</h1>
+          <p className="mb-2 text-center">{t('sessionId')}: {<span className="font-mono">{sessionId}</span>}</p>
           <p className="mb-4 text-center">{t('round', { count: round })}</p>
           
           <GameBoard blocksLeft={blocksLeft} data={data} />
