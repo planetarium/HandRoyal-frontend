@@ -3,20 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
-import { graphql } from '../gql/gql';
+import { getUserDocument } from '../queries';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
-
-const getUserDocument = graphql(/* GraphQL */ `
-  query GetUser($address: Address!) {
-    stateQuery {
-      user(userId: $address) {
-        id
-        gloves
-      }
-    }
-  }
-`);
 
 const UserPage: React.FC = () => {
   const { t } = useTranslation();

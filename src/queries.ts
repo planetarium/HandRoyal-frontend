@@ -2,12 +2,13 @@ import { graphql } from './gql/gql';
 
 export const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
-export const checkUserDocument = graphql(/* GraphQL */ `
-  query CheckUser($address: Address!) {
+export const getUserDocument = graphql(/* GraphQL */ `
+  query GetUser($address: Address!) {
     stateQuery {
       user(userId: $address) {
         id
         gloves
+        sessionId
       }
     }
   }
@@ -118,6 +119,7 @@ export const getSessionDocument = graphql(/* GraphQL */ `
         }
         creationHeight
         startHeight
+        height
       }
     }
   }

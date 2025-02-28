@@ -18,7 +18,7 @@ interface GameRules {
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { privateKey, address, setPrivateKey } = useAccount();
+  const { privateKey, address } = useAccount();
   const [sessionIdCandidate, setSessionIdCandidate] = useState<string>('0000000000000000000000000000000000000000');
   const [sessionId, setSessionId] = useState<string>('');
   const [isSessionIdValid, setIsSessionIdValid] = useState<boolean>(false);
@@ -55,7 +55,7 @@ export const CreateSession: React.FC = () => {
           console.error('Subscription error:', err);
         },
         complete: () => {
-          console.log('Subscription completed');
+          console.error('Subscription completed');
         },
       }
     );
@@ -63,7 +63,7 @@ export const CreateSession: React.FC = () => {
     return () => {
       unsubscribe();
     };
-  }, [sessionId, navigate]);
+  }, [sessionId, navigate, address]);
 
   const generateRandomAddress = () => {
     let address = '';
@@ -142,7 +142,7 @@ export const CreateSession: React.FC = () => {
       });
       return response.createSession;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       setIsPolling(true);
     },
     onError: (error) => {

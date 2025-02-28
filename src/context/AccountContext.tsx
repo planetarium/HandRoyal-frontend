@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Address, RawPrivateKey } from '@planetarium/account';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import type {  RawPrivateKey, Address } from '@planetarium/account';
 import type { ReactNode } from 'react';
 
 interface AccountContextType {
