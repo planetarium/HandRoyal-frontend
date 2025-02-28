@@ -7,9 +7,9 @@ i18n
     resources: {
       en: {
         translation: {
-          "alreadyJoinedSession": "Already joined session: {{sessionId}}",
+          "alreadyJoinedSession": "Already joined session",
           "backToMain": "Back to Main",
-          "blocksLeft": "Blocks left: {{count}}",
+          "blocksLeft": "Blocks left",
           "cancel": "Cancel",
           "closed": "Closed",
           "createNewSession": "Or you can create a new session...",
@@ -44,6 +44,7 @@ i18n
           "prize": "Prize",
           "playerLeft": "Players left",
           "remainingUser": "Users left to end game",
+          "rejoin": "Rejoin",
           "rock": "Rock",
           "round": "Round: {{count}}",
           "roundInterval": "Blocks per round",
@@ -66,9 +67,9 @@ i18n
       },
       ko: {
         translation: {
-          "alreadyJoinedSession": "이미 다음 세션에 참가중입니다: {{sessionId}}",
+          "alreadyJoinedSession": "이미 다음 세션에 참가중입니다",
           "backToMain": "메인으로 돌아가기",
-          "blocksLeft": "남은 블록: {{count}}",
+          "blocksLeft": "블록 뒤에 시작",
           "cancel": "취소",
           "closed": "닫힘",
           "createNewSession": "혹은 새 세션 만들기...",
@@ -103,6 +104,7 @@ i18n
           "prize": "상품",
           "playerLeft": "남은 플레이어 수",
           "remainingUser": "최종 승리자 수",
+          "rejoin": "다시 참가",
           "rock": "바위",
           "round": "라운드: {{count}}",
           "roundInterval": "라운드 당 블록 수",
