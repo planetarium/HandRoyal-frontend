@@ -6,6 +6,7 @@ import { request } from 'graphql-request';
 import { getSessionDocument, GRAPHQL_ENDPOINT } from '../queries';
 import { PlayerState, SessionState, type Match, type MoveType } from '../gql/graphql';
 import { useTip } from '../context/TipContext';
+import StyledButton from '../components/StyledButton';
 
 export const ResultPage: React.FC = () => {
   const { t } = useTranslation();
@@ -150,7 +151,9 @@ export const ResultPage: React.FC = () => {
       ))}
       {data.state === SessionState.Active ? <p className='text-sm text-center'>{t('blocksLeft', { count: blocksLeft })}</p> : null}
       <div className="text-center mt-6">
-        <button className="bg-blue-500 text-white p-2 rounded cursor-pointer" onClick={() => navigate('/')}>{t('backToMain')}</button>
+        <StyledButton onClick={() => navigate('/')}>
+          {t('backToMain')}
+        </StyledButton>
       </div>
     </div>
   );

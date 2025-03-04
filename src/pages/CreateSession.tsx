@@ -6,6 +6,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, SESSION_SUBSCRIPTION } from '../queries';
 import subscriptionClient from '../subscriptionClient';
+import StyledButton from '../components/StyledButton';
 
 interface GameRules {
   maximumUser: number,
@@ -259,22 +260,22 @@ export const CreateSession: React.FC = () => {
           />
         </div>
         <div className="flex justify-center space-x-4 mt-4">
-          <button 
-            className="bg-gray-500 text-white p-2 rounded cursor-pointer"
+          <StyledButton
+            bgColor="bg-gray-500"
             disabled={createSessionMutation.isPending || isPolling}
+            hoverBgColor="hover:bg-gray-600"
+            textColor="text-white"
             onClick={() => navigate('/')}
           >
             {t('cancel')}
-          </button>
-          <button
-            className={`p-2 rounded cursor-pointer ${(!isSessionIdValid || createSessionMutation.isPending || isPolling) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-            disabled={!isSessionIdValid || createSessionMutation.isPending || isPolling}
-            onClick={handleCreateSession}
-          >
+          </StyledButton>
+          <StyledButton onClick={handleCreateSession}>
             {createSessionMutation.isPending ? t('creatingSession') : t('createSessionButton')}
-          </button>
+          </StyledButton>
         </div>
       </div>
     </div>
   );
 };
+
+export default CreateSession;

@@ -8,7 +8,8 @@ import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { SessionState, PlayerState } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
-import GameBoard from './GameBoard';
+import GameBoard from '../components/GameBoard';
+import StyledButton from '../components/StyledButton';
 import type { Session } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
@@ -88,18 +89,12 @@ export const GamePage: React.FC = () => {
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
         <p className="text-2xl">{t('lose')}</p>
         <div className="flex justify-center space-x-4 mt-5">
-          <button
-            className="bg-blue-500 text-white p-2 rounded cursor-pointer"
-            onClick={() => navigate(`/result/${sessionId}`)}
-          >
+          <StyledButton onClick={() => navigate(`/result/${sessionId}`)}>
             {t('viewResults')}
-          </button>
-          <button
-            className="bg-blue-500 text-white p-2 rounded cursor-pointer"
-            onClick={() => navigate('/')}
-          >
+          </StyledButton>
+          <StyledButton onClick={() => navigate('/')} >
             {t('backToMain')}
-          </button>
+          </StyledButton>
         </div>
       </div>
     );
@@ -110,18 +105,12 @@ export const GamePage: React.FC = () => {
       <div className="game-board p-4 max-w-md mx-auto text-center space-x-4">
         <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
         <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended</h2>
-        <button
-          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
-          onClick={() => navigate(`/result/${sessionId}`)}
-        >
+        <StyledButton onClick={() => navigate(`/result/${sessionId}`)}>
           {t('viewResults')}
-        </button>
-        <button
-          className="bg-blue-500 text-white p-2 mt-5 rounded cursor-pointer"
-          onClick={() => navigate('/')}
-        >
+        </StyledButton>
+        <StyledButton onClick={() => navigate('/')} >
           {t('backToMain')}
-        </button>
+        </StyledButton>
       </div>
     );
   }

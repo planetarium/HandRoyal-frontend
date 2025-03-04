@@ -6,6 +6,7 @@ import { request } from 'graphql-request';
 import { MoveType, SessionState } from '../gql/graphql';
 import { useAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, submitMoveDocument } from '../queries';
+import StyledButton from './StyledButton';
 import type { Session } from '../gql/graphql';
 import type { HandType } from '../types/types';
 
@@ -190,13 +191,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
       </button>
     </div>
     <div className="flex justify-center">
-      <button
-        className={`text-white p-2 rounded ${canSubmit() ? 'bg-blue-500 cursor-pointer' : 'bg-gray-300'}`}
-        disabled={!canSubmit()}
-        onClick={handleSubmit}
-      >
+      <StyledButton onClick={handleSubmit}>
         {t('submit')}
-      </button>
+      </StyledButton>
     </div>
     </div>
   );

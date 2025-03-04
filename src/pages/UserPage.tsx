@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { getUserDocument } from '../queries';
+import StyledButton from '../components/StyledButton';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
@@ -23,6 +24,10 @@ const UserPage: React.FC = () => {
   if (error) return <p>{t('error')}: {error.message}</p>;
 
   const user = data?.stateQuery.user;
+
+  const handleLogout = () => {
+    // Implement the logout logic here
+  };
 
   return (
     <div className="user-page p-4 max-w-md mx-auto">
@@ -50,6 +55,9 @@ const UserPage: React.FC = () => {
               <p className="text-gray-500">{t('No gloves found')}</p>
             )}
           </div>
+          <StyledButton onClick={handleLogout}>
+            {t('logout')}
+          </StyledButton>
         </>
       ) : (
         <p className="text-red-500">{t('User not found')}</p>
