@@ -146,3 +146,34 @@ export const SESSION_SUBSCRIPTION = `
     }
   }
 `;
+
+export const registerGloveDocument = graphql(/* GraphQL */ `
+  mutation RegisterGlove($privateKey: PrivateKey, $gloveId: Address!) {
+    registerGlove(privateKey: $privateKey, gloveId: $gloveId)
+  }
+`);
+
+export const isGloveRegisteredDocument = graphql(/* GraphQL */ `
+  query IsGloveRegistered($gloveId: Address!) {
+    isGloveRegistered(gloveId: $gloveId)
+  }
+`);
+
+export const GLOVE_SUBSCRIPTION = `
+  subscription OnGloveRegistered($gloveId: Address!) {
+    onGloveRegistered(gloveId: $gloveId) {
+      id
+    }
+  }
+`;
+
+export const getGloveDocument = graphql(/* GraphQL */ `
+  query GetGlove($gloveId: Address!) {
+    stateQuery {
+      glove(gloveId: $gloveId) {
+        id
+        author
+      }
+    }
+  }
+`);

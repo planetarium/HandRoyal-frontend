@@ -5,12 +5,13 @@ import { JoinSession } from './components/JoinSession';
 import { CreateSession } from './components/CreateSession';
 import { GamePage } from './components/GamePage';
 import { ResultPage } from './components/ResultPage';
+import GlovePage from './components/GlovePage';
 import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
 import { AccountProvider, useAccount } from './context/AccountContext';
 import UserPage from './components/UserPage';
 import { TipProvider } from './context/TipContext';
-
+import RegisterGlove from './components/RegisterGlove';
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { privateKey } = useAccount();
   return privateKey ? children : <Navigate to="/login" />;
@@ -28,6 +29,8 @@ const AppContent: React.FC = () => {
           <Route element={<ProtectedRoute><GamePage /></ProtectedRoute>} path="/game/:sessionId" />
           <Route element={<ResultPage />} path="/result/:sessionId" />
           <Route element={<UserPage />} path="/user/:userAddress" />
+          <Route element={<RegisterGlove />} path="/registerGlove" />
+          <Route element={<GlovePage />} path="/glove/:gloveId" />
         </Routes>
       </main>
     </div>

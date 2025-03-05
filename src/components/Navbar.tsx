@@ -21,6 +21,9 @@ const Navbar: React.FC = () => {
       <Link className="text-lg font-bold text-white" to="/">
         HandRoyal
       </Link>
+      <Link className="text-lg font-bold text-white" to="/registerGlove">
+        Register Glove
+      </Link>
       <div className="flex items-center">
         {tip && (
           <div className="ml-4 mr-4 text-sm">
