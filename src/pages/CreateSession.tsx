@@ -263,7 +263,6 @@ export const CreateSession: React.FC = () => {
           <StyledButton
             bgColor="bg-gray-500"
             disabled={createSessionMutation.isPending || isPolling}
-            hoverBgColor="hover:bg-gray-600"
             textColor="text-white"
             onClick={() => navigate('/')}
           >

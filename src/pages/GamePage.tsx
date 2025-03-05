@@ -4,12 +4,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { request } from 'graphql-request';
 import { Address } from '@planetarium/account';
 import { useQuery } from '@tanstack/react-query';
+import { Clock, Swords } from 'lucide-react';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { SessionState, PlayerState } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
+import logo from '../assets/logo.webp';
 import type { Session } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
@@ -70,25 +72,59 @@ export const GamePage: React.FC = () => {
 
   if (isLoading) return <p>{t('loading')}</p>;
   if (error) return <p>{t('error')}: {error.message}</p>;
-
-  if (data === null) {
-    return (
-      <div className="game-board p-4 max-w-md mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">{t('waitingForSession')}</p>
-      </div>
-    );
-  }
-
+  
   // Ensure data is of type Session
   const sessionData = data as Session;
 
-  if (playerStatus === PlayerState.Lose) {
-    return (
-      <div className="game-board p-4 max-w-md mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">{t('lose')}</p>
-        <div className="flex justify-center space-x-4 mt-5">
+  const renderContent = () => {
+    if (showNoSessionMessage) {
+      return(
+        <p className="text-red-500 text-center mb-4">{t('noSessionFound')}</p>
+      );
+    }
+
+    if (sessionData === null) {
+      return <p className="text-2xl">{t('waitingForSession')}</p>;
+    }
+
+    if (playerStatus === PlayerState.Lose) {
+      return (
+        <div className="flex flex-col justify-between h-full">
+          <p> </p>
+          <div>
+            <img alt="lose" className="w-1/2 h-1/2" src={logo} />
+            <p className="text-2xl text-center">{t('lose')}</p>
+          </div>
+          <div className="flex justify-center space-x-4 mb-5">
+            <StyledButton 
+              bgColor = '#FFE55C'
+              shadowColor = '#FF9F0A'
+              onClick={() => navigate(`/result/${sessionId}`)}>
+              {t('viewResults')}
+            </StyledButton>
+            <StyledButton onClick={() => navigate('/')} >
+              {t('backToMain')}
+            </StyledButton>
+          </div>
+        </div>
+      );
+    }
+
+    if (sessionData.state === SessionState.Ready) {
+      return (
+        <div>
+          <p className="text-2xl text-white text-center">{t('waitingForGameToStart')}</p>
+          <div className="flex items-center justify-center font-bold text-xl mt-5">
+            <Clock className="w-5 h-5 mr-1" />{blocksLeft}
+          </div>
+        </div>
+      );
+    }
+
+    if (sessionData.state === SessionState.Ended) {
+      return (
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended</h2>
           <StyledButton onClick={() => navigate(`/result/${sessionId}`)}>
             {t('viewResults')}
           </StyledButton>
@@ -96,71 +132,48 @@ export const GamePage: React.FC = () => {
             {t('backToMain')}
           </StyledButton>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (data?.state === SessionState.Ended) {
-    return (
-      <div className="game-board p-4 max-w-md mx-auto text-center space-x-4">
-        <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended</h2>
-        <StyledButton onClick={() => navigate(`/result/${sessionId}`)}>
-          {t('viewResults')}
-        </StyledButton>
-        <StyledButton onClick={() => navigate('/')} >
-          {t('backToMain')}
-        </StyledButton>
-      </div>
-    );
-  }
-
-  if (data?.state === SessionState.Ready) {
-    return (
-      <div className="game-board p-4 max-w-md mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">{t('waitingForGameToStart')}</p>
-        <p className="text-2xl">{t('blocksLeft', { count: blocksLeft })}</p>
-      </div>
-    );
-  }
-
-  if (address && data?.metadata?.organizer && Address.fromHex(data.metadata.organizer).toHex() === address.toHex()) {
-    return (
-      <div className="game-board p-4 max-w-md mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-8">{t('gameBoardTitle')}</h1>
-        <p className="text-2xl">{t('youAreTheSessionOrganizer')}</p>
-        <div className="mt-4">
-          {data.rounds?.map((round, index) => (
-            <div key={index} className="mb-4">
-              <h2 className="text-xl font-bold">Round {index + 1}</h2>
-              {round?.matches?.map((match, matchIndex) => (
-                <div key={matchIndex} className="text-lg">
-                  <p>Match {matchIndex + 1}:</p>
-                  <p>Player 1: {match?.move1?.type}</p>
-                  <p>Player 2: {match?.move2?.type}</p>
-                </div>
-              ))}
-            </div>
-          ))}
+    if (address && sessionData.metadata?.organizer && Address.fromHex(sessionData.metadata.organizer).toHex() === address.toHex()) {
+      return (
+        <div>
+          <p className="text-2xl">{t('youAreTheSessionOrganizer')}</p>
+          <StyledButton 
+            bgColor = '#FFE55C'
+            shadowColor = '#FF9F0A'
+            onClick={() => navigate(`/result/${sessionId}`)}>
+          {t('spectate')}
+          </StyledButton>
+          <StyledButton onClick={() => navigate('/')} >
+            {t('backToMain')}
+          </StyledButton>
         </div>
-      </div>
+      )
+    }
+
+    return (
+      <GameBoard blocksLeft={blocksLeft} data={sessionData} round={round} />
     );
   }
 
   return (
-    <div className="game-board p-4 max-w-xl mx-auto">
-      {showNoSessionMessage ? (
-        <p className="text-red-500 text-center mb-4">{t('noSessionFound')}</p>
-      ) : (
-        <>
-          <h1 className="text-4xl font-bold mb-4 text-center">{t('gameBoardTitle')}</h1>
-          <p className="mb-2 text-center">{t('sessionId')}: {<span className="font-mono">{sessionId}</span>}</p>
-          <p className="mb-4 text-center">{t('round', { count: round })}</p>
-          
-          <GameBoard blocksLeft={blocksLeft} data={sessionData} />
-        </>
-      )}
+    <div className="flex justify-center">
+      <div className="flex flex-col justify-between bg-gray-500 rounded-lg text-white border-black border-2 min-w-1/2 min-h-[calc(100vh-180px)] w-full max-w-4xl">
+        <div className="flex items-center justify-center rounded-t-lg p-4 bg-gray-700">
+          <Swords className="w-10 h-10 mr-1" />
+          <p
+            className="text-2xl text-center text-white font-extrabold"
+            style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+          >
+            {t('gameBoardTitle')}
+          </p>
+          <Swords className="w-10 h-10 ml-1" />
+        </div>
+        <div className="flex flex-col justify-center flex-grow">
+          {renderContent()}
+        </div>
+      </div>
     </div>
   );
 }; 

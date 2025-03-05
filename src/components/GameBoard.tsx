@@ -3,27 +3,24 @@ import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
+import { Clock, Swords } from 'lucide-react';
 import { MoveType, SessionState } from '../gql/graphql';
 import { useAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, submitMoveDocument } from '../queries';
 import StyledButton from './StyledButton';
+import MoveDisplay from './MoveDisplay';
 import type { Session } from '../gql/graphql';
 import type { HandType } from '../types/types';
 
 interface GameBoardProps {
+  round: number;
   blocksLeft: number;
   data: Session | undefined;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
+const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
   const { t } = useTranslation();
-  const { privateKey, address, setPrivateKey } = useAccount();
-  const emojiMap: Record<MoveType, string> = {
-    [MoveType.Rock]: '✊',
-    [MoveType.Paper]: '✋',
-    [MoveType.Scissors]: '✌️',
-    [MoveType.None]: '?',
-  };
+  const { privateKey, address } = useAccount();
   const [submitting, setSubmitting] = useState(false);
   const [selectedHand, setSelectedHand] = useState<HandType | null>(null);
   const [gameBoardState, setGameBoardState] = useState<GameBoardState>({myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null});
@@ -107,7 +104,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
     };
 
     updateGameBoardState();
-  }, [data, privateKey]);
+  }, [address, data, privateKey]);
 
   const handleSubmit = () => {
     if (selectedHand) {
@@ -116,17 +113,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
     }
   };
 
-  const canSubmit = () => {
-    return data?.state === SessionState.Active && selectedHand && !submitting;
-  };
-
   return (
-    <div>
+    <div className="flex flex-col p-6">
+      <p className="text-2xl font-bold text-center 0">{t('round') + ' ' + round}</p>
       {/* blocks left */}
       <div className="relative h-12 mb-8">
-        <p className="text-center mb-4">
-          {t('blocksLeft', { count: blocksLeft })}
-        </p>
+        {/* 추후에 시계 연출 추가할 예정. 파이가 줄어드는 모양으로 표시하고, 숫자도 안에 같이 표시해서 컴팩트하고 가시성 좋게 */}
+        <div className="flex justify-center items-center text-center mb-4">
+          <Clock className="w-5 h-5 mr-1" />{blocksLeft}
+        </div>
         <div className="w-full max-w-sm mx-auto relative mt-2">
           <div className="absolute -left-8 translate-y-[-50%]">
             {blocksLeft > 0 && (
@@ -154,47 +149,48 @@ const GameBoard: React.FC<GameBoardProps> = ({ blocksLeft, data }) => {
         </div>
       </div>
 
-      <div className="bg-gray-100 h-64 mb-4 flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <span className="text-6xl">{emojiMap[gameBoardState.myMove]}</span>
-          <span className="mt-2 text-sm text-gray-600">{t('you')}</span>
-        </div>
-        <span className="text-2xl text-gray-700 mx-8">VS</span>
-        <div className="flex flex-col items-center">
-          <span className="text-6xl">{emojiMap[gameBoardState.opponentMove]}</span>
-          <span className="mt-2 text-sm text-gray-600 font-mono">
-            {gameBoardState.opponentAddress ?? ''}
-          </span>
-        </div>
+      <div className="flex items-center justify-center space-x-4 mb-4">
+        <MoveDisplay 
+          gloveAddress={data?.metadata?.id} 
+          moveType={gameBoardState.myMove} 
+          userAddress={t('you')} 
+        />
+        <Swords className="w-20 h-20" color="white" />
+        <MoveDisplay 
+          gloveAddress={data?.metadata?.id} 
+          moveType={gameBoardState.opponentMove} 
+          userAddress={gameBoardState.opponentAddress ?? ''}
+        />
       </div>
-      <div className="flex justify-center space-x-4 mb-4">
-      <button
-        className={`p-2 rounded cursor-pointer ${selectedHand === 'rock' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
-        disabled={submitting}
-        onClick={() => setSelectedHand('rock')}
-      >
-        ✊ {t('rock')}
-      </button>
-      <button
-        className={`p-2 rounded cursor-pointer ${selectedHand === 'paper' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
-        disabled={submitting}
-        onClick={() => setSelectedHand('paper')}
-      >
-        ✋ {t('paper')}
-      </button>
-      <button
-        className={`p-2 rounded cursor-pointer ${selectedHand === 'scissors' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
-        disabled={submitting}
-        onClick={() => setSelectedHand('scissors')}
-      >
-        ✌️ {t('scissors')}
-      </button>
-    </div>
-    <div className="flex justify-center">
-      <StyledButton onClick={handleSubmit}>
-        {t('submit')}
-      </StyledButton>
-    </div>
+      
+      <div className="flex justify-center space-x-4 mb-4 p-6">
+        <button
+          className={`p-2 rounded cursor-pointer ${selectedHand === 'rock' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
+          disabled={submitting}
+          onClick={() => setSelectedHand('rock')}
+        >
+          ✊ {t('rock')}
+        </button>
+        <button
+          className={`p-2 rounded cursor-pointer ${selectedHand === 'paper' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
+          disabled={submitting}
+          onClick={() => setSelectedHand('paper')}
+        >
+          ✋ {t('paper')}
+        </button>
+        <button
+          className={`p-2 rounded cursor-pointer ${selectedHand === 'scissors' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
+          disabled={submitting}
+          onClick={() => setSelectedHand('scissors')}
+        >
+          ✌️ {t('scissors')}
+        </button>
+      </div>
+      <div className="flex justify-center">
+        <StyledButton onClick={handleSubmit}>
+          {t('submit')}
+        </StyledButton>
+      </div>
     </div>
   );
 };
