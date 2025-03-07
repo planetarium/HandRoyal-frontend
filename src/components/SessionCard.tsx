@@ -4,6 +4,7 @@ import { Users, Clock, Crown, Trophy } from 'lucide-react';
 import { SessionState } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import logo from '../assets/logo.webp';
+import AddressDisplay from './AddressDisplay';
 
 interface SessionCardProps {
   id: string;
@@ -53,12 +54,13 @@ const SessionCard: React.FC<SessionCardProps> = ({
   return (
     <div
       key={id}
-      className="flex items-center p-6 rounded-lg w-full border-2 border-black"
+      className="flex items-center p-3 pt-6 pb-6 rounded-lg w-full border-2 border-black"
       style={{
         background: `${backgroundColor}`,
+        boxShadow: 'inset 0 4px 6px -4px rgba(255, 255, 255, 0.5)',
       }}
     >
-      <div className="w-16 h-16 bg-gray-200 rounded-full mr-6 flex-shrink-0">
+      <div className="w-16 h-16 bg-gray-200 rounded-full mr-3 flex-shrink-0">
         <img alt="logo" className="w-full h-full object-cover rounded-full" src={logo} />
       </div>
       <div className="flex flex-col flex-grow">
@@ -70,20 +72,20 @@ const SessionCard: React.FC<SessionCardProps> = ({
         </h3>
         <div className="flex items-center text-sm mt-2" style={{ color: textColor }}>
           <Crown className="mr-1 h-4 w-4" />
-          <span className="font-mono">{host}</span>
+          <AddressDisplay type='user' address={host} shorten={false} />
         </div>
         <div className="flex items-center text-sm mt-1" style={{ color: textColor }}>
           <Trophy className="mr-1 h-4 w-4" />
-          <span className="font-mono">{prize}</span>
+          <AddressDisplay type='glove' address={prize} shorten={false} />
         </div>
       </div>
-      <div className="flex font-bold items-center space-x-4 flex-shrink-0">
+      <div className="flex font items-center space-x-4 flex-shrink-0">
         <div className={`flex items-center ${currentPlayers === maxPlayers ? 'text-red-700' : 'text-blue-700'}`}>
           <Users className="mr-1 h-4 w-4" strokeWidth={3} />
           <span>{currentPlayers}/{maxPlayers}</span>
         </div>
         <div
-          className={`flex font-bold items-center mr-5 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
+          className={`flex font items-center mr-5 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
         >
           <Clock className="mr-1 h-4 w-4" strokeWidth={3} />
           <span>{state === SessionState.Ready ? `${blocksLeft}` : "Playing..."}</span>

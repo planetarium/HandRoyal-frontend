@@ -115,7 +115,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
 
   return (
     <div className="flex flex-col p-6">
-      <p className="text-2xl font-bold text-center 0">{t('round') + ' ' + round}</p>
+      <p className="text-2xl font-bold text-center mb-2" 
+        style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+      >
+        {t('round') + ' ' + round}
+      </p>
       {/* blocks left */}
       <div className="relative h-12 mb-8">
         {/* 추후에 시계 연출 추가할 예정. 파이가 줄어드는 모양으로 표시하고, 숫자도 안에 같이 표시해서 컴팩트하고 가시성 좋게 */}
@@ -153,7 +157,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
         <MoveDisplay 
           gloveAddress={data?.metadata?.id} 
           moveType={gameBoardState.myMove} 
-          userAddress={t('you')} 
+          userAddress={'you'} 
         />
         <Swords className="w-20 h-20" color="white" />
         <MoveDisplay 
@@ -187,7 +191,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
         </button>
       </div>
       <div className="flex justify-center">
-        <StyledButton onClick={handleSubmit}>
+        <StyledButton onClick={handleSubmit} bgColor='#FFE55C' shadowColor='#FF9F0A'>
           {t('submit')}
         </StyledButton>
       </div>

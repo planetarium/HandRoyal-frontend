@@ -116,8 +116,8 @@ export const JoinSession: React.FC = () => {
           </StyledButton>
         </div>
       ) : null}
-      <div className="w-full max-w-4xl bg-gray-500 border-2 border-black rounded-lg">
-        <div className="bg-gray-700 p-4 rounded-t-lg">
+      <div className="w-full max-w-4xl bg-gray-700 border-2 border-black rounded-lg">
+        <div className="bg-gray-900 p-4 rounded-t-lg">
           <p
             className="text-2xl text-center text-white font-extrabold"
             style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}

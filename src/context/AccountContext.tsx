@@ -24,6 +24,9 @@ export const AccountProvider: React.FC<{ children: ReactNode }> = ({ children })
           console.error('Failed to get address:', error);
         }
       }
+      else {
+        setAddress(null);
+      }
     };
 
     fetchAddress();

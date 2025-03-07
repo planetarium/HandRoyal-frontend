@@ -26,6 +26,10 @@
     "src",
     ".prettierrc.cjs",
     "eslint.config.js",
-    "codegen.ts"
+    "codegen.ts",
+    "vite.config.js",
+    "tailwind.config.js",
+    "index.html",
+    "src/global.css"
   ]
 }

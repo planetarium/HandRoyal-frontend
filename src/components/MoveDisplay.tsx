@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import logo from '../assets/logo.webp';
 import { MoveType } from '../gql/graphql';
+import AddressDisplay from './AddressDisplay';
 
 interface MoveDisplayProps {
   gloveAddress: string;
@@ -20,11 +21,11 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, mo
       </div>
       {/* 가위, 바위, 보 텍스트 공간 */}
       <div className="flex w-full items-center justify-center text-2xl text-white font-bold border-black border-b p-2">
-        {moveType === MoveType.Paper ? t("paper") : moveType === MoveType.Rock ? t("rock") : t("scissors")}
+        {moveType === MoveType.Paper ? '✋ ' + t("paper") + ' ✋' : moveType === MoveType.Rock ? '✊ ' + t("rock") + ' ✊' : moveType === MoveType.Scissors ? '✌️ ' + t("scissors") + ' ✌️' : '-'}
       </div>
       {/* 플레이어 주소 공간 */}
       <div className="flex-1 flex items-center justify-center text-sm text-white p-1">
-        <span className="font-mono">{userAddress}</span>
+        {userAddress === 'you' ? t('you') : <AddressDisplay type='user' address={userAddress} />}
       </div>
     </div>
   );

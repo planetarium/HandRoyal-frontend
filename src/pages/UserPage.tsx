@@ -5,13 +5,16 @@ import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { getUserDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
+import { useAccount } from '../context/AccountContext';
+import { useNavigate } from 'react-router-dom';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
 const UserPage: React.FC = () => {
   const { t } = useTranslation();
   const { userAddress } = useParams<{ userAddress: string }>();
-
+  const { setPrivateKey } = useAccount();
+  const navigate = useNavigate();
   const { data, error, isLoading } = useQuery<{ stateQuery: { user: { id: string; gloves: string[] } } }>({
     queryKey: ['getUser', userAddress],
     queryFn: async () => {
@@ -26,11 +29,12 @@ const UserPage: React.FC = () => {
   const user = data?.stateQuery.user;
 
   const handleLogout = () => {
-    // Implement the logout logic here
+    setPrivateKey(null);
+    navigate('/');
   };
 
   return (
-    <div className="user-page p-4 max-w-md mx-auto">
+    <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">{t('User Page')}</h1>
       {user ? (
         <>

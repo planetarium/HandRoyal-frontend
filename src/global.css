@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'ONE-Mobile-POP';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/ONE-Mobile-POP.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  --font-sans: 'ONE-Mobile-POP', sans-serif;
+  --font-sans-serif: sans-serif;
+  --animate-swing: swing 2s ease-in-out infinite;
+  --animate-cry: cry 1s ease-in-out infinite;
+
+  @keyframes swing {
+    0% {
+      transform: rotate(-5deg);
+    }
+    50% {
+      transform: rotate(5deg);
+    }
+    100% {
+      transform: rotate(-5deg);
+    }
+  }
+
+  @keyframes cry {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+}

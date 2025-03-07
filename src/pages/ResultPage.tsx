@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -7,12 +7,15 @@ import { getSessionDocument, GRAPHQL_ENDPOINT } from '../queries';
 import { PlayerState, SessionState, type Match, type MoveType } from '../gql/graphql';
 import { useTip } from '../context/TipContext';
 import StyledButton from '../components/StyledButton';
+import AddressDisplay from '../components/AddressDisplay';
+import { Swords, Eye, EyeOff } from 'lucide-react';
 
 export const ResultPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { tip } = useTip();
   const { sessionId } = useParams<{ sessionId: string }>();
+  const [showParticipants, setShowParticipants] = useState(false);
 
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['getSession', sessionId],
@@ -51,25 +54,19 @@ export const ResultPage: React.FC = () => {
     return winner ? winner.id : undefined;
   };
 
-  const handleUserClick = (userId: string | undefined) => {
-    if (userId) {
-      navigate(`/user/${userId}`);
-    }
-  };
-
   const renderMatches = (matches: Match[]) => {
     return matches.map((match, index) => (
-      <div key={index} className="flex items-center justify-between p-1 border-b">
-        <div className="flex justify-start text-left w-90 text-sm">
-          {displayUser(getAddressByIndex(match.move1?.playerIndex))}
+      <div key={index} className={`flex items-center justify-between p-1 ${index === matches.length - 1 ? '' : 'border-b border-gray-400'}`}>
+        <div className="flex justify-start text-left w-90 text-sm ml-2">
+          <AddressDisplay type='user' address={getAddressByIndex(match.move1?.playerIndex)} />
         </div>
         <div className="flex justify-center text-center">
-          <span className="text-2xl text-center font-bold w-8">{getEmoji(match.move1?.type)}</span>
-          <span className="mt-1 mx-2 text-center font-bold">vs</span>
-          <span className="text-2xl text-center font-bold w-8">{getEmoji(match.move2?.type)}</span>
+          <span className="text-2xl text-center w-8">{getEmoji(match.move1?.type)}</span>
+          <Swords className='w-6 h-6 mt-1' />
+          <span className="text-2xl text-center w-8">{getEmoji(match.move2?.type)}</span>
         </div>
-        <div className="flex justify-end text-right w-90 text-sm">
-          {displayUser(getAddressByIndex(match.move2?.playerIndex))}
+        <div className="flex justify-end text-right w-90 text-sm mr-2">
+          <AddressDisplay type='user' address={getAddressByIndex(match.move2?.playerIndex)} />
         </div>
       </div>
     ));
@@ -88,72 +85,97 @@ export const ResultPage: React.FC = () => {
     }
   };
 
-  const displayUser = (userId: string | undefined) => {
-    if (userId) {
-      return <span className="font-mono cursor-pointer hover:underline" onClick={() => handleUserClick(userId)}>{userId}</span>;
-    }
-
-    return 'UNDEFINED';
+  const toggleParticipants = () => {
+    setShowParticipants(!showParticipants);
   };
 
-  if (isLoading) {
-    return <p className="text-center">{t('loading')}</p>;
-  }
+  const renderContent = () => {
+    if (isLoading) {
+      return <p className="text-center">{t('loading')}</p>;
+    }
 
-  if (error || !data) {
-    return (
-      <div className="max-w-4xl mx-auto p-4">
-        <h1 className="text-4xl font-bold mb-4 text-center">{t('sessionResults')}</h1>
+    if (error || !data) {
+      return (
         <div className="text-center">
           <p>{t('invalidSession', { sessionId: sessionId })}</p>
-          <button className="bg-blue-500 text-white p-2 rounded mt-4" onClick={() => navigate('/')}>{t('backToMain')}</button>
+          <StyledButton onClick={() => navigate('/')}>
+            {t('backToMain')}
+          </StyledButton>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (data.state === SessionState.Ready) {
-    return (
-      <div className="max-w-4xl mx-auto p-4">
-        <h1 className="text-4xl font-bold mb-4 text-center">{t('sessionResults')}</h1>
+    if (data.state === SessionState.Ready) {
+      return (
         <div className="text-center">
           <p>{t('waitingForGameToStart')}</p>
           <p>{t('blocksLeft', { count: blocksLeft })}</p>
-          <button className="bg-blue-500 text-white p-2 rounded mt-4" onClick={() => navigate('/')}>{t('backToMain')}</button>
+          <StyledButton onClick={() => navigate('/')}>
+            {t('backToMain')}
+          </StyledButton>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col justify-between items-center text-center p-6 h-full">
+        <div className="mb-4 flex-grow">
+          <p className='text-xl mb-2'>{t('sessionId')}:&nbsp;{sessionId}</p>
+          <p className='text-xl mb-2'>{t('organizer')}:&nbsp;<AddressDisplay type='user' address={data.metadata?.organizer} /></p>
+          <p className='text-xl mb-2'>{t('prize')}:&nbsp;<AddressDisplay type='glove' address={data.metadata?.prize} /></p>
+          <p className='text-xl mb-2'>
+            {t('participants')}:&nbsp;{data.players?.length}
+            <button onClick={toggleParticipants} className="ml-2 text-white cursor-pointer">
+              {showParticipants ? <EyeOff className="inline-block w-5 h-5" /> : <Eye className="inline-block w-5 h-5" />}
+            </button>
+          </p>
+          {showParticipants && (
+            <div className="border border-gray-400 rounded-lg p-4 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {data.players?.map((player, index) => (
+                <p key={index} className='text-sm mr-4'><AddressDisplay type='user' address={player?.id} /></p>
+              ))}
+            </div>
+          )}
+          {data.state === SessionState.Ended ?
+            <p className='text-xl mt-2 mb-4'>{t('winner')}:&nbsp;<AddressDisplay type='user' address={getWinner()}/></p> :
+            <p className='text-xl mt-2 mb-4'>{t('playersLeft')}:&nbsp;{data.players?.filter(player => player?.state !== PlayerState.Lose).length}</p>}
+          <p className='text-xl'>{t('matches')}:&nbsp;{data.rounds?.length}</p>
+          {data.rounds?.map((round, index) => (
+            <div key={index} className="mb-4">
+              <span className="font-semibold mb-2">{t('round')}&nbsp;{index + 1}</span>
+              <div className="bg-gray-500 shadow-md rounded-lg overflow-hidden">
+                {renderMatches(round?.matches?.filter((match): match is Match => match !== null) ?? [])}
+              </div>
+            </div>
+          ))}
+          {data.state === SessionState.Active ? <p className='text-sm text-center'>{t('blocksLeft', { count: blocksLeft })}</p> : null}
+        </div>
+        <div className="text-center mt-6">
+          <StyledButton onClick={() => navigate('/')}>
+            {t('backToMain')}
+          </StyledButton>
         </div>
       </div>
     );
   }
 
+  
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-4 text-center">{t('sessionResults')}</h1>
-      <div className="mb-4">
-        <p className='text-xl mb-2'><strong>{t('sessionId')}:</strong> <span className="font-mono">{sessionId}</span></p>
-        <p className='text-xl mb-2'><strong>{t('organizer')}:</strong> {displayUser(data.metadata?.organizer)}</p>
-        <p className='text-xl mb-2'><strong>{t('prize')}:</strong> <span className="font-mono">{data.metadata?.prize}</span></p>
-        <p className='text-xl mb-2'><strong>{t('participants')}: {data.players?.length}</strong></p>
-        {data.players?.map((player, index) => (
-          <p key={index} className='text-sm'>{displayUser(player?.id)}</p>
-        ))}
-        {data.state === SessionState.Ended ?
-          <p className='text-xl mt-2'><strong>{t('winner')}:</strong> {displayUser(getWinner())}</p> :
-          <p className='text-xl mt-2'><strong>{t('remainingUser')}:</strong> {data.players?.filter(player => player?.state !== PlayerState.Lose).length}</p>}
-      </div>
-      <p className='text-xl'><strong>{t('matches')}:</strong> {data.rounds?.length}</p>
-      {data.rounds?.map((round, index) => (
-        <div key={index} className="mb-4">
-          <span className="font-semibold mb-2">{t('round', { count: index + 1 })}</span>
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            {renderMatches(round?.matches?.filter((match): match is Match => match !== null) ?? [])}
-          </div>
+    <div className="flex justify-center">
+      <div
+        className="flex flex-col justify-between bg-gray-700 rounded-lg text-white border-black border-2 min-w min-h-[calc(100vh-180px)] w-full max-w-4xl"
+      >
+        <div className="flex items-center justify-center rounded-t-lg p-4 bg-gray-900">
+          <p
+            className="text-4xl text-center text-white font-extrabold"
+            style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+          >
+            {t('sessionResults')}
+          </p>
         </div>
-      ))}
-      {data.state === SessionState.Active ? <p className='text-sm text-center'>{t('blocksLeft', { count: blocksLeft })}</p> : null}
-      <div className="text-center mt-6">
-        <StyledButton onClick={() => navigate('/')}>
-          {t('backToMain')}
-        </StyledButton>
+        <div className="flex flex-col justify-center flex-grow">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

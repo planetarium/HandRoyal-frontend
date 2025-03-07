@@ -135,7 +135,7 @@ const LoginPage: React.FC = () => {
       <div className="login-form max-w-md w-full mx-auto mb-12">
         <div className="flex items-center mb-4">
           <input
-            className={`w-full p-2 border border-black border-2 bg-gray-100 rounded-xl mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+            className={`font-sans-serif w-full p-2 border border-black border-2 bg-gray-100 rounded-xl mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
             disabled={isDisabled()}
             placeholder={t('enterPrivateKey')}
             type="password"

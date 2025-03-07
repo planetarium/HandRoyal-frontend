@@ -11,7 +11,8 @@ import { SessionState, PlayerState } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
-import logo from '../assets/logo.webp';
+import lose from '../assets/lose.webp';
+import loading from '../assets/loading.webp';
 import type { Session } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
@@ -89,10 +90,10 @@ export const GamePage: React.FC = () => {
 
     if (playerStatus === PlayerState.Lose) {
       return (
-        <div className="flex flex-col justify-between h-full">
+        <div className="flex flex-col items-center justify-between h-full">
           <p> </p>
-          <div>
-            <img alt="lose" className="w-1/2 h-1/2" src={logo} />
+          <div className="flex flex-col items-center justify-center">
+            <img alt="Lose" className="w-1/4 h-auto object-contain animate-cry mb-6" src={lose} />
             <p className="text-2xl text-center">{t('lose')}</p>
           </div>
           <div className="flex justify-center space-x-4 mb-5">
@@ -112,9 +113,10 @@ export const GamePage: React.FC = () => {
 
     if (sessionData.state === SessionState.Ready) {
       return (
-        <div>
-          <p className="text-2xl text-white text-center">{t('waitingForGameToStart')}</p>
-          <div className="flex items-center justify-center font-bold text-xl mt-5">
+        <div className="flex flex-col items-center justify-center">
+          <img alt="Loading" className="w-1/4 h-auto object-contain animate-swing mb-6" src={loading} />
+          <p className="text-2xl text-white text-center mt-4">{t('waitingForGameToStart')}</p>
+          <div className="flex items-center justify-center text-xl mt-5">
             <Clock className="w-5 h-5 mr-1" />{blocksLeft}
           </div>
         </div>
@@ -159,11 +161,11 @@ export const GamePage: React.FC = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="flex flex-col justify-between bg-gray-500 rounded-lg text-white border-black border-2 min-w-1/2 min-h-[calc(100vh-180px)] w-full max-w-4xl">
-        <div className="flex items-center justify-center rounded-t-lg p-4 bg-gray-700">
+      <div className="flex flex-col justify-between bg-gray-700 rounded-lg text-white border-black border-2 min-w-1/2 min-h-[calc(100vh-180px)] w-full max-w-4xl">
+        <div className="flex items-center justify-center rounded-t-lg p-6 bg-gray-900">
           <Swords className="w-10 h-10 mr-1" />
           <p
-            className="text-2xl text-center text-white font-extrabold"
+            className="text-4xl text-center text-white font-extrabold"
             style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
           >
             {t('gameBoardTitle')}
