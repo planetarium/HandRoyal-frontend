@@ -7,6 +7,8 @@ import { RawPrivateKey } from '@planetarium/account';
 import { useAccount } from '../context/AccountContext';
 import subscriptionClient from '../subscriptionClient';
 import { GRAPHQL_ENDPOINT, createUserDocument, USER_SUBSCRIPTION, getUserDocument } from '../queries';
+import StyledButton from '../components/StyledButton';
+import logo from '../assets/logo.webp';
 
 const TEST_ACCOUNTS = [
   {
@@ -128,29 +130,27 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="login-page p-4 max-w-4xl mx-auto">
-      <div className="login-form max-w-md mx-auto mb-12">
-        <h1 className="text-2xl font-bold mb-4">{t('login')}</h1>
-        <input
-          className={`w-full p-2 border border-gray-300 rounded mb-4 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
-          disabled={isDisabled()}
-          placeholder={t('enterPrivateKey')}
-          type="password"
-          value={privateKeyInput}
-          onChange={(e) => setPrivateKeyInput(e.target.value)}
-        />
+    <div className="flex flex-col items-center">
+      <img alt="Hand Royal Logo" className="w-120 h-120 mb-6" src={logo} />
+      <div className="login-form max-w-md w-full mx-auto mb-12">
+        <div className="flex items-center mb-4">
+          <input
+            className={`font-sans-serif w-full p-2 border border-black border-2 bg-gray-100 rounded-xl mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+            disabled={isDisabled()}
+            placeholder={t('enterPrivateKey')}
+            type="password"
+            value={privateKeyInput}
+            onChange={(e) => setPrivateKeyInput(e.target.value)}
+          />
+          <StyledButton disabled={isDisabled()} textColor="#FFFFFF" onClick={handleLogin}>
+            {t('loginButton')}
+          </StyledButton>
+        </div>
         {errorMessage && (
           <div className="text-red-500 italic mb-4">
             {errorMessage}
           </div>
         )}
-        <button
-          className={`p-2 rounded w-full ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-          disabled={isDisabled()}
-          onClick={handleLogin}
-        >
-          {isLoggingIn ? 'Logging in...' : t('loginButton')}
-        </button>
       </div>
 
       <div className="test-accounts">

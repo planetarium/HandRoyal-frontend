@@ -1,15 +1,18 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
+import AddressDisplay from './AddressDisplay';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { address, setPrivateKey } = useAccount();
   const { tip } = useTip();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     setPrivateKey(null);
+    navigate('/');
   };
 
   const changeLanguage = (lng: string) => {
@@ -33,7 +36,7 @@ const Navbar: React.FC = () => {
         {address && (
           <div className="flex items-center mr-4">
             <div className="text-sm">
-              Address: {address.toString()}
+              Address: <AddressDisplay type='user' address={address.toString()} />
             </div>
             <button
               className="bg-gray-600 text-white py-1 px-2 text-xs rounded border border-gray-500 hover:bg-gray-500 ml-2 cursor-pointer"
@@ -52,11 +55,6 @@ const Navbar: React.FC = () => {
           <option value="en">English</option>
           <option value="ko">한국어</option>
         </select>
-        {address && (
-          <li>
-            <Link to={`/user/${address}`}>User Page</Link>
-          </li>
-        )}
       </div>
     </nav>
   );
