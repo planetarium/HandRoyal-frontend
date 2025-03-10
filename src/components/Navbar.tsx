@@ -19,10 +19,15 @@ const Navbar: React.FC = () => {
     i18n.changeLanguage(lng);
   };
 
+  const userPagePath = address ? `/user/${address.toString()}` : '/';
+
   return (
     <nav className="bg-gray-800 p-4 text-white flex justify-between items-center">
       <Link className="text-lg font-bold text-white" to="/">
         HandRoyal
+      </Link>
+      <Link className="text-lg font-bold text-white" to={userPagePath}>
+        My Page
       </Link>
       <Link className="text-lg font-bold text-white" to="/registerGlove">
         Register Glove

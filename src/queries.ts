@@ -8,6 +8,7 @@ export const getUserDocument = graphql(/* GraphQL */ `
       user(userId: $address) {
         id
         gloves
+        equippedGlove
         sessionId
       }
     }
@@ -135,6 +136,7 @@ export const USER_SUBSCRIPTION = `
   subscription OnUserChanged($userId: Address!) {
     onUserChanged(userId: $userId) {
       id
+      equippedGlove
     }
   }
 `;
@@ -175,5 +177,11 @@ export const getGloveDocument = graphql(/* GraphQL */ `
         author
       }
     }
+  }
+`);
+
+export const equipGloveDocument = graphql(/* GraphQL */ `
+  mutation EquipGlove($privateKey: PrivateKey, $gloveId: Address!) {
+    equipGlove(privateKey: $privateKey, gloveId: $gloveId)
   }
 `);
