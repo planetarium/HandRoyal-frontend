@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { request } from 'graphql-request';
-import { getUserDocument } from '../queries';
+import { getUserDocument, equipGloveDocument, USER_SUBSCRIPTION } from '../queries';
+import { getGloveImage } from '../fetches';
 import StyledButton from '../components/StyledButton';
 import { useAccount } from '../context/AccountContext';
+import { useNavigate } from 'react-router-dom';
 import { MoveType } from '../gql/graphql';
-import AddressDisplay from '../components/AddressDisplay';
+import subscriptionClient from '../subscriptionClient';
+import { Address } from '@planetarium/account';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
@@ -17,7 +19,16 @@ const UserPage: React.FC = () => {
   const { userAddress } = useParams<{ userAddress: string }>();
   const { address } = useAccount();
   const navigate = useNavigate();
-  const { data, error, isLoading } = useQuery<{ stateQuery: { user: { id: string; registeredGloves: string[]; ownedGloves: string[]; equippedGlove: string[] } } }>({
+  const [gloveImages, setGloveImages] = useState<{ [key: string]: string | null }>({});
+  const [equippedGlove, setEquippedGlove] = useState<string | null>(null);
+
+  const bytesToHex = (bytes: Uint8Array): string => {
+    return Array.from(bytes)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  };
+
+  const { data, error, isLoading } = useQuery({
     queryKey: ['getUser', userAddress],
     queryFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: userAddress });
@@ -33,7 +44,9 @@ const UserPage: React.FC = () => {
   if (isLoading) return <p>{t('loading')}</p>;
   if (error) return <p>{t('error')}: {error.message}</p>;
 
-  const user = data?.stateQuery.user;
+  const user = data;
+
+  const gloveIds = ['0000000000000000000000000000000000000000', ...(user?.gloves || [])];
 
   const handleBack = () => {
     navigate(-1);
@@ -61,6 +74,29 @@ const UserPage: React.FC = () => {
     if (currentRegisteredPage > 0) {
       setCurrentRegisteredPage(currentRegisteredPage - 1);
     }
+  const handleGloveClick = (gloveId: string) => {
+    if (!user || !userAddress) return;
+    equipGloveMutation.mutate(gloveId);
+    const unsubscribe = subscriptionClient.subscribe(
+      {
+        query: USER_SUBSCRIPTION,
+        variables: { userId: userAddress },
+      },
+      {
+        next: (result: any) => {
+          if (Address.fromHex(result.data.onUserChanged.id).equals(Address.fromHex(userAddress))) {
+            setEquippedGlove(result.data.onUserChanged.equippedGlove);
+            unsubscribe();
+          }
+        },
+        error: (err: any) => {
+          console.error('Subscription error:', err);
+        },
+        complete: () => {
+          console.log('Subscription completed');
+        },
+      }
+    );
   };
 
   return (

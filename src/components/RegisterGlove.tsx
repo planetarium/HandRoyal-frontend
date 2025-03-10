@@ -5,7 +5,7 @@ import { useAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, registerGloveDocument, isGloveRegisteredDocument, GLOVE_SUBSCRIPTION } from '../queries';
 import subscriptionClient from '../subscriptionClient';
 import type { RequestDocument } from 'graphql-request';
-
+import { registerGlove } from '../fetches';
 const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
 
 const RegisterGlove: React.FC = () => {
@@ -27,13 +27,6 @@ const RegisterGlove: React.FC = () => {
       const privateKeyBytes = privateKey.toBytes();
       const privateKeyHex = Array.from(privateKeyBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
-      // Upload the file to the server
-      const formData = new FormData();
-      formData.append('gloveAddress', gloveAddress);
-      if (file) {
-        formData.append('file', file);
-      }
-
       // Call the mutation
       const response = await request(GRAPHQL_ENDPOINT, registerGloveDocument, {
         privateKey: privateKeyHex,
@@ -48,10 +41,7 @@ const RegisterGlove: React.FC = () => {
         {
           next: (result: any) => {
             if (result.data.onGloveRegistered.id.toLowerCase() === gloveAddress.toLowerCase()) {
-              fetch(`${GLOVE_API_URL}/register-glove`, {
-                method: 'POST',
-                body: formData,
-              });
+              registerGlove(gloveAddress, file);
               unsubscribe();
             }
           },
