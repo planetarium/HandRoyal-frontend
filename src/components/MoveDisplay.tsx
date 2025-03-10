@@ -14,7 +14,7 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, mo
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center rounded-lg w-full border-2 border-black bg-gray-700 shadow-md">
+    <div className="flex flex-col items-center rounded-lg w-full border-2 border-black bg-gray-600 shadow-md">
       {/* 이미지 공간 */}
       <div className="w-full h-64 bg-white rounded-t-lg flex items-center justify-center">
         <img alt="logo" className="w-32 h-32 object-cover" src={logo} />
@@ -24,8 +24,8 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, mo
         {moveType === MoveType.Paper ? '✋ ' + t("paper") + ' ✋' : moveType === MoveType.Rock ? '✊ ' + t("rock") + ' ✊' : moveType === MoveType.Scissors ? '✌️ ' + t("scissors") + ' ✌️' : '-'}
       </div>
       {/* 플레이어 주소 공간 */}
-      <div className="flex-1 flex items-center justify-center text-sm text-white p-1">
-        {userAddress === 'you' ? t('you') : <AddressDisplay type='user' address={userAddress} />}
+      <div className="flex w-full items-center justify-center text-sm text-white p-1 bg-gray-800 rounded-b">
+        {userAddress === 'you' ? t('you') : <AddressDisplay address={userAddress} type='user' />}
       </div>
     </div>
   );

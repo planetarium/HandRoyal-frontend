@@ -130,12 +130,12 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <img alt="Hand Royal Logo" className="w-120 h-120 mb-6" src={logo} />
-      <div className="login-form max-w-md w-full mx-auto mb-12">
+      <div className="flex flex-col w-full">
         <div className="flex items-center mb-4">
           <input
-            className={`font-sans-serif w-full p-2 border border-black border-2 bg-gray-100 rounded-xl mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+            className={`font-sans-serif flex-grow p-2 border border-black border-2 bg-gray-100 rounded-xl mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
             disabled={isDisabled()}
             placeholder={t('enterPrivateKey')}
             type="password"
@@ -153,8 +153,8 @@ const LoginPage: React.FC = () => {
         )}
       </div>
 
-      <div className="test-accounts">
-        <h2 className="text-xl font-semibold mb-4">{t('testAccounts')}</h2>
+      <div className="flex flex-col w-full">
+        <h2 className="text-xl font-semibold mt-12 mb-4">{t('testAccounts')}</h2>
         <div className="md:overflow-visible overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>

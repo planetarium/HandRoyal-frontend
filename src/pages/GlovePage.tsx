@@ -43,21 +43,35 @@ const GlovePage: React.FC = () => {
   const glove = data;
 
   return (
-    <div className="glove-page p-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Glove Information</h1>
-      {glove ? (
-        <>
-          <p className="mb-2 text-lg font-semibold">Glove ID: {glove.id}</p>
-          <p className="mb-2 text-lg font-semibold">Author: {glove.author}</p>
-          <div className="flex space-x-4">
-            {['rock', 'scissors', 'paper'].map(hand => (
-              images[hand] && <img key={hand} src={images[hand]} alt={`${hand} Glove`} className="w-1/3 h-auto rounded-md" />
-            ))}
-          </div>
-        </>
-      ) : (
-        <p className="text-red-500">Glove not found</p>
-      )}
+    <div className="flex flex-col items-center justify-center w-full mx-auto bg-gray-700 rounded-lg border border-black">
+      <div className="flex flex-col items-center p-4 w-full mx-auto bg-gray-900 rounded-t-lg border-b border-black">
+        <h1
+          className="text-4xl text-white font-bold"
+          style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+        >
+          Glove Information
+        </h1>
+      </div>
+      <div className="flex flex-col items-center p-4 w-full mx-auto text-white">
+        {glove ? (
+          <>
+            <div className="flex flex-row justify-between">
+              <img alt="rock" className="w-1/3 h-auto" src={images['rock'] ?? undefined} />
+              <img alt="scissors" className="w-1/3 h-auto" src={images['scissors'] ?? undefined} />
+              <img alt="paper" className="w-1/3 h-auto" src={images['paper'] ?? undefined} />
+            </div>
+            <p className="mb-2 text-md">Glove ID: {glove.id}</p>
+            <p className="mb-2 text-md">Author: {glove.author}</p>
+            <div className="flex space-x-4">
+              {['rock', 'scissors', 'paper'].map(hand => (
+                images[hand] && <img key={hand} alt={`${hand} Glove`} className="w-1/3 h-auto rounded-md" src={images[hand]} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="text-red-500">Glove not found</p>
+        )}
+      </div>
     </div>
   );
 };

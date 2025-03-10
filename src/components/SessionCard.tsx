@@ -65,27 +65,27 @@ const SessionCard: React.FC<SessionCardProps> = ({
       </div>
       <div className="flex flex-col flex-grow">
         <h3
-          className="text-lg font-extrabold text-white"
+          className="text-md font-extrabold text-white"
           style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
         >
           {id}
         </h3>
-        <div className="flex items-center text-sm mt-2" style={{ color: textColor }}>
+        <div className="flex items-center text-xs mt-2" style={{ color: textColor }}>
           <Crown className="mr-1 h-4 w-4" />
-          <AddressDisplay type='user' address={host} shorten={false} />
+          <AddressDisplay address={host} shorten={false} type='user' />
         </div>
-        <div className="flex items-center text-sm mt-1" style={{ color: textColor }}>
+        <div className="flex items-center text-xs mt-1" style={{ color: textColor }}>
           <Trophy className="mr-1 h-4 w-4" />
-          <AddressDisplay type='glove' address={prize} shorten={false} />
+          <AddressDisplay address={prize} shorten={false} type='glove' />
         </div>
       </div>
-      <div className="flex font items-center space-x-4 flex-shrink-0">
-        <div className={`flex items-center ${currentPlayers === maxPlayers ? 'text-red-700' : 'text-blue-700'}`}>
+      <div className="flex items-center space-x-4 flex-shrink-0">
+        <div className={`flex text-sm items-center ${currentPlayers === maxPlayers ? 'text-red-700' : 'text-blue-700'}`}>
           <Users className="mr-1 h-4 w-4" strokeWidth={3} />
           <span>{currentPlayers}/{maxPlayers}</span>
         </div>
         <div
-          className={`flex font items-center mr-5 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
+          className={`flex text-sm items-center mr-5 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
         >
           <Clock className="mr-1 h-4 w-4" strokeWidth={3} />
           <span>{state === SessionState.Ready ? `${blocksLeft}` : "Playing..."}</span>

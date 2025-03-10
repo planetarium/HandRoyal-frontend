@@ -1,15 +1,13 @@
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 interface AddressDisplayProps {
   className?: string;
   type: 'glove' | 'user';
-  address: string;
+  address: string | undefined;
   shorten?: boolean;
 }
 
 const AddressDisplay: React.FC<AddressDisplayProps> = ({ type, address, className, shorten = true }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleClick = (address: string | undefined) => {
