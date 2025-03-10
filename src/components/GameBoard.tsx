@@ -6,9 +6,10 @@ import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
 import { MoveType, SessionState } from '../gql/graphql';
 import { useAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, submitMoveDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, submitMoveAction } from '../queries';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
+import { executeTransaction } from '../utils/transaction';
 import type { Session } from '../gql/graphql';
 import type { HandType } from '../types/types';
 
@@ -20,7 +21,7 @@ interface GameBoardProps {
 
 const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
   const { t } = useTranslation();
-  const { privateKey, address } = useAccount();
+  const { account } = useAccount();
   const [submitting, setSubmitting] = useState(false);
   const [selectedHand, setSelectedHand] = useState<HandType | null>(null);
   const [gameBoardState, setGameBoardState] = useState<GameBoardState>({myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null});
@@ -33,15 +34,22 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
 
   const submitMoveMutation = useMutation({
     mutationFn: async (move: HandType) => {
-      const privateKeyBytes = privateKey?.toBytes();
-      const privateKeyHex = privateKeyBytes ? Array.from(privateKeyBytes).map(b => b.toString(16).padStart(2, '0')).join('') : undefined;
+      if (!account) {
+        throw new Error('Account not connected');
+      }
+
       const moveType = move === 'rock' ? MoveType.Rock : move === 'paper' ? MoveType.Paper : MoveType.Scissors;
-      const response = await request(GRAPHQL_ENDPOINT, submitMoveDocument, {
-        privateKey: privateKeyHex,
+      const submitMoveResponse = await request(GRAPHQL_ENDPOINT, submitMoveAction, {
         sessionId: data?.metadata?.id,
-        move: moveType,
+        move: moveType
       });
-      return response.submitMove;
+
+      if (!submitMoveResponse.actionQuery?.submitMove) {
+        throw new Error('Failed to get submit move response');
+      }
+
+      const plainValue = submitMoveResponse.actionQuery.submitMove;
+      return executeTransaction(account, plainValue);
     },
     onSuccess: (data) => {
       console.error('Move submitted successfully: ' + data);
@@ -83,6 +91,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
   useEffect(() => {
     const updateGameBoardState = async () => {
       const props: GameBoardState = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null};
+      const address = account?.isConnected ? account.address : null;
       if (data?.rounds && data.players) {
         const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === address?.toHex());
         const currentRound = data.rounds[data.rounds.length - 1];
@@ -104,7 +113,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
     };
 
     updateGameBoardState();
-  }, [address, data, privateKey]);
+  }, [data, account]);
 
   const handleSubmit = () => {
     if (selectedHand) {
@@ -191,7 +200,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
         </button>
       </div>
       <div className="flex justify-center">
-        <StyledButton onClick={handleSubmit} bgColor='#FFE55C' shadowColor='#FF9F0A'>
+        <StyledButton 
+          bgColor='#FFE55C' 
+          shadowColor='#FF9F0A'
+          onClick={handleSubmit}
+        >
           {t('submit')}
         </StyledButton>
       </div>

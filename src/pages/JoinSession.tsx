@@ -6,25 +6,20 @@ import { request } from 'graphql-request';
 import { Search, Swords } from 'lucide-react';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument, joinSessionDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument, joinSessionAction } from '../queries';
 import { SessionState } from '../gql/graphql';
 import logo from '../assets/logo.webp';
 import StyledButton from '../components/StyledButton';
 import SessionCard from '../components/SessionCard';
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 
 export const JoinSession: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState('');
   const [error, setError] = useState('');
-  const { privateKey, address } = useAccount();
+  const { account } = useAccount();
   const { tip } = useTip();
-
-  const bytesToHex = (bytes: Uint8Array): string => {
-    return Array.from(bytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  };
 
   const { data: sessionData, error: sessionError, isLoading: sessionIsLoading, refetch: sessionRefetch } = useQuery({
     queryKey: ['getSessions'],
@@ -35,9 +30,12 @@ export const JoinSession: React.FC = () => {
   });
 
   const { data: userData, refetch: userRefetch } = useQuery({
-    queryKey: ['getUser', address],
+    queryKey: ['getUser', account?.address],
     queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: address?.toString() });
+      if (!account) {
+        throw new Error('Account not connected');
+      }
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
       return response.stateQuery?.user;
     }
   });
@@ -51,15 +49,21 @@ export const JoinSession: React.FC = () => {
 
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      const privateKeyBytes = privateKey?.toBytes();
-      const privateKeyHex = privateKeyBytes ? bytesToHex(privateKeyBytes) : undefined;
-      
-      const response = await request(GRAPHQL_ENDPOINT, joinSessionDocument, {
-        privateKey: privateKeyHex,
-        sessionId: sessionId,
+      if (!account) {
+        throw new Error('Account not connected');
+      }
+
+      const joinSesisonResponse = await request(GRAPHQL_ENDPOINT, joinSessionAction, {
+        sessionId,
         gloveId: null,
       });
-      return response.joinSession;
+      if (!joinSesisonResponse.actionQuery?.joinSession) {
+        throw new Error('Failed to join session');
+      }
+      
+      const plainValue = joinSesisonResponse.actionQuery.joinSession;
+      const txId = await executeTransaction(account, plainValue);
+      await waitForTransaction(txId);
     },
     onSuccess: () => {
     },
@@ -69,6 +73,11 @@ export const JoinSession: React.FC = () => {
   });
 
   const handleJoin = (id: string) => {
+    if (!account) {
+      setError(t('pleaseConnectWallet'));
+      return;
+    }
+
     if (!validateSessionIdLength(id)) {
       setError(t('invalidSessionIdLength'));
       return;
@@ -79,6 +88,11 @@ export const JoinSession: React.FC = () => {
   };
 
   const handleSpectate = (id: string) => {
+    if (!account) {
+      setError(t('pleaseConnectWallet'));
+      return;
+    }
+
     if (!validateSessionIdLength(id)) {
       setError(t('invalidSessionIdLength'));
       return;

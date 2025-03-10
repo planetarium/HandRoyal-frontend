@@ -4,11 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { RawPrivateKey } from '@planetarium/account';
-import { useAccount } from '../context/AccountContext';
+import { PrivateKeyAccount, MetamaskAccount, useAccount } from '../context/AccountContext';
 import subscriptionClient from '../subscriptionClient';
-import { GRAPHQL_ENDPOINT, createUserDocument, USER_SUBSCRIPTION, getUserDocument } from '../queries';
+import {
+  GRAPHQL_ENDPOINT, 
+  createUserAction, 
+  USER_SUBSCRIPTION, 
+  getUserDocument
+} from '../queries';
 import StyledButton from '../components/StyledButton';
 import logo from '../assets/logo.webp';
+import metamaskIcon from '../assets/MetaMask-icon-fox.svg';
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 
 const TEST_ACCOUNTS = [
   {
@@ -39,12 +46,13 @@ const TEST_ACCOUNTS = [
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
-  const { address, setPrivateKey } = useAccount();
+  const { account, setAccount } = useAccount();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const address = account?.isConnected ? account.address : null;
 
   useEffect(() => {
     if (!address) return;
@@ -78,8 +86,18 @@ const LoginPage: React.FC = () => {
 
   const createUserMutation = useMutation({
     mutationFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, createUserDocument, { privateKey: privateKeyInput });
-      return response.createUser;
+      if (!account) {
+        throw new Error('Account not connected');
+      }
+
+      const createUserResponse = await request(GRAPHQL_ENDPOINT, createUserAction);
+      if (!createUserResponse.actionQuery?.createUser) {
+        throw new Error('Failed to create user');
+      }
+
+      const plainValue = createUserResponse.actionQuery.createUser;
+      const txId = await executeTransaction(account, plainValue);
+      await waitForTransaction(txId);
     },
     onSuccess: async () => {
       setErrorMessage(null);
@@ -102,7 +120,9 @@ const LoginPage: React.FC = () => {
     try {
       const privateKey = RawPrivateKey.fromHex(privateKeyInput);
       const address = (await privateKey.getAddress()).toHex();
-      setPrivateKey(privateKey);
+      const account = new PrivateKeyAccount(privateKey);
+      await account.connect();
+      setAccount(account);
 
       const data = await queryClient.fetchQuery({
         queryKey: ['checkUser', address],
@@ -123,38 +143,83 @@ const LoginPage: React.FC = () => {
       setErrorMessage('Invalid private key format.');
       setIsLoggingIn(false);
     }
-  }, [queryClient, privateKeyInput, createUserMutation, navigate, setPrivateKey]);
+  }, [queryClient, privateKeyInput, createUserMutation, navigate, setAccount]);
+
+  const handleMetamaskLogin = useCallback(async () => {
+    setIsLoggingIn(true);
+    try {
+      const account = new MetamaskAccount();
+      await account.connect();
+      setAccount(account);
+
+      const data = await queryClient.fetchQuery({
+        queryKey: ['checkUser', account.address.toString()],
+        queryFn: async () => {
+          const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
+          return response;
+        }
+      });
+
+      if (data?.stateQuery?.user) {
+        setErrorMessage(null);
+        navigate('/');
+      } else {
+        createUserMutation.mutate();
+      }
+    } catch (error) {
+      console.error('Failed to connect with Metamask:', error);
+      setErrorMessage('Failed to connect with Metamask');
+      setIsLoggingIn(false);
+    }
+  }, [setAccount, navigate, createUserMutation, queryClient]);
 
   const isDisabled = () => {
     return isLoggingIn;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <img alt="Hand Royal Logo" className="w-120 h-120 mb-6" src={logo} />
-      <div className="flex flex-col w-full">
-        <div className="flex items-center mb-4">
-          <input
-            className={`font-sans-serif flex-grow p-2 border border-black border-2 bg-gray-100 rounded-xl mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
-            disabled={isDisabled()}
-            placeholder={t('enterPrivateKey')}
-            type="password"
-            value={privateKeyInput}
-            onChange={(e) => setPrivateKeyInput(e.target.value)}
-          />
-          <StyledButton disabled={isDisabled()} textColor="#FFFFFF" onClick={handleLogin}>
-            {t('loginButton')}
-          </StyledButton>
-        </div>
+    <div className="login-page p-4 max-w-4xl mx-auto">
+      <div className="login-form max-w-md mx-auto mb-12">
+        <h1 className="text-2xl font-bold mb-4">{t('login')}</h1>
+        <input
+          className={`w-full p-2 border border-gray-300 rounded mb-4 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+          disabled={isDisabled()}
+          placeholder={t('enterPrivateKey')}
+          type="password"
+          value={privateKeyInput}
+          onChange={(e) => setPrivateKeyInput(e.target.value)}
+        />
         {errorMessage && (
           <div className="text-red-500 italic mb-4">
             {errorMessage}
           </div>
         )}
+        <button
+          className={`p-2 rounded w-full ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          disabled={isDisabled()}
+          onClick={handleLogin}
+        >
+          {isLoggingIn ? 'Logging in...' : t('loginButton')}
+        </button>
+        <div className="text-center my-4 text-gray-500 flex items-center justify-center">
+          <span className="mx-4">{t('or')}</span>
+        </div>
+        <button
+          className={`p-2 rounded w-full flex items-center justify-center ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          disabled={isDisabled()}
+          onClick={handleMetamaskLogin}
+        >
+          <img 
+            alt="MetaMask" 
+            className="w-6 h-6 mr-2"
+            src={metamaskIcon}
+          />
+          {isLoggingIn ? 'Logging in...' : t('connectWithMetamask')}
+        </button>
       </div>
 
-      <div className="flex flex-col w-full">
-        <h2 className="text-xl font-semibold mt-12 mb-4">{t('testAccounts')}</h2>
+      <div className="test-accounts">
+        <h2 className="text-xl font-semibold mb-4">{t('testAccounts')}</h2>
         <div className="md:overflow-visible overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>

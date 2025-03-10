@@ -6,12 +6,13 @@ import AddressDisplay from './AddressDisplay';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { address, setPrivateKey } = useAccount();
+  const { account } = useAccount();
   const { tip } = useTip();
   const navigate = useNavigate();
+  const address = account?.isConnected ? account.address : null;
 
   const handleLogout = () => {
-    setPrivateKey(null);
+    account?.disconnect();
     navigate('/');
   };
 

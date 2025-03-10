@@ -7,7 +7,6 @@ import { Swords, Eye, EyeOff, Crown } from 'lucide-react';
 import { getSessionDocument, GRAPHQL_ENDPOINT } from '../queries';
 import { PlayerState, SessionState, type Match, type MoveType } from '../gql/graphql';
 import { useTip } from '../context/TipContext';
-import StyledButton from '../components/StyledButton';
 import AddressDisplay from '../components/AddressDisplay';
 
 export const ResultPage: React.FC = () => {

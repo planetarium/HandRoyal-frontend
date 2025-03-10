@@ -16,12 +16,6 @@ export const getUserDocument = graphql(/* GraphQL */ `
   }
 `);
 
-export const createUserDocument = graphql(/* GraphQL */ `
-  mutation CreateUser($privateKey: PrivateKey) {
-    createUser(privateKey: $privateKey)
-  }
-`);
-
 export const getSessionsDocument = graphql(/* GraphQL */ `
   query GetSessions {
     stateQuery {
@@ -57,34 +51,11 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
   }
 `);
 
-export const joinSessionDocument = graphql(/* GraphQL */ `
-  mutation JoinSession($privateKey: PrivateKey, $sessionId: Address!, $gloveId: Address) {
-    joinSession(privateKey: $privateKey, sessionId: $sessionId, gloveId: $gloveId)
-  }
-`);
-
 export const isValidSessionIdDocument = graphql(/* GraphQL */ `
   query IsValidSessionId($sessionId: Address!) {
     isValidSessionId(sessionId: $sessionId)
   }
 `)
-
-export const createSessionDocument = graphql(/* GraphQL */ `
-  mutation CreateSession($privateKey: PrivateKey, $sessionId: Address!, $prize: Address!, $maximumUser: Int!, $minimumUser: Int!, $remainingUser: Int!, $startAfter: Long!, $roundLength: Long!, $roundInterval: Long!) {
-    createSession(privateKey: $privateKey, sessionId: $sessionId, prize: $prize, maximumUser: $maximumUser, minimumUser: $minimumUser, remainingUser: $remainingUser, startAfter: $startAfter, roundLength: $roundLength, roundInterval: $roundInterval)
-  }
-`);
-
-export const transactionResultDocument = graphql(/* GraphQL */ `
-  query TransactionResult($txId: TxId!) {
-    transaction
-    {
-      transactionResult(txId: $txId) {
-        txStatus
-      }
-    }
-  }
-`);
 
 export const getSessionDocument = graphql(/* GraphQL */ `
   query GetSession($sessionId: Address!) {
@@ -125,12 +96,6 @@ export const getSessionDocument = graphql(/* GraphQL */ `
         height
       }
     }
-  }
-`);
-
-export const submitMoveDocument = graphql(/* GraphQL */ `
-  mutation SubmitMove($privateKey: PrivateKey, $sessionId: Address!, $move: MoveType!) {
-    submitMove(privateKey: $privateKey, sessionId: $sessionId, move: $move)
   }
 `);
 
@@ -176,6 +141,64 @@ export const getGloveDocument = graphql(/* GraphQL */ `
       glove(gloveId: $gloveId) {
         id
         author
+      }
+    }
+  }
+`);
+
+export const createSessionAction = graphql(/* GraphQL */ `
+  query CreateSessionAction($sessionId: Address!, $prize: Address!, $maximumUser: Int!, $minimumUser: Int!, $remainingUser: Int!, $roundInterval: Long!, $waitingInterval: Long!) {
+    actionQuery {
+      createSession(sessionId: $sessionId, prize: $prize, maximumUser: $maximumUser, minimumUser: $minimumUser, remainingUser: $remainingUser, roundInterval: $roundInterval, waitingInterval: $waitingInterval)
+    }
+  }
+`);
+
+export const joinSessionAction = graphql(/* GraphQL */ `
+  query JoinSessionAction($sessionId: Address!, $gloveId: Address!) {
+    actionQuery {
+      joinSession(sessionId: $sessionId, gloveId: $gloveId)
+    }
+  }
+`);
+
+export const createUserAction = graphql(/* GraphQL */ `
+  query CreateUserAction {
+    actionQuery {
+      createUser
+    }
+  }
+`);
+
+export const submitMoveAction = graphql(/* GraphQL */ `
+  query SubmitMoveAction($sessionId: Address!, $move: MoveType!) {
+    actionQuery {
+      submitMove(sessionId: $sessionId, move: $move)
+    }
+  }
+`);
+
+export const unsignedTransactionQuery = graphql(/* GraphQL */ `  
+  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {
+    transaction {
+      unsignedTransaction(address: $address, plainValue: $plainValue)
+    }
+  }
+`);
+
+export const stageTransactionMutation = graphql(/* GraphQL */ `  
+  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {
+    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)
+  }
+`);
+
+export const transactionResultQuery = graphql(/* GraphQL */ `
+  query TransactionResult($txId: TxId!) {
+    transaction {
+      transactionResult(txId: $txId) {
+        txStatus
+        blockIndex
+        exceptionNames
       }
     }
   }

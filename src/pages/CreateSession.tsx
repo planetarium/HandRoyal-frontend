@@ -4,10 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { request } from 'graphql-request';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, SESSION_SUBSCRIPTION } from '../queries';
+import { 
+  GRAPHQL_ENDPOINT,
+  isValidSessionIdDocument,
+  SESSION_SUBSCRIPTION,
+  createSessionAction, 
+} from '../queries';
 import subscriptionClient from '../subscriptionClient';
 import StyledButton from '../components/StyledButton';
-
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 interface GameRules {
   maximumUser: number,
   minimumUser: number,
@@ -19,7 +24,7 @@ interface GameRules {
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { privateKey, address } = useAccount();
+  const { account } = useAccount();
   const [sessionIdCandidate, setSessionIdCandidate] = useState<string>('0000000000000000000000000000000000000000');
   const [sessionId, setSessionId] = useState<string>('');
   const [isSessionIdValid, setIsSessionIdValid] = useState<boolean>(false);
@@ -40,10 +45,14 @@ export const CreateSession: React.FC = () => {
   useEffect(() => {
     if (!sessionId) return;
 
+    if (!account) {
+      throw new Error('Account not connected');
+    }
+
     const unsubscribe = subscriptionClient.subscribe(
       {
         query: SESSION_SUBSCRIPTION, // Define this query in your queries file
-        variables: { sessionId: sessionId, userId: address!.toString() },
+        variables: { sessionId: sessionId, userId: account.address.toString() },
       },
       {
         next: (result) => {
@@ -64,7 +73,7 @@ export const CreateSession: React.FC = () => {
     return () => {
       unsubscribe();
     };
-  }, [sessionId, navigate, address]);
+  }, [sessionId, navigate, account]);
 
   const generateRandomAddress = () => {
     let address = '';
@@ -128,11 +137,11 @@ export const CreateSession: React.FC = () => {
 
   const createSessionMutation = useMutation({
     mutationFn: async () => {
-      const privateKeyBytes = privateKey?.toBytes();
-      const privateKeyHex = privateKeyBytes ? bytesToHex(privateKeyBytes) : undefined;
-      
-      const response = await request(GRAPHQL_ENDPOINT, createSessionDocument, {
-        privateKey: privateKeyHex,
+      if (!account) {
+        throw new Error('Account not connected');
+      }
+
+      const createSessionResponse = await request(GRAPHQL_ENDPOINT, createSessionAction, {
         sessionId: sessionIdCandidate,
         prize: selectedPrize,
         maximumUser: gameRules.maximumUser,
@@ -141,7 +150,13 @@ export const CreateSession: React.FC = () => {
         roundInterval: gameRules.roundInterval,
         waitingInterval: gameRules.waitingInterval
       });
-      return response.createSession;
+      if (!createSessionResponse.actionQuery?.createSession) {
+        throw new Error('Failed to create session');
+      }
+
+      const txId = await executeTransaction(account, createSessionResponse.actionQuery.createSession);
+      console.error(txId);
+      await waitForTransaction(txId);
     },
     onSuccess: () => {
       setIsPolling(true);

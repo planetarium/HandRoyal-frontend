@@ -78,7 +78,9 @@ i18n
           "gloveId": "Glove ID",
           "gloveAuthor": "Author",
           "gloveNotFound": "Glove not found",
-          "noGlovesFound": "No gloves found"
+          "noGlovesFound": "No gloves found",
+          "connectWithMetamask": "Connect with MetaMask",
+          "or": "or"
         }
       },
       ko: {
@@ -154,7 +156,9 @@ i18n
           "gloveId": "장갑 ID",
           "gloveAuthor": "작가",
           "gloveNotFound": "장갑을 찾을 수 없습니다",
-          "noGlovesFound": "장갑이 없습니다"
+          "noGlovesFound": "장갑이 없습니다",
+          "connectWithMetamask": "메타마스크로 연결",
+          "or": "또는"
         }
       }
     },

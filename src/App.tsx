@@ -13,8 +13,8 @@ import UserPage from './pages/UserPage';
 import { TipProvider } from './context/TipContext';
 import RegisterGlove from './components/RegisterGlove';
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
-  const { privateKey } = useAccount();
-  return privateKey ? children : <Navigate to="/login" />;
+  const { account } = useAccount();
+  return account ? children : <Navigate to="/login" />;
 };
 
 const AppContent: React.FC = () => {
