@@ -20,6 +20,8 @@ const Navbar: React.FC = () => {
     i18n.changeLanguage(lng);
   };
 
+  const userPagePath = address ? `/user/${address.toString()}` : '/';
+
   return (
     <nav className="bg-gray-800 p-4 text-white flex justify-between items-center fixed top-0 left-0 w-full h-16 z-10">
       <div className="flex items-center space-x-20">
