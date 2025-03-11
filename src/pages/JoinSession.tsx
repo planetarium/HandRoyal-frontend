@@ -56,7 +56,8 @@ export const JoinSession: React.FC = () => {
       
       const response = await request(GRAPHQL_ENDPOINT, joinSessionDocument, {
         privateKey: privateKeyHex,
-        sessionId,
+        sessionId: sessionId,
+        gloveId: null,
       });
       return response.joinSession;
     },
@@ -103,7 +104,7 @@ export const JoinSession: React.FC = () => {
     <div className="flex flex-col items-center">
       <img alt="Hand Royal Logo" className="w-60 h-60 mb-6" src={logo} />
       {userData?.sessionId && userData.sessionId !== "0000000000000000000000000000000000000000" ? (
-        <div className="flex justify-between items-center bg-gradient-to-r from-yellow-200 to-blue-200 p-6 rounded-lg border-2 border-black w-full max-w-4xl mb-6">
+        <div className="flex justify-between items-center bg-gradient-to-r from-yellow-200 to-blue-200 p-6 rounded-lg border-2 border-black w-full mb-6">
           <div>
             <h3 className="text-xl font-bold text-blue-800">{t('alreadyJoinedSession')}</h3>
             <p className="text-gray-700 font-mono">{userData.sessionId}</p>
@@ -148,7 +149,7 @@ export const JoinSession: React.FC = () => {
             <div className="text-center text-white mb-2">
               <div className="flex items-center justify-center">
                 <Swords className="w-4 h-4" />
-                <span className="ml-1">{filteredSessions?.length || 0}&nbsp;/&nbsp;{sessionData?.length || 0}</span>
+                <span className="ml-1 text-sm">{filteredSessions?.length || 0}&nbsp;/&nbsp;{sessionData?.length || 0}</span>
               </div>
             </div>
             <div className="flex flex-col space-y-4">

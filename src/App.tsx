@@ -19,21 +19,23 @@ const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
 
 const AppContent: React.FC = () => {
   return (
-    <div>
+    <div className="min-h-screen pt-16">
       <Navbar />
-      <div className= "min-h-screen bg-gradient-to-b from-yellow-100 to-blue-100 p-10">
-        <main>
-          <Routes>
-            <Route element={<LoginPage />} path="/login" />
-            <Route element={<ProtectedRoute><JoinSession /></ProtectedRoute>} path="/" />
-            <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
-            <Route element={<ProtectedRoute><GamePage /></ProtectedRoute>} path="/game/:sessionId" />
-            <Route element={<ResultPage />} path="/result/:sessionId" />
-            <Route element={<UserPage />} path="/user/:userAddress" />
-            <Route element={<ProtectedRoute><RegisterGlove /></ProtectedRoute>} path="/registerGlove" />
-            <Route element={<GlovePage />} path="/glove/:gloveId" />
-          </Routes>
-        </main>
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-yellow-100 to-blue-100 p-10">
+        <div className="max-w-3xl mx-auto">
+          <main>
+            <Routes>
+              <Route element={<LoginPage />} path="/login" />
+              <Route element={<ProtectedRoute><JoinSession /></ProtectedRoute>} path="/" />
+              <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
+              <Route element={<ProtectedRoute><GamePage /></ProtectedRoute>} path="/game/:sessionId" />
+              <Route element={<ResultPage />} path="/result/:sessionId" />
+              <Route element={<UserPage />} path="/user/:userAddress" />
+              <Route element={<ProtectedRoute><RegisterGlove /></ProtectedRoute>} path="/registerGlove" />
+              <Route element={<GlovePage />} path="/glove/:gloveId" />
+            </Routes>
+          </main>
+        </div>
       </div>
     </div>
   );

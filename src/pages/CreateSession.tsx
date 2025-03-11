@@ -32,7 +32,7 @@ export const CreateSession: React.FC = () => {
     roundInterval: 5,
     waitingInterval: 10
   });
-  const [prize, setPrize] = useState('0000000000000000000000000000000000000000');
+  const [selectedPrize, setSelectedPrize] = useState('');
   const [pollingError, setPollingError] = useState<string | null>(null);
   const isFirstMount = useRef(true);
   const queryClient = useQueryClient();
@@ -134,7 +134,7 @@ export const CreateSession: React.FC = () => {
       const response = await request(GRAPHQL_ENDPOINT, createSessionDocument, {
         privateKey: privateKeyHex,
         sessionId: sessionIdCandidate,
-        prize,
+        prize: selectedPrize,
         maximumUser: gameRules.maximumUser,
         minimumUser: gameRules.minimumUser,
         remainingUser: gameRules.remainingUser,
@@ -160,9 +160,9 @@ export const CreateSession: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center create-session max-w-lg mx-auto bg-gray-400 border-2 border-black rounded-lg">
-      <div className="w-full flex flex-col items-center bg-gray-700 p-4 rounded-t-lg border-b border-black">
-        <h1 className="text-2xl font-bold text-white" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('createSession')}</h1>
+    <div className="flex flex-col items-center create-session w-full mx-auto bg-gray-700 border-2 border-black rounded-lg text-white">
+      <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
+        <h1 className="text-2xl font-bold" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('createSession')}</h1>
       </div>
       {pollingError && <p className="text-red-500">{pollingError}</p>}
       {isPolling && <p className="text-blue-500">{t('creatingSession')}</p>}
@@ -172,7 +172,7 @@ export const CreateSession: React.FC = () => {
           <div className="flex items-center space-x-2">
             <input
               readOnly
-              className="flex-grow mt-1 block text-gray-400 w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100"
+              className="flex-grow mt-1 block text-gray-400 w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 text-black"
               type="text"
               value={(!isSessionIdValid || isFetching) ? 'Checking...' : sessionIdCandidate}
             />
@@ -188,11 +188,11 @@ export const CreateSession: React.FC = () => {
         </div>
 
         <div className="rules-section mt-8 mb-8 space-y-1">
-          <h2 className="text-xl font-semibold mb-2 text-center">{t('gameRules')}</h2>
+          <h2 className="text-xl mb-2 text-center">{t('gameRules')}</h2>
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('maximumUser')}</label>
+            <label className="block text-sm">{t('maximumUser')}</label>
             <input
-              className="mt-1 block w-full bg-white border border-black rounded-md shadow-sm p-2 mb-2"
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
               min="1"
               type="number"
@@ -202,9 +202,9 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('minimumUser')}</label>
+            <label className="block text-sm">{t('minimumUser')}</label>
             <input
-              className="mt-1 block w-full bg-white border border-black rounded-md shadow-sm p-2 mb-2"
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
               min="1"
               type="number"
@@ -214,9 +214,9 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('remainingUser')}</label>
+            <label className="block text-sm">{t('remainingUser')}</label>
             <input
-              className="mt-1 block w-full bg-white border border-black rounded-md shadow-sm p-2 mb-2"
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
               min="1"
               type="number"
@@ -226,9 +226,9 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('roundInterval')}</label>
+            <label className="block text-sm">{t('roundInterval')}</label>
             <input
-              className="mt-1 block w-full bg-white border border-black rounded-md shadow-sm p-2 mb-2"
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
               min="1"
               type="number"
@@ -238,9 +238,9 @@ export const CreateSession: React.FC = () => {
           </div>
           
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700">{t('waitingInterval')}</label>
+            <label className="block text-sm">{t('waitingInterval')}</label>
             <input
-              className="mt-1 block w-full bg-white border border-black rounded-md shadow-sm p-2 mb-2"
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
               min="1"
               type="number"
@@ -251,15 +251,17 @@ export const CreateSession: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">{t('prize')}</label>
-          <input
-            className="mt-1 block w-full bg-white border border-black rounded-md shadow-sm p-2 mb-2"
-            disabled={isPolling}
-            placeholder={t('enterPrize')}
-            type="text"
-            value={prize}
-            onChange={(e) => setPrize(e.target.value)}
-          />
+          <label className="block text-sm font-medium text-black-700">{t('prize')}</label>
+          <select
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 text-black"
+            value={selectedPrize}
+            onChange={(e) => setSelectedPrize(e.target.value)}
+          >
+            <option value="">{t('selectPrize')}</option>
+            <option value="prize1">Prize 1</option>
+            <option value="prize2">Prize 2</option>
+            <option value="prize3">Prize 3</option>
+          </select>
         </div>
         <div className="flex justify-center space-x-4 mt-4">
           <StyledButton 

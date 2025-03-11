@@ -20,13 +20,20 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-gray-800 p-4 text-white flex justify-between items-center">
-      <Link className="text-lg font-bold text-white" to="/">
-        HandRoyal
-      </Link>
-      <Link className="text-lg font-bold text-white" to="/registerGlove">
-        Register Glove
-      </Link>
+    <nav className="bg-gray-800 p-4 text-white flex justify-between items-center fixed top-0 left-0 w-full h-16 z-10">
+      <div className="flex items-center space-x-20">
+        <Link className="text-lg font-bold text-white" to="/">
+          HandRoyal
+        </Link>
+        <div className="flex items-center space-x-6">
+          <Link className="text-lg text-white" to={"/user/" + address?.toString()}>
+            {t('userInfo')}
+          </Link>
+          <Link className="text-lg text-white" to="/registerGlove">
+            {t('registerGlove')}
+          </Link>
+        </div>
+      </div>
       <div className="flex items-center">
         {tip && (
           <div className="ml-4 mr-4 text-sm">
@@ -36,7 +43,7 @@ const Navbar: React.FC = () => {
         {address && (
           <div className="flex items-center mr-4">
             <div className="text-sm">
-              Address: <AddressDisplay type='user' address={address.toString()} />
+              Address: <AddressDisplay address={address.toString()} type='user' />
             </div>
             <button
               className="bg-gray-600 text-white py-1 px-2 text-xs rounded border border-gray-500 hover:bg-gray-500 ml-2 cursor-pointer"
@@ -49,7 +56,7 @@ const Navbar: React.FC = () => {
         <span className="text-sm font-medium mr-2">{t('language')}</span>
         <select
           className="bg-gray-700 text-white p-1 rounded text-sm cursor-pointer"
-          defaultValue={i18n.language}
+          value={i18n.language}
           onChange={(e) => changeLanguage(e.target.value)}
         >
           <option value="en">English</option>

@@ -3,8 +3,8 @@ import { useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { useAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, registerGloveDocument, isGloveRegisteredDocument, GLOVE_SUBSCRIPTION } from '../queries';
-import { RequestDocument } from 'graphql-request';
 import subscriptionClient from '../subscriptionClient';
+import type { RequestDocument } from 'graphql-request';
 
 const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
 
@@ -136,10 +136,10 @@ const RegisterGlove: React.FC = () => {
         <label className="block text-sm font-medium text-gray-700">Glove Address</label>
         <div className="flex items-center space-x-2">
           <input
+            readOnly
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
             type="text"
             value={isFetching ? 'Generating...' : gloveAddress}
-            readOnly
           />
           <button
             aria-label="Refresh Glove Address"
@@ -154,28 +154,28 @@ const RegisterGlove: React.FC = () => {
       <div className="form-group mb-4">
         <label className="block text-sm font-medium text-gray-700">Upload Image</label>
         <label
-          htmlFor="file-upload"
           className="mt-1 block w-full bg-blue-500 text-white p-2 rounded cursor-pointer text-center"
+          htmlFor="file-upload"
         >
           Choose File
         </label>
         <input
-          id="file-upload"
-          className="hidden"
-          type="file"
           accept="image/*"
+          className="hidden"
+          id="file-upload"
+          type="file"
           onChange={handleFileChange}
         />
         {filePreview && (
           <div className="mt-4">
-            <img src={filePreview} alt="File Preview" className="w-full h-auto rounded-md" />
+            <img alt="File Preview" className="w-full h-auto rounded-md" src={filePreview} />
           </div>
         )}
       </div>
       <button
         className="bg-blue-500 text-white p-2 rounded cursor-pointer"
-        onClick={handleSubmit}
         disabled={!isGloveAddressValid || isFetching}
+        onClick={handleSubmit}
       >
         Register Glove
       </button>

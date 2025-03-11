@@ -88,6 +88,48 @@ export const GamePage: React.FC = () => {
       return <p className="text-2xl">{t('waitingForSession')}</p>;
     }
 
+    if (playerStatus === PlayerState.Won) {
+      return (
+        <div className="flex flex-col items-center justify-between h-full">
+          <p> </p>
+          <div className="flex flex-col items-center justify-center">
+            <img alt="Win" className="w-1/4 h-auto object-contain animate-cry mb-6" src={win} />
+            <p className="text-2xl text-center">{t('win')}</p>
+          </div>
+          <div className="flex justify-center space-x-4 mb-5">
+            <StyledButton 
+              bgColor = '#FFE55C'
+              shadowColor = '#FF9F0A'
+              onClick={() => navigate(`/result/${sessionId}`)}>
+              {t('viewResults')}
+            </StyledButton>
+            <StyledButton onClick={() => navigate('/')} >
+              {t('backToMain')}
+            </StyledButton>
+          </div>
+        </div>
+      );
+    }
+
+    if (sessionData.state === SessionState.Ended) {
+      return (
+        <div className="flex flex-col items-center justify-center">
+          <h2 className="text-2xl mb-4">{t('sessionEnded')}</h2>
+          <div className="flex justify-center space-x-4 mb-5">
+            <StyledButton 
+              bgColor = '#FFE55C'
+              shadowColor = '#FF9F0A'
+              onClick={() => navigate(`/result/${sessionId}`)}>
+              {t('viewResults')}
+            </StyledButton>
+            <StyledButton onClick={() => navigate('/')} >
+              {t('backToMain')}
+            </StyledButton>
+          </div>
+        </div>
+      );
+    }
+
     if (playerStatus === PlayerState.Lose) {
       return (
         <div className="flex flex-col items-center justify-between h-full">
@@ -123,20 +165,6 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (sessionData.state === SessionState.Ended) {
-      return (
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Session: {truncateAddress(sessionId!)} ended</h2>
-          <StyledButton onClick={() => navigate(`/result/${sessionId}`)}>
-            {t('viewResults')}
-          </StyledButton>
-          <StyledButton onClick={() => navigate('/')} >
-            {t('backToMain')}
-          </StyledButton>
-        </div>
-      );
-    }
-
     if (address && sessionData.metadata?.organizer && Address.fromHex(sessionData.metadata.organizer).toHex() === address.toHex()) {
       return (
         <div>
@@ -161,16 +189,14 @@ export const GamePage: React.FC = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="flex flex-col justify-between bg-gray-700 rounded-lg text-white border-black border-2 min-w-1/2 min-h-[calc(100vh-180px)] w-full max-w-4xl">
+      <div className="flex flex-col justify-between bg-gray-700 rounded-lg text-white border-black border-2 min-h-[calc(100vh-180px)] w-full">
         <div className="flex items-center justify-center rounded-t-lg p-6 bg-gray-900">
-          <Swords className="w-10 h-10 mr-1" />
           <p
             className="text-4xl text-center text-white font-extrabold"
             style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
           >
             {t('gameBoardTitle')}
           </p>
-          <Swords className="w-10 h-10 ml-1" />
         </div>
         <div className="flex flex-col justify-center flex-grow">
           {renderContent()}

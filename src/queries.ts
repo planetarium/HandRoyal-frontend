@@ -7,7 +7,9 @@ export const getUserDocument = graphql(/* GraphQL */ `
     stateQuery {
       user(userId: $address) {
         id
-        gloves
+        registeredGloves
+        ownedGloves
+        equippedGlove
         sessionId
       }
     }
@@ -56,8 +58,8 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
 `);
 
 export const joinSessionDocument = graphql(/* GraphQL */ `
-  mutation JoinSession($privateKey: PrivateKey, $sessionId: Address!) {
-    joinSession(privateKey: $privateKey, sessionId: $sessionId)
+  mutation JoinSession($privateKey: PrivateKey, $sessionId: Address!, $gloveId: Address) {
+    joinSession(privateKey: $privateKey, sessionId: $sessionId, gloveId: $gloveId)
   }
 `);
 
