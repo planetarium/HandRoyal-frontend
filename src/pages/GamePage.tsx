@@ -57,19 +57,26 @@ export const GamePage: React.FC = () => {
     }
   }, [sessionId, navigate]);
 
-  const blocksLeft = data?.state === SessionState.Ready
-    ? (data?.startHeight && tip 
-      ? data.startHeight - tip.index
-      : 0)
-    : (data?.rounds && data.metadata && tip
-      ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundInterval) - tip.index
-      : 0);
+  const blocksLeft = () => {
+    switch (data?.state) {
+      case SessionState.Ready:
+        return data?.startHeight && tip
+          ? data.startHeight - tip.index
+          : 0;
+      case SessionState.Active:
+        return data?.rounds && data.metadata && tip
+          ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundLength) - tip.index
+          : 0;
+      case SessionState.Break:
+        return data?.rounds && data.metadata && tip
+          ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundLength + data.metadata.roundInterval) - tip.index
+          : 0;
+      default:
+        return 0;
+    }
+  }
 
   const round = data?.rounds ? data.rounds.length : 0;
-
-  const truncateAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   if (isLoading) return <p>{t('loading')}</p>;
   if (error) return <p>{t('error')}: {error.message}</p>;
@@ -106,6 +113,19 @@ export const GamePage: React.FC = () => {
             <StyledButton onClick={() => navigate('/')} >
               {t('backToMain')}
             </StyledButton>
+          </div>
+        </div>
+      );
+    }
+
+    if (sessionData.state === SessionState.Break) {
+      {/* 여기에 승리 모션 들어가야함 */}
+      return (
+        <div className="flex flex-col items-center justify-center">
+          <img alt="Loading" className="w-1/4 h-auto object-contain animate-swing mb-6" src={loading} />
+          <p className="text-2xl text-white text-center mt-4">{t('waitingForRoundToStart')}</p>
+          <div className="flex items-center justify-center text-xl mt-5">
+            <Clock className="w-5 h-5 mr-1" />{blocksLeft()}
           </div>
         </div>
       );
@@ -159,7 +179,7 @@ export const GamePage: React.FC = () => {
           <img alt="Loading" className="w-1/4 h-auto object-contain animate-swing mb-6" src={loading} />
           <p className="text-2xl text-white text-center mt-4">{t('waitingForGameToStart')}</p>
           <div className="flex items-center justify-center text-xl mt-5">
-            <Clock className="w-5 h-5 mr-1" />{blocksLeft}
+            <Clock className="w-5 h-5 mr-1" />{blocksLeft()}
           </div>
         </div>
       );
@@ -183,7 +203,7 @@ export const GamePage: React.FC = () => {
     }
 
     return (
-      <GameBoard blocksLeft={blocksLeft} data={sessionData} round={round} />
+      <GameBoard blocksLeft={blocksLeft()} data={sessionData} round={round} />
     );
   }
 

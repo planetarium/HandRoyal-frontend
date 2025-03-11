@@ -70,8 +70,8 @@ export const isValidSessionIdDocument = graphql(/* GraphQL */ `
 `)
 
 export const createSessionDocument = graphql(/* GraphQL */ `
-  mutation CreateSession($privateKey: PrivateKey, $sessionId: Address!, $prize: Address!, $maximumUser: Int!, $minimumUser: Int!, $remainingUser: Int!, $roundInterval: Long!, $waitingInterval: Long!) {
-    createSession(privateKey: $privateKey, sessionId: $sessionId, prize: $prize, maximumUser: $maximumUser, minimumUser: $minimumUser, remainingUser: $remainingUser, roundInterval: $roundInterval, waitingInterval: $waitingInterval)
+  mutation CreateSession($privateKey: PrivateKey, $sessionId: Address!, $prize: Address!, $maximumUser: Int!, $minimumUser: Int!, $remainingUser: Int!, $startAfter: Long!, $roundLength: Long!, $roundInterval: Long!) {
+    createSession(privateKey: $privateKey, sessionId: $sessionId, prize: $prize, maximumUser: $maximumUser, minimumUser: $minimumUser, remainingUser: $remainingUser, startAfter: $startAfter, roundLength: $roundLength, roundInterval: $roundInterval)
   }
 `);
 
@@ -97,7 +97,8 @@ export const getSessionDocument = graphql(/* GraphQL */ `
           maximumUser
           minimumUser
           remainingUser
-          waitingInterval
+          startAfter
+          roundLength
           roundInterval
         }
         state
