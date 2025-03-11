@@ -2,14 +2,12 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { useAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, registerGloveDocument, isGloveRegisteredDocument, GLOVE_SUBSCRIPTION } from '../queries';
-import subscriptionClient from '../subscriptionClient';
+import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument, registerGloveAction } from '../queries';
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import type { RequestDocument } from 'graphql-request';
 
-const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
-
 const RegisterGlove: React.FC = () => {
-  const { privateKey } = useAccount();
+  const { account } = useAccount();
   const [gloveAddress, setGloveAddress] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -19,13 +17,13 @@ const RegisterGlove: React.FC = () => {
 
   const registerGloveMutation = useMutation({
     mutationFn: async () => {
-      if (!privateKey || !gloveAddress) {
-        throw new Error('Missing required fields');
+      if (!account) {
+        throw new Error('No account found');
       }
 
-      // Convert privateKey to hex
-      const privateKeyBytes = privateKey.toBytes();
-      const privateKeyHex = Array.from(privateKeyBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (!gloveAddress) {
+        throw new Error('Missing required fields');
+      }
 
       // Upload the file to the server
       const formData = new FormData();
@@ -35,36 +33,19 @@ const RegisterGlove: React.FC = () => {
       }
 
       // Call the mutation
-      const response = await request(GRAPHQL_ENDPOINT, registerGloveDocument, {
-        privateKey: privateKeyHex,
+      const registerGloveResponse = await request(GRAPHQL_ENDPOINT, registerGloveAction, {
         gloveId: gloveAddress,
       });
 
-      const unsubscribe = subscriptionClient.subscribe(
-        {
-          query: GLOVE_SUBSCRIPTION,
-          variables: { gloveId: gloveAddress },
-        },
-        {
-          next: (result: any) => {
-            if (result.data.onGloveRegistered.id.toLowerCase() === gloveAddress.toLowerCase()) {
-              fetch(`${GLOVE_API_URL}/register-glove`, {
-                method: 'POST',
-                body: formData,
-              });
-              unsubscribe();
-            }
-          },
-          error: (err: any) => {
-            console.error('Subscription error:', err);
-          },
-          complete: () => {
-            console.log('Subscription completed');
-          },
-        }
-      );
+      if (!registerGloveResponse.actionQuery?.registerGlove) {
+        throw new Error('Failed to register glove');
+      }
 
-      return response.registerGlove;
+      const plainValue = registerGloveResponse.actionQuery.registerGlove;
+      const txId = await executeTransaction(account, plainValue);
+      await waitForTransaction(txId);
+
+      return txId;
     },
     onSuccess: () => {
       setErrorMessage(null);

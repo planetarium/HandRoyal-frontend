@@ -115,12 +115,6 @@ export const SESSION_SUBSCRIPTION = `
   }
 `;
 
-export const registerGloveDocument = graphql(/* GraphQL */ `
-  mutation RegisterGlove($privateKey: PrivateKey, $gloveId: Address!) {
-    registerGlove(privateKey: $privateKey, gloveId: $gloveId)
-  }
-`);
-
 export const isGloveRegisteredDocument = graphql(/* GraphQL */ `
   query IsGloveRegistered($gloveId: Address!) {
     isGloveRegistered(gloveId: $gloveId)
@@ -174,6 +168,14 @@ export const submitMoveAction = graphql(/* GraphQL */ `
   query SubmitMoveAction($sessionId: Address!, $move: MoveType!) {
     actionQuery {
       submitMove(sessionId: $sessionId, move: $move)
+    }
+  }
+`);
+
+export const registerGloveAction = graphql(/* GraphQL */ `
+  query RegisterGloveAction($gloveId: Address!) {
+    actionQuery {
+      registerGlove(gloveId: $gloveId)
     }
   }
 `);
