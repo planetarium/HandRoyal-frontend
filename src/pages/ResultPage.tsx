@@ -34,10 +34,10 @@ export const ResultPage: React.FC = () => {
   }, [tip, refetch]);
 
   useEffect(() => {
-    if (data?.rounds) {
+    if (data?.rounds && showRounds.length === 0) {
       setShowRounds(new Array(data.rounds.length).fill(false));
     }
-  }, [data]);
+  }, [data, showRounds.length]);
 
   const blocksLeft = data?.state === SessionState.Ready
   ? (data?.startHeight && tip 

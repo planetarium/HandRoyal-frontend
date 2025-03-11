@@ -32,7 +32,7 @@ export const CreateSession: React.FC = () => {
     roundInterval: 5,
     waitingInterval: 10
   });
-  const [prize, setPrize] = useState('0000000000000000000000000000000000000000');
+  const [selectedPrize, setSelectedPrize] = useState('');
   const [pollingError, setPollingError] = useState<string | null>(null);
   const isFirstMount = useRef(true);
   const queryClient = useQueryClient();
@@ -134,7 +134,7 @@ export const CreateSession: React.FC = () => {
       const response = await request(GRAPHQL_ENDPOINT, createSessionDocument, {
         privateKey: privateKeyHex,
         sessionId: sessionIdCandidate,
-        prize,
+        prize: selectedPrize,
         maximumUser: gameRules.maximumUser,
         minimumUser: gameRules.minimumUser,
         remainingUser: gameRules.remainingUser,
@@ -251,15 +251,17 @@ export const CreateSession: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label className="block text-sm">{t('prize')}</label>
-          <input
-            className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
-            disabled={isPolling}
-            placeholder={t('enterPrize')}
-            type="text"
-            value={prize}
-            onChange={(e) => setPrize(e.target.value)}
-          />
+          <label className="block text-sm font-medium text-black-700">{t('prize')}</label>
+          <select
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 text-black"
+            value={selectedPrize}
+            onChange={(e) => setSelectedPrize(e.target.value)}
+          >
+            <option value="">{t('selectPrize')}</option>
+            <option value="prize1">Prize 1</option>
+            <option value="prize2">Prize 2</option>
+            <option value="prize3">Prize 3</option>
+          </select>
         </div>
         <div className="flex justify-center space-x-4 mt-4">
           <StyledButton 

@@ -56,7 +56,8 @@ export const JoinSession: React.FC = () => {
       
       const response = await request(GRAPHQL_ENDPOINT, joinSessionDocument, {
         privateKey: privateKeyHex,
-        sessionId,
+        sessionId: sessionId,
+        gloveId: null,
       });
       return response.joinSession;
     },

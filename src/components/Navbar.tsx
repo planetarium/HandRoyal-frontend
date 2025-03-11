@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
         {tip && (
           <div className="ml-4 mr-4 text-sm">
             Tip: #{tip.index} 0x{tip.hash.substring(0, 6)}
-        </div>
+          </div>
         )}
         {address && (
           <div className="flex items-center mr-4">
@@ -56,7 +56,7 @@ const Navbar: React.FC = () => {
         <span className="text-sm font-medium mr-2">{t('language')}</span>
         <select
           className="bg-gray-700 text-white p-1 rounded text-sm cursor-pointer"
-          defaultValue={i18n.language}
+          value={i18n.language}
           onChange={(e) => changeLanguage(e.target.value)}
         >
           <option value="en">English</option>
