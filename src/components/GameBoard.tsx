@@ -24,12 +24,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
   const { account } = useAccount();
   const [submitting, setSubmitting] = useState(false);
   const [selectedHand, setSelectedHand] = useState<HandType | null>(null);
-  const [gameBoardState, setGameBoardState] = useState<GameBoardState>({myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null});
+  const [gameBoardState, setGameBoardState] = useState<GameBoardState>({myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null});
 
   interface GameBoardState {
     myMove: MoveType;
     opponentMove: MoveType;
     opponentAddress: string | null;
+    myGloveAddress: string | null;
+    opponentGloveAddress: string | null;
   }
 
   const submitMoveMutation = useMutation({
@@ -90,7 +92,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
 
   useEffect(() => {
     const updateGameBoardState = async () => {
-      const props: GameBoardState = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null};
+      const props: GameBoardState = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null};
       const address = account?.isConnected ? account.address : null;
       if (data?.rounds && data.players) {
         const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === address?.toHex());
@@ -105,6 +107,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
             props.myMove = match.move1.playerIndex === currentPlayerIndex ? match.move1.type : match.move2.type;
             props.opponentAddress = data.players[opponentMove.playerIndex]?.id;
             props.opponentMove = opponentMove.type;
+            props.myGloveAddress = data.players[currentPlayerIndex]?.glove;
+            props.opponentGloveAddress = data.players[opponentMove.playerIndex]?.glove;
           }
         }
       }
@@ -164,13 +168,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
 
       <div className="flex items-center justify-center space-x-4 mb-4">
         <MoveDisplay 
-          gloveAddress={data?.metadata?.id} 
+          gloveAddress={gameBoardState.myGloveAddress ?? ''} 
           moveType={gameBoardState.myMove} 
           userAddress={'you'} 
         />
         <Swords className="w-20 h-20" color="white" />
         <MoveDisplay 
-          gloveAddress={data?.metadata?.id} 
+          gloveAddress={gameBoardState.opponentGloveAddress ?? ''} 
           moveType={gameBoardState.opponentMove} 
           userAddress={gameBoardState.opponentAddress ?? ''}
         />
