@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import logo from '../assets/logo.webp';
 import { MoveType } from '../gql/graphql';
 import AddressDisplay from './AddressDisplay';
+import { getGloveImage } from '../fetches';
 
 interface MoveDisplayProps {
   gloveAddress: string;
@@ -12,12 +13,32 @@ interface MoveDisplayProps {
 
 const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, moveType }) => {
   const { t } = useTranslation();
+  const [moveImage, setMoveImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        const response = await getGloveImage(gloveAddress, moveType);
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        setMoveImage(imageUrl);
+      } catch (error) {
+        console.error('Failed to fetch glove image:', error);
+      }
+    };
+
+    fetchImage();
+  }, [gloveAddress, moveType]);
 
   return (
     <div className="flex flex-col items-center rounded-lg w-full border-2 border-black bg-gray-600 shadow-md">
       {/* 이미지 공간 */}
       <div className="w-full h-64 bg-white rounded-t-lg flex items-center justify-center">
-        <img alt="logo" className="w-32 h-32 object-cover" src={logo} />
+        {moveImage ? (
+          <img alt="move" className="w-32 h-32 object-cover" src={moveImage} />
+        ) : (
+          <img alt="logo" className="w-32 h-32 object-cover" src={logo} />
+        )}
       </div>
       {/* 가위, 바위, 보 텍스트 공간 */}
       <div className="flex w-full items-center justify-center text-2xl text-white font-bold border-black border-b p-2">
