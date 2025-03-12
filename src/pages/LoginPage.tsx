@@ -164,34 +164,34 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="login-page p-4 max-w-4xl mx-auto">
-      <div className="login-form max-w-md mx-auto mb-12">
-        <h1 className="text-2xl font-bold mb-4">{t('login')}</h1>
-        <input
-          className={`w-full p-2 border border-gray-300 rounded mb-4 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
-          disabled={isDisabled()}
-          placeholder={t('enterPrivateKey')}
-          type="password"
-          value={privateKeyInput}
-          onChange={(e) => setPrivateKeyInput(e.target.value)}
-        />
-        {errorMessage && (
-          <div className="text-red-500 italic mb-4">
-            {errorMessage}
-          </div>
-        )}
-        <button
-          className={`p-2 rounded w-full ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-          disabled={isDisabled()}
-          onClick={() => handleLogin('raw')}
-        >
-          {isLoggingIn ? 'Logging in...' : t('loginButton')}
-        </button>
+    <div className="flex flex-col items-center justify-center">
+      <img alt="logo" className="w-120 h-auto object-contain mb-4" src={logo} />
+      <div className="flex flex-col w-full">
+        <div className="flex items-center">
+          <input
+            className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+            disabled={isDisabled()}
+            placeholder={t('enterPrivateKey')}
+            type="password"
+            value={privateKeyInput}
+            onChange={(e) => setPrivateKeyInput(e.target.value)}
+          />
+          {errorMessage && (
+            <div className="text-red-500 italic mb-4">
+              {errorMessage}
+            </div>
+          )}
+          <StyledButton
+            disabled={isDisabled()}
+            onClick={() => handleLogin('raw')}
+          >
+            {isLoggingIn ? 'Logging in...' : t('loginButton')}
+          </StyledButton>
+        </div>
         <div className="text-center my-4 text-gray-500 flex items-center justify-center">
           <span className="mx-4">{t('or')}</span>
         </div>
-        <button
-          className={`p-2 rounded w-full flex items-center justify-center ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+        <StyledButton
           disabled={isDisabled()}
           onClick={() => handleLogin('metamask')}
         >
@@ -201,11 +201,11 @@ const LoginPage: React.FC = () => {
             src={metamaskIcon}
           />
           {isLoggingIn ? 'Logging in...' : t('connectWithMetamask')}
-        </button>
+        </StyledButton>
       </div>
 
-      <div className="test-accounts">
-        <h2 className="text-xl font-semibold mb-4">{t('testAccounts')}</h2>
+      <div className="flex flex-col w-full">
+        <h2 className="text-xl font-semibold mt-50 mb-4">{t('testAccounts')}</h2>
         <div className="md:overflow-visible overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
