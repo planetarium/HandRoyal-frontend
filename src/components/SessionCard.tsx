@@ -84,12 +84,14 @@ const SessionCard: React.FC<SessionCardProps> = ({
           <Users className="mr-1 h-4 w-4" strokeWidth={3} />
           <span>{currentPlayers}/{maxPlayers}</span>
         </div>
-        <div
-          className={`flex text-sm items-center mr-5 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
-        >
-          <Clock className="mr-1 h-4 w-4" strokeWidth={3} />
-          <span>{state === SessionState.Ready ? `${blocksLeft}` : "Playing..."}</span>
-        </div>
+        {state === SessionState.Ready ? (
+            <div
+              className={`flex text-sm items-center mr-3 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
+            >
+            <Clock className="mr-1 h-4 w-4" strokeWidth={3} />
+            <span>{`${blocksLeft}`}</span>
+          </div>
+        ) : null}
         {state === SessionState.Ready ? (
           <StyledButton
             bgColor = '#FFE55C'
