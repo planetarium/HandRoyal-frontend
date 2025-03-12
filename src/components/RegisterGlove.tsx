@@ -43,6 +43,7 @@ const RegisterGlove: React.FC = () => {
       return txId;
     },
     onSuccess: () => {
+      registerGlove(gloveAddress, file);
       setErrorMessage(null);
       alert('Glove registered successfully!');
     },
