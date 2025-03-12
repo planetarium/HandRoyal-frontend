@@ -44,6 +44,8 @@ const TEST_ACCOUNTS = [
   }
 ];
 
+type LoginType = 'raw' | 'metamask';
+
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const { account, setAccount } = useAccount();
@@ -98,64 +100,34 @@ const LoginPage: React.FC = () => {
       const plainValue = createUserResponse.actionQuery.createUser;
       const txId = await executeTransaction(account, plainValue);
       await waitForTransaction(txId);
-    },
-    onSuccess: async () => {
-      setErrorMessage(null);
-      setIsLoggingIn(true);
-      const timeoutId = setTimeout(() => {
-        setIsLoggingIn(false);
-        setErrorMessage('Login timed out. Please try again.');
-      }, 30000);
-
-      return () => clearTimeout(timeoutId);
-    },
-    onError: (error) => {
-      console.error('Failed to create user:', error);
-      setErrorMessage(error.message);
+      
+      return txId;
     }
   });
 
-  const handleLogin = useCallback(async () => {
+  const handleLogin = useCallback(async (type: LoginType) => {
     setIsLoggingIn(true);
     try {
-      const privateKey = RawPrivateKey.fromHex(privateKeyInput);
-      const address = (await privateKey.getAddress()).toHex();
-      const account = new PrivateKeyAccount(privateKey);
-      await account.connect();
-      setAccount(account);
-
-      const data = await queryClient.fetchQuery({
-        queryKey: ['checkUser', address],
-        queryFn: async () => {
-          const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: address!.toString() });
-          return response;
-        }
-      });
-
-      if (data?.stateQuery?.user) {
-        setErrorMessage(null);
-        navigate('/');
+      let account;
+      if (type === 'raw') {
+        const privateKey = RawPrivateKey.fromHex(privateKeyInput);
+        const privateKeyAccount = new PrivateKeyAccount(privateKey);
+        await privateKeyAccount.connect();
+        account = privateKeyAccount;
       } else {
-        createUserMutation.mutate();
+        const metamaskAccount = new MetamaskAccount();
+        await metamaskAccount.connect();
+        account = metamaskAccount;
       }
-    } catch (error) {
-      console.error('Invalid private key format:', error);
-      setErrorMessage('Invalid private key format.');
-      setIsLoggingIn(false);
-    }
-  }, [queryClient, privateKeyInput, createUserMutation, navigate, setAccount]);
-
-  const handleMetamaskLogin = useCallback(async () => {
-    setIsLoggingIn(true);
-    try {
-      const account = new MetamaskAccount();
-      await account.connect();
+      
       setAccount(account);
 
       const data = await queryClient.fetchQuery({
         queryKey: ['checkUser', account.address.toString()],
         queryFn: async () => {
-          const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
+          const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { 
+            address: account.address.toString() 
+          });
           return response;
         }
       });
@@ -164,14 +136,28 @@ const LoginPage: React.FC = () => {
         setErrorMessage(null);
         navigate('/');
       } else {
-        createUserMutation.mutate();
+        await createUserMutation.mutateAsync();
+        
+        setErrorMessage(null);
+        setIsLoggingIn(true);
+        const timeoutId = setTimeout(() => {
+          setIsLoggingIn(false);
+          setErrorMessage('Login timed out. Please try again.');
+        }, 30000);
+
+        return () => clearTimeout(timeoutId);
       }
     } catch (error) {
-      console.error('Failed to connect with Metamask:', error);
-      setErrorMessage('Failed to connect with Metamask');
+      console.error(
+        type === 'raw' ? 'Invalid private key format:' : 'Failed to connect with Metamask:', 
+        error
+      );
+      setErrorMessage(
+        type === 'raw' ? 'Invalid private key format.' : 'Failed to connect with Metamask'
+      );
       setIsLoggingIn(false);
     }
-  }, [setAccount, navigate, createUserMutation, queryClient]);
+  }, [queryClient, privateKeyInput, createUserMutation, navigate, setAccount]);
 
   const isDisabled = () => {
     return isLoggingIn;
@@ -197,7 +183,7 @@ const LoginPage: React.FC = () => {
         <button
           className={`p-2 rounded w-full ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
           disabled={isDisabled()}
-          onClick={handleLogin}
+          onClick={() => handleLogin('raw')}
         >
           {isLoggingIn ? 'Logging in...' : t('loginButton')}
         </button>
@@ -207,7 +193,7 @@ const LoginPage: React.FC = () => {
         <button
           className={`p-2 rounded w-full flex items-center justify-center ${(isDisabled()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
           disabled={isDisabled()}
-          onClick={handleMetamaskLogin}
+          onClick={() => handleLogin('metamask')}
         >
           <img 
             alt="MetaMask" 
