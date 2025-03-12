@@ -3,8 +3,9 @@ import {
   GRAPHQL_ENDPOINT,
   unsignedTransactionQuery,
   stageTransactionMutation,
-  transactionResultQuery
+  onTransactionChangedSubscription,
 } from '../queries';
+import subscriptionClient from '../subscriptionClient';
 import type { IAccount } from '../context/AccountContext';
 
 export async function executeTransaction(
@@ -37,29 +38,42 @@ export async function executeTransaction(
 }
 
 export async function waitForTransaction(txId: string, timeout: number = 30000): Promise<void> {
-  const startTime = Date.now();
-  const pollInterval = 1000;
+  return new Promise((resolve, reject) => {
+    const unsubscribe = subscriptionClient.subscribe({
+      query: onTransactionChangedSubscription, // Define this query in your queries file
+      variables: { txId: txId },
+    }, {
+      next: (result) => {
+        const data = result.data as {
+          onTransactionChanged: {
+            status: string,
+            exceptionNames: string[]
+          }
+        };
+        const status = data.onTransactionChanged.status;
+        const exceptionNames = data.onTransactionChanged.exceptionNames;
 
-  while (Date.now() - startTime < timeout) {
-    const result = await request(GRAPHQL_ENDPOINT, transactionResultQuery, {
-      txId: txId
+        if (status === 'SUCCESS') {
+          unsubscribe();
+          resolve();
+        } else if (status === 'FAILURE') {
+          const errorMessage = exceptionNames?.join(', ') || 'Transaction failed';
+          unsubscribe();
+          reject(new Error(errorMessage));
+        }
+      },
+      error: (error) => {
+        unsubscribe();
+        reject(error);
+      },
+      complete: () => {
+      }
     });
 
-    if (!result.transaction?.transactionResult?.txStatus) {
-      throw new Error('Transaction result not found');
-    }
-
-    const txStatus = result.transaction.transactionResult.txStatus;
-    if (txStatus === 'SUCCESS') {
-      return;
-    }
-
-    if (txStatus === 'FAILURE') {
-      throw new Error(result.transaction.transactionResult.exceptionNames?.join(', ') || 'Transaction failed');
-    }
-
-    await new Promise(resolve => setTimeout(resolve, pollInterval));
-  }
-
-  throw new Error('Transaction timeout');
+    // 타임아웃 처리
+    setTimeout(() => {
+      unsubscribe();
+      reject(new Error('Transaction timeout'));
+    }, timeout);
+  });
 } 

@@ -205,3 +205,11 @@ export const transactionResultQuery = graphql(/* GraphQL */ `
     }
   }
 `);
+
+export const onTransactionChangedSubscription = `
+  subscription OnTransactionChanged($txId: TxId!) {
+    onTransactionChanged(txId: $txId) {
+      status
+    }
+  }
+`;
