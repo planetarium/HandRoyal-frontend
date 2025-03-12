@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
-import { useAccount } from '../context/AccountContext';
+import { useRequiredAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument, registerGloveAction } from '../queries';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import type { RequestDocument } from 'graphql-request';
@@ -9,7 +9,7 @@ import { registerGlove } from '../fetches';
 const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
 
 const RegisterGlove: React.FC = () => {
-  const { account } = useAccount();
+  const account = useRequiredAccount();
   const [gloveAddress, setGloveAddress] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -19,10 +19,6 @@ const RegisterGlove: React.FC = () => {
 
   const registerGloveMutation = useMutation({
     mutationFn: async () => {
-      if (!account) {
-        throw new Error('No account found');
-      }
-
       if (!gloveAddress) {
         throw new Error('Missing required fields');
       }

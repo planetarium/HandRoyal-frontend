@@ -5,7 +5,7 @@ import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
 import { MoveType, SessionState } from '../gql/graphql';
-import { useAccount } from '../context/AccountContext';
+import { useRequiredAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, submitMoveAction } from '../queries';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
@@ -21,7 +21,7 @@ interface GameBoardProps {
 
 const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
   const { t } = useTranslation();
-  const { account } = useAccount();
+  const account = useRequiredAccount();
   const [submitting, setSubmitting] = useState(false);
   const [selectedHand, setSelectedHand] = useState<HandType | null>(null);
   const [gameBoardState, setGameBoardState] = useState<GameBoardState>({myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null});
@@ -36,10 +36,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
 
   const submitMoveMutation = useMutation({
     mutationFn: async (move: HandType) => {
-      if (!account) {
-        throw new Error('Account not connected');
-      }
-
       const moveType = move === 'rock' ? MoveType.Rock : move === 'paper' ? MoveType.Paper : MoveType.Scissors;
       const submitMoveResponse = await request(GRAPHQL_ENDPOINT, submitMoveAction, {
         sessionId: data?.metadata?.id,

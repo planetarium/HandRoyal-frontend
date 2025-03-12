@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { RawPrivateKey } from '@planetarium/account';
-import { PrivateKeyAccount, MetamaskAccount, useAccount } from '../context/AccountContext';
+import { PrivateKeyAccount, MetamaskAccount, useAccountContext } from '../context/AccountContext';
 import subscriptionClient from '../subscriptionClient';
 import {
   GRAPHQL_ENDPOINT, 
@@ -48,21 +48,21 @@ type LoginType = 'raw' | 'metamask';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
-  const { account, setAccount } = useAccount();
+  const accountContext = useAccountContext();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const address = account?.isConnected ? account.address : null;
 
   useEffect(() => {
-    if (!address) return;
+    const account = accountContext.account;
+    if (!account) return;
 
     const unsubscribe = subscriptionClient.subscribe(
       {
         query: USER_SUBSCRIPTION,
-        variables: { userId: address.toString() },
+        variables: { userId: account.address.toString() },
       },
       {
         next: (result) => {
@@ -84,10 +84,11 @@ const LoginPage: React.FC = () => {
     return () => {
       unsubscribe();
     };
-  }, [address, navigate]);
+  }, [navigate, accountContext]);
 
   const createUserMutation = useMutation({
     mutationFn: async () => {
+      const account = accountContext.account;
       if (!account) {
         throw new Error('Account not connected');
       }
@@ -120,7 +121,7 @@ const LoginPage: React.FC = () => {
         account = metamaskAccount;
       }
       
-      setAccount(account);
+      accountContext.setAccount(account);
 
       const data = await queryClient.fetchQuery({
         queryKey: ['checkUser', account.address.toString()],
@@ -157,7 +158,7 @@ const LoginPage: React.FC = () => {
       );
       setIsLoggingIn(false);
     }
-  }, [queryClient, privateKeyInput, createUserMutation, navigate, setAccount]);
+  }, [queryClient, privateKeyInput, createUserMutation, navigate, accountContext]);
 
   const isDisabled = () => {
     return isLoggingIn;

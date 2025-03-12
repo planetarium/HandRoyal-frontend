@@ -8,14 +8,14 @@ import { GamePage } from './pages/GamePage';
 import { ResultPage } from './pages/ResultPage';
 import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
-import { AccountProvider, useAccount } from './context/AccountContext';
+import { AccountProvider, useAccountContext } from './context/AccountContext';
 import UserPage from './pages/UserPage';
 import { TipProvider } from './context/TipContext';
 import RegisterGlove from './components/RegisterGlove';
 import { EquippedGloveProvider } from './context/EquippedGloveContext';
 import GloveEquipPage from './pages/GloveEquipPage';
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
-  const { account } = useAccount();
+  const { account } = useAccountContext();
   return account ? children : <Navigate to="/login" />;
 };
 

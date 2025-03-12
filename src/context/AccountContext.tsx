@@ -8,8 +8,6 @@ import type { ReactNode } from 'react';
 
 export interface IAccount {
   get address(): Address;
-  get isConnected(): boolean;
-  connect(): Promise<void>;
   disconnect: () => void;
   sign(message: string): Promise<string>;
 }
@@ -170,11 +168,24 @@ export const AccountProvider: React.FC<{ children: ReactNode }> = ({ children })
   );
 };
 
-export const useAccount = () => {
+export const useAccountContext = () => {
   const context = useContext(AccountContext);
   if (!context) {
     throw new Error('useAccount must be used within an AccountProvider');
   }
   
   return context;
+};
+
+export const useAccount = (): IAccount | null => {
+  const { account } = useAccountContext();
+  return account;
+};
+
+export const useRequiredAccount = (): IAccount => {
+  const { account } = useAccountContext();
+  if (!account) {
+    throw new Error('Account is not connected');
+  }
+  return account;
 };

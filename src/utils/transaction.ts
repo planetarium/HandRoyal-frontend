@@ -10,10 +10,6 @@ import type { IAccount } from '../context/AccountContext';
 
 export async function executeTransaction(
   account: IAccount, plainValue: string) {
-  if (!account.isConnected) {
-    throw new Error('Account not connected');
-  }
-
   const unsignedTransactionResponse = await request(GRAPHQL_ENDPOINT, unsignedTransactionQuery, {
     address: account.address.toString(),
     plainValue: plainValue
