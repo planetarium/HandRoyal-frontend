@@ -24,6 +24,8 @@ const AddressDisplay: React.FC<AddressDisplayProps> = ({ type, address, classNam
     return shorten ? '0x' + address.slice(0, 6) : address;
   };
 
+  const processedAddress = address ? (address.startsWith('0x') ? address.slice(2) : address) : undefined;
+
   const displayAddress = (address: string | undefined) => {
     if (address) {
       return <span className={`cursor-pointer hover:underline ${className}`} onClick={() => handleClick(address)}>{shortenAddress(address)}</span>;
@@ -33,7 +35,7 @@ const AddressDisplay: React.FC<AddressDisplayProps> = ({ type, address, classNam
   };
 
   return (
-    displayAddress(address)
+    displayAddress(processedAddress)
   );
 };
 
