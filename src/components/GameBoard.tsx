@@ -66,7 +66,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
     
     const maxInterval = data.state === SessionState.Ready 
       ? (data.startHeight - (data.creationHeight ?? 0))
-      : data.metadata.roundInterval;
+      : data.metadata.roundLength;
     
     const remainingBlocks = blocksLeft;
     const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
@@ -78,7 +78,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
     
     const maxInterval = data.state === SessionState.Ready 
       ? (data.startHeight - (data.creationHeight ?? 0))
-      : data.metadata.roundInterval;
+      : data.metadata.roundLength;
     
     const remainingBlocks = blocksLeft;
     const percentage = (remainingBlocks / maxInterval) * 100;

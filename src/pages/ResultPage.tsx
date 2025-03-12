@@ -8,7 +8,7 @@ import { getSessionDocument, GRAPHQL_ENDPOINT } from '../queries';
 import { PlayerState, SessionState, type Match, type MoveType } from '../gql/graphql';
 import { useTip } from '../context/TipContext';
 import AddressDisplay from '../components/AddressDisplay';
-
+import StyledButton from '../components/StyledButton';
 export const ResultPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -38,13 +38,24 @@ export const ResultPage: React.FC = () => {
     }
   }, [data, showRounds.length]);
 
-  const blocksLeft = data?.state === SessionState.Ready
-  ? (data?.startHeight && tip 
-    ? data.startHeight - tip.index
-    : 0)
-  : (data?.rounds && data.metadata && tip
-    ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundInterval) - tip.index
-    : 0);
+  const blocksLeft = () => {
+    switch (data?.state) {
+      case SessionState.Ready:
+        return data?.startHeight && tip
+          ? data.startHeight - tip.index
+          : 0;
+      case SessionState.Active:
+        return data?.rounds && data.metadata && tip
+          ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundLength) - tip.index
+          : 0;
+      case SessionState.Break:
+        return data?.rounds && data.metadata && tip
+          ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundLength + data.metadata.roundInterval) - tip.index
+          : 0;
+      default:
+        return 0;
+    }
+  }
 
   const getAddressByIndex = (index: number | undefined) => {
     if (index !== undefined) {
@@ -133,7 +144,7 @@ export const ResultPage: React.FC = () => {
       return (
         <div className="text-center">
           <p>{t('waitingForGameToStart')}</p>
-          <p>{t('blocksLeft', { count: blocksLeft })}</p>
+          <p>{t('blocksLeft', { count: blocksLeft() })}</p>
           <StyledButton onClick={() => navigate('/')}>
             {t('backToMain')}
           </StyledButton>
@@ -183,7 +194,13 @@ export const ResultPage: React.FC = () => {
               )}
             </div>
           ))}
-          {data.state === SessionState.Active ? <p className='text-sm text-center'>{t('blocksLeft', { count: blocksLeft })}</p> : null}
+          {(() => {
+            switch(data.state) {
+              case SessionState.Active: return <p className='text-sm text-center'>{t('roundActive', { count: blocksLeft() })}</p>
+              case SessionState.Break: return <p className='text-sm text-center'>{t('roundBreak', { count: blocksLeft() })}</p>
+              default: return null
+            }
+          })()}
         </div>
         <div className="text-center mt-6">
           <StyledButton onClick={() => navigate('/')}>
