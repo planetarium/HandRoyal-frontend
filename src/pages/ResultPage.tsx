@@ -9,6 +9,7 @@ import { PlayerState, SessionState, type Match, type MoveType } from '../gql/gra
 import { useTip } from '../context/TipContext';
 import AddressDisplay from '../components/AddressDisplay';
 import StyledButton from '../components/StyledButton';
+
 export const ResultPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
