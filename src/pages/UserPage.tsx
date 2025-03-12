@@ -15,7 +15,7 @@ const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 const UserPage: React.FC = () => {
   const { t } = useTranslation();
   const { userAddress } = useParams<{ userAddress: string }>();
-  const { address } = useAccount();
+  const { account } = useAccount();
   const navigate = useNavigate();
   const { data, error, isLoading } = useQuery<{ stateQuery: { user: { id: string; registeredGloves: string[]; ownedGloves: string[]; equippedGlove: string[] } } }>({
     queryKey: ['getUser', userAddress],

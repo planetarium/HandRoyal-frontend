@@ -17,7 +17,7 @@ import type { Session } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
   const { t } = useTranslation();
-  const { address } = useAccount();
+  const { account } = useAccount();
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { tip } = useTip();
@@ -40,13 +40,14 @@ export const GamePage: React.FC = () => {
   }, [tip, refetch]);
 
   useEffect(() => {
-    if (data?.players && address) {
-      const currentPlayer = data.players.find(player => Address.fromHex(player!.id).toHex() === address.toHex());
+    if (data?.players && account) {
+      const address = account.isConnected ? account.address : null;
+      const currentPlayer = data.players.find(player => Address.fromHex(player!.id).toHex() === address?.toHex());
       if (currentPlayer) {
         setPlayerStatus(currentPlayer.state);
       }
     }
-  }, [data, address]);
+  }, [data, account]);
 
   useEffect(() => {
     if (!sessionId) {

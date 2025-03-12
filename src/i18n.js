@@ -49,7 +49,8 @@ i18n
           "remainingUser": "Users left to end game",
           "rock": "Rock",
           "round": "Round",
-          "roundInterval": "Blocks per round",
+          "roundInterval": "Waiting time between rounds",
+          "roundLength": "Round Length",
           "scissors": "Scissors",
           "selectPrize": "Select Prize",
           "sessionEnded": "The session ended",
@@ -59,7 +60,7 @@ i18n
           "sessionList": "Available Sessions",
           "sessionResults": "Session Results",
           "spectate": "Spectate",
-          "startAfter": "Start After",
+          "startAfter": "Waiting time before first round",
           "submit": "Submit",
           "tip": "Tip",
           "userId": "User ID",
@@ -78,7 +79,9 @@ i18n
           "gloveId": "Glove ID",
           "gloveAuthor": "Author",
           "gloveNotFound": "Glove not found",
-          "noGlovesFound": "No gloves found"
+          "noGlovesFound": "No gloves found",
+          "connectWithMetamask": "Connect with MetaMask",
+          "or": "or"
         }
       },
       ko: {
@@ -125,7 +128,8 @@ i18n
           "remainingUser": "최종 승리자 수",
           "rock": "바위",
           "round": "라운드",
-          "roundInterval": "라운드 당 블록 수",
+          "roundInterval": "라운드 사이 대기 시간",
+          "roundLength": "라운드 길이",
           "scissors": "가위",
           "selectPrize": "상품을 선택하세요",
           "sessionEnded": "세션이 끝났습니다",
@@ -135,7 +139,7 @@ i18n
           "sessionList": "세션 목록",
           "sessionResults": "세션 결과",
           "spectate": "관전",
-          "startAfter": "시작까지 남은 블록",
+          "startAfter": "첫 라운드 전 대기 시간",
           "submit": "제출",
           "tip": "블록 팁팁",
           "userId": "유저 ID",
@@ -154,7 +158,9 @@ i18n
           "gloveId": "장갑 ID",
           "gloveAuthor": "작가",
           "gloveNotFound": "장갑을 찾을 수 없습니다",
-          "noGlovesFound": "장갑이 없습니다"
+          "noGlovesFound": "장갑이 없습니다",
+          "connectWithMetamask": "메타마스크로 연결",
+          "or": "또는"
         }
       }
     },

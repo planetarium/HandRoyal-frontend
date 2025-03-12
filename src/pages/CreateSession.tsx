@@ -4,22 +4,28 @@ import { useTranslation } from 'react-i18next';
 import { request } from 'graphql-request';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, SESSION_SUBSCRIPTION } from '../queries';
+import { 
+  GRAPHQL_ENDPOINT,
+  isValidSessionIdDocument,
+  SESSION_SUBSCRIPTION,
+  createSessionAction, 
+} from '../queries';
 import subscriptionClient from '../subscriptionClient';
 import StyledButton from '../components/StyledButton';
-
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 interface GameRules {
   maximumUser: number,
   minimumUser: number,
   remainingUser: number,
-  roundInterval: number,
-  waitingInterval: number
+  startAfter: number,
+  roundLength: number,
+  roundInterval: number
 }
 
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { privateKey, address } = useAccount();
+  const { account } = useAccount();
   const [sessionIdCandidate, setSessionIdCandidate] = useState<string>('0000000000000000000000000000000000000000');
   const [sessionId, setSessionId] = useState<string>('');
   const [isSessionIdValid, setIsSessionIdValid] = useState<boolean>(false);
@@ -29,8 +35,9 @@ export const CreateSession: React.FC = () => {
     maximumUser: 8,
     minimumUser: 2,
     remainingUser: 1,
-    roundInterval: 5,
-    waitingInterval: 10
+    startAfter: 20,
+    roundLength: 20,
+    roundInterval: 7,
   });
   const [selectedPrize, setSelectedPrize] = useState('');
   const [pollingError, setPollingError] = useState<string | null>(null);
@@ -40,10 +47,14 @@ export const CreateSession: React.FC = () => {
   useEffect(() => {
     if (!sessionId) return;
 
+    if (!account) {
+      throw new Error('Account not connected');
+    }
+
     const unsubscribe = subscriptionClient.subscribe(
       {
         query: SESSION_SUBSCRIPTION, // Define this query in your queries file
-        variables: { sessionId: sessionId, userId: address!.toString() },
+        variables: { sessionId: sessionId, userId: account.address.toString() },
       },
       {
         next: (result) => {
@@ -64,7 +75,7 @@ export const CreateSession: React.FC = () => {
     return () => {
       unsubscribe();
     };
-  }, [sessionId, navigate, address]);
+  }, [sessionId, navigate, account]);
 
   const generateRandomAddress = () => {
     let address = '';
@@ -128,20 +139,27 @@ export const CreateSession: React.FC = () => {
 
   const createSessionMutation = useMutation({
     mutationFn: async () => {
-      const privateKeyBytes = privateKey?.toBytes();
-      const privateKeyHex = privateKeyBytes ? bytesToHex(privateKeyBytes) : undefined;
-      
-      const response = await request(GRAPHQL_ENDPOINT, createSessionDocument, {
-        privateKey: privateKeyHex,
+      if (!account) {
+        throw new Error('Account not connected');
+      }
+
+      const createSessionResponse = await request(GRAPHQL_ENDPOINT, createSessionAction, {
         sessionId: sessionIdCandidate,
         prize: selectedPrize,
         maximumUser: gameRules.maximumUser,
         minimumUser: gameRules.minimumUser,
         remainingUser: gameRules.remainingUser,
-        roundInterval: gameRules.roundInterval,
-        waitingInterval: gameRules.waitingInterval
+        startAfter: gameRules.startAfter,
+        roundLength: gameRules.roundLength,
+        roundInterval: gameRules.roundInterval
       });
-      return response.createSession;
+      if (!createSessionResponse.actionQuery?.createSession) {
+        throw new Error('Failed to create session');
+      }
+
+      const txId = await executeTransaction(account, createSessionResponse.actionQuery.createSession);
+      console.error(txId);
+      await waitForTransaction(txId);
     },
     onSuccess: () => {
       setIsPolling(true);
@@ -226,6 +244,30 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
+            <label className="block text-sm">{t('startAfter')}</label>
+            <input
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
+              disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.startAfter}
+              onChange={(e) => handleGameRulesChange('startAfter', e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="block text-sm">{t('roundLength')}</label>
+            <input
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
+              disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.roundLength}
+              onChange={(e) => handleGameRulesChange('roundLength', e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
             <label className="block text-sm">{t('roundInterval')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
@@ -234,18 +276,6 @@ export const CreateSession: React.FC = () => {
               type="number"
               value={gameRules.roundInterval}
               onChange={(e) => handleGameRulesChange('roundInterval', e.target.value)}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="block text-sm">{t('waitingInterval')}</label>
-            <input
-              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
-              disabled={isPolling}
-              min="1"
-              type="number"
-              value={gameRules.waitingInterval}
-              onChange={(e) => handleGameRulesChange('waitingInterval', e.target.value)}
             />
           </div>
         </div>
