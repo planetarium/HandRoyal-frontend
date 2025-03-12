@@ -72,7 +72,7 @@ export const JoinSession: React.FC = () => {
     }
   });
 
-  const handleJoin = (id: string) => {
+  const handleJoin = async (id: string) => {
     if (!account) {
       setError(t('pleaseConnectWallet'));
       return;
@@ -83,8 +83,13 @@ export const JoinSession: React.FC = () => {
       return;
     }
 
-    joinSessionMutation.mutate(id);
-    navigate(`/game/${id}`);
+    try {
+      await joinSessionMutation.mutateAsync(id);
+      navigate(`/game/${id}`);
+    } catch (error) {
+      console.error('Failed to join session:', error);
+      setError(t('failedToJoinSession'));
+    }
   };
 
   const handleSpectate = (id: string) => {

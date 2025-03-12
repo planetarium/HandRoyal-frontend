@@ -186,6 +186,7 @@ export const GamePage: React.FC = () => {
       );
     }
 
+    const address = account?.isConnected ? account.address : null;
     if (address && sessionData.metadata?.organizer && Address.fromHex(sessionData.metadata.organizer).toHex() === address.toHex()) {
       return (
         <div>
