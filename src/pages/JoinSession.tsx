@@ -6,6 +6,7 @@ import { request } from 'graphql-request';
 import { Search, Swords } from 'lucide-react';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
+import { useEquippedGlove } from '../context/EquippedGloveContext';
 import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument, joinSessionDocument } from '../queries';
 import { SessionState } from '../gql/graphql';
 import logo from '../assets/logo.webp';
@@ -19,6 +20,7 @@ export const JoinSession: React.FC = () => {
   const [error, setError] = useState('');
   const { privateKey, address } = useAccount();
   const { tip } = useTip();
+  const { equippedGlove } = useEquippedGlove();
 
   const bytesToHex = (bytes: Uint8Array): string => {
     return Array.from(bytes)
@@ -57,7 +59,7 @@ export const JoinSession: React.FC = () => {
       const response = await request(GRAPHQL_ENDPOINT, joinSessionDocument, {
         privateKey: privateKeyHex,
         sessionId: sessionId,
-        gloveId: null,
+        gloveId: equippedGlove,
       });
       return response.joinSession;
     },

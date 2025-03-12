@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { request } from 'graphql-request';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, SESSION_SUBSCRIPTION } from '../queries';
+import { GRAPHQL_ENDPOINT, isValidSessionIdDocument, createSessionDocument, SESSION_SUBSCRIPTION, getUserDocument } from '../queries';
 import subscriptionClient from '../subscriptionClient';
 import StyledButton from '../components/StyledButton';
 
@@ -36,6 +36,14 @@ export const CreateSession: React.FC = () => {
   const [pollingError, setPollingError] = useState<string | null>(null);
   const isFirstMount = useRef(true);
   const queryClient = useQueryClient();
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['getUser', address],
+    queryFn: async () => {
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address });
+      return response?.stateQuery?.user;
+    }
+  });
 
   useEffect(() => {
     if (!sessionId) return;
@@ -159,6 +167,9 @@ export const CreateSession: React.FC = () => {
     }, 30000); // 30 seconds timeout
   };
 
+  if (isLoading) return <p>{t('loading')}</p>;
+  if (error) return <p>{t('error')}: {error.message}</p>;
+
   return (
     <div className="flex flex-col items-center create-session w-full mx-auto bg-gray-700 border-2 border-black rounded-lg text-white">
       <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
@@ -258,9 +269,9 @@ export const CreateSession: React.FC = () => {
             onChange={(e) => setSelectedPrize(e.target.value)}
           >
             <option value="">{t('selectPrize')}</option>
-            <option value="prize1">Prize 1</option>
-            <option value="prize2">Prize 2</option>
-            <option value="prize3">Prize 3</option>
+            {(data?.registeredGloves || []).map(glove => (
+              <option key={glove} value={glove}>{glove}</option>
+            ))}
           </select>
         </div>
         <div className="flex justify-center space-x-4 mt-4">

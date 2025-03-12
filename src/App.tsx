@@ -12,6 +12,8 @@ import { AccountProvider, useAccount } from './context/AccountContext';
 import UserPage from './pages/UserPage';
 import { TipProvider } from './context/TipContext';
 import RegisterGlove from './components/RegisterGlove';
+import { EquippedGloveProvider } from './context/EquippedGloveContext';
+import GloveEquipPage from './pages/GloveEquipPage';
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { privateKey } = useAccount();
   return privateKey ? children : <Navigate to="/login" />;
@@ -33,6 +35,7 @@ const AppContent: React.FC = () => {
               <Route element={<UserPage />} path="/user/:userAddress" />
               <Route element={<ProtectedRoute><RegisterGlove /></ProtectedRoute>} path="/registerGlove" />
               <Route element={<GlovePage />} path="/glove/:gloveId" />
+              <Route element={<GloveEquipPage />} path="/gloveEquip" />
             </Routes>
           </main>
         </div>
@@ -48,9 +51,11 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <AccountProvider>
         <TipProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <EquippedGloveProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </EquippedGloveProvider>
         </TipProvider>
       </AccountProvider>
     </QueryClientProvider>

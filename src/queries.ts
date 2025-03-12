@@ -180,9 +180,3 @@ export const getGloveDocument = graphql(/* GraphQL */ `
     }
   }
 `);
-
-export const equipGloveDocument = graphql(/* GraphQL */ `
-  mutation EquipGlove($privateKey: PrivateKey, $gloveId: Address!) {
-    equipGlove(privateKey: $privateKey, gloveId: $gloveId)
-  }
-`);
