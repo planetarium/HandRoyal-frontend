@@ -17,8 +17,9 @@ interface GameRules {
   maximumUser: number,
   minimumUser: number,
   remainingUser: number,
-  roundInterval: number,
-  waitingInterval: number
+  startAfter: number,
+  roundLength: number,
+  roundInterval: number
 }
 
 export const CreateSession: React.FC = () => {
@@ -34,8 +35,9 @@ export const CreateSession: React.FC = () => {
     maximumUser: 8,
     minimumUser: 2,
     remainingUser: 1,
-    roundInterval: 5,
-    waitingInterval: 10
+    startAfter: 20,
+    roundLength: 20,
+    roundInterval: 7,
   });
   const [selectedPrize, setSelectedPrize] = useState('');
   const [pollingError, setPollingError] = useState<string | null>(null);
@@ -147,8 +149,9 @@ export const CreateSession: React.FC = () => {
         maximumUser: gameRules.maximumUser,
         minimumUser: gameRules.minimumUser,
         remainingUser: gameRules.remainingUser,
-        roundInterval: gameRules.roundInterval,
-        waitingInterval: gameRules.waitingInterval
+        startAfter: gameRules.startAfter,
+        roundLength: gameRules.roundLength,
+        roundInterval: gameRules.roundInterval
       });
       if (!createSessionResponse.actionQuery?.createSession) {
         throw new Error('Failed to create session');
@@ -241,6 +244,30 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
+            <label className="block text-sm">{t('startAfter')}</label>
+            <input
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
+              disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.startAfter}
+              onChange={(e) => handleGameRulesChange('startAfter', e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="block text-sm">{t('roundLength')}</label>
+            <input
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
+              disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.roundLength}
+              onChange={(e) => handleGameRulesChange('roundLength', e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
             <label className="block text-sm">{t('roundInterval')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
@@ -249,18 +276,6 @@ export const CreateSession: React.FC = () => {
               type="number"
               value={gameRules.roundInterval}
               onChange={(e) => handleGameRulesChange('roundInterval', e.target.value)}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="block text-sm">{t('waitingInterval')}</label>
-            <input
-              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
-              disabled={isPolling}
-              min="1"
-              type="number"
-              value={gameRules.waitingInterval}
-              onChange={(e) => handleGameRulesChange('waitingInterval', e.target.value)}
             />
           </div>
         </div>

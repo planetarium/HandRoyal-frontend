@@ -141,15 +141,33 @@ export const getGloveDocument = graphql(/* GraphQL */ `
 `);
 
 export const createSessionAction = graphql(/* GraphQL */ `
-  query CreateSessionAction($sessionId: Address!, $prize: Address!, $maximumUser: Int!, $minimumUser: Int!, $remainingUser: Int!, $roundInterval: Long!, $waitingInterval: Long!) {
+  query CreateSessionAction(
+    $sessionId: Address!,
+    $prize: Address!,
+    $maximumUser: Int!,
+    $minimumUser: Int!,
+    $remainingUser: Int!,
+    $startAfter: Long!,
+    $roundLength: Long!,
+    $roundInterval: Long!
+  ) {
     actionQuery {
-      createSession(sessionId: $sessionId, prize: $prize, maximumUser: $maximumUser, minimumUser: $minimumUser, remainingUser: $remainingUser, roundInterval: $roundInterval, waitingInterval: $waitingInterval)
+      createSession(
+        sessionId: $sessionId,
+        prize: $prize,
+        maximumUser: $maximumUser,
+        minimumUser: $minimumUser,
+        remainingUser: $remainingUser,
+        startAfter: $startAfter,
+        roundLength: $roundLength,
+        roundInterval: $roundInterval
+      )
     }
   }
 `);
 
 export const joinSessionAction = graphql(/* GraphQL */ `
-  query JoinSessionAction($sessionId: Address!, $gloveId: Address!) {
+  query JoinSessionAction($sessionId: Address!, $gloveId: Address) {
     actionQuery {
       joinSession(sessionId: $sessionId, gloveId: $gloveId)
     }
