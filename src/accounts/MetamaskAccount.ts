@@ -12,10 +12,6 @@ export class MetamaskAccount implements Account {
     return this.addressInternal;
   }
 
-  public get isConnected(): boolean {
-    return !!this.addressInternal;
-  }
-
   public disconnect() {
     this.addressInternal = null;
   }

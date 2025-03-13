@@ -4,8 +4,8 @@ import { request } from 'graphql-request';
 import { useRequiredAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument, registerGloveAction } from '../queries';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
-import type { RequestDocument } from 'graphql-request';
 import { registerGlove } from '../fetches';
+import type { RequestDocument } from 'graphql-request';
 const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
 
 const RegisterGlove: React.FC = () => {

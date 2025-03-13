@@ -136,12 +136,6 @@ export const CreateSession: React.FC = () => {
     }));
   };
 
-  const bytesToHex = (bytes: Uint8Array): string => {
-    return Array.from(bytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  };
-
   const createSessionMutation = useMutation({
     mutationFn: async () => {
       const createSessionResponse = await request(GRAPHQL_ENDPOINT, createSessionAction, {

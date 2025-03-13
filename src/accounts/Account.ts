@@ -1,8 +1,8 @@
 import type { Address } from '@planetarium/account';
 
 export interface Account {
-  get address(): Address;
-  get type(): string;
+  address: Address;
+  type: string;
   disconnect: () => void;
   sign(message: string): Promise<string>;
 }
