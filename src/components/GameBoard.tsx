@@ -89,9 +89,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
   useEffect(() => {
     const updateGameBoardState = async () => {
       const props: GameBoardState = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null};
-      const address = account?.isConnected ? account.address : null;
+      const address = account.address;
       if (data?.rounds && data.players) {
-        const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === address?.toHex());
+        const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === address.toHex());
         const currentRound = data.rounds[data.rounds.length - 1];
         if (currentRound?.matches) {
           const match = currentRound.matches.find(match => {
