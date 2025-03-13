@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { request } from 'graphql-request';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useAccount } from '../context/AccountContext';
+import { useRequiredAccount } from '../context/AccountContext';
 import { 
   GRAPHQL_ENDPOINT,
   isValidSessionIdDocument,
@@ -26,7 +26,7 @@ interface GameRules {
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { account } = useAccount();
+  const account = useRequiredAccount();
   const [sessionIdCandidate, setSessionIdCandidate] = useState<string>('0000000000000000000000000000000000000000');
   const [sessionId, setSessionId] = useState<string>('');
   const [isSessionIdValid, setIsSessionIdValid] = useState<boolean>(false);
@@ -55,10 +55,6 @@ export const CreateSession: React.FC = () => {
 
   useEffect(() => {
     if (!sessionId) return;
-
-    if (!account) {
-      throw new Error('Account not connected');
-    }
 
     const unsubscribe = subscriptionClient.subscribe(
       {
@@ -140,18 +136,8 @@ export const CreateSession: React.FC = () => {
     }));
   };
 
-  const bytesToHex = (bytes: Uint8Array): string => {
-    return Array.from(bytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  };
-
   const createSessionMutation = useMutation({
     mutationFn: async () => {
-      if (!account) {
-        throw new Error('Account not connected');
-      }
-
       const createSessionResponse = await request(GRAPHQL_ENDPOINT, createSessionAction, {
         sessionId: sessionIdCandidate,
         prize: selectedPrize,

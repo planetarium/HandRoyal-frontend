@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Search, Swords } from 'lucide-react';
-import { useAccount } from '../context/AccountContext';
+import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument, joinSessionAction } from '../queries';
 import { SessionState } from '../gql/graphql';
@@ -19,7 +19,7 @@ export const JoinSession: React.FC = () => {
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState('');
   const [error, setError] = useState('');
-  const { account } = useAccount();
+  const account = useRequiredAccount();
   const { tip } = useTip();
   const { equippedGlove } = useEquippedGlove();
 
@@ -35,9 +35,6 @@ export const JoinSession: React.FC = () => {
   const { data: userData, refetch: userRefetch } = useQuery({
     queryKey: ['getUser', account?.address],
     queryFn: async () => {
-      if (!account) {
-        throw new Error('Account not connected');
-      }
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
       return response.stateQuery?.user;
     }
@@ -52,10 +49,6 @@ export const JoinSession: React.FC = () => {
 
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      if (!account) {
-        throw new Error('Account not connected');
-      }
-
       const joinSesisonResponse = await request(GRAPHQL_ENDPOINT, joinSessionAction, {
         sessionId,
         gloveId: equippedGlove,
@@ -76,11 +69,6 @@ export const JoinSession: React.FC = () => {
   });
 
   const handleJoin = async (id: string) => {
-    if (!account) {
-      setError(t('pleaseConnectWallet'));
-      return;
-    }
-
     if (!validateSessionIdLength(id)) {
       setError(t('invalidSessionIdLength'));
       return;
@@ -96,11 +84,6 @@ export const JoinSession: React.FC = () => {
   };
 
   const handleSpectate = (id: string) => {
-    if (!account) {
-      setError(t('pleaseConnectWallet'));
-      return;
-    }
-
     if (!validateSessionIdLength(id)) {
       setError(t('invalidSessionIdLength'));
       return;

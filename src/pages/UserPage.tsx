@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
+import { Address } from '@planetarium/account';
 import { getUserDocument, USER_SUBSCRIPTION } from '../queries';
 import { getGloveImage } from '../fetches';
 import StyledButton from '../components/StyledButton';
-import { useAccount } from '../context/AccountContext';
-import { useNavigate } from 'react-router-dom';
+import { useRequiredAccount } from '../context/AccountContext';
 import { MoveType } from '../gql/graphql';
 import subscriptionClient from '../subscriptionClient';
-import { Address } from '@planetarium/account';
 import AddressDisplay from '../components/AddressDisplay';
 import { useEquippedGlove } from '../context/EquippedGloveContext';
 
@@ -18,21 +17,15 @@ const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
 const UserPage: React.FC = () => {
   const { t } = useTranslation();
-  const { account } = useAccount();
+  const account = useRequiredAccount();
   const navigate = useNavigate();
   const [gloveImages, setGloveImages] = useState<{ [key: string]: string | null }>({});
   const { equippedGlove, setEquippedGlove } = useEquippedGlove();
 
-  const bytesToHex = (bytes: Uint8Array): string => {
-    return Array.from(bytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  };
-
   const { data, error, isLoading } = useQuery({
     queryKey: ['getUser', account],
     queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account?.address.toString() });
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
       return response?.stateQuery?.user;
     }
   });

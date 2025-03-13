@@ -8,14 +8,20 @@ import { GamePage } from './pages/GamePage';
 import { ResultPage } from './pages/ResultPage';
 import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
-import { AccountProvider, useAccount } from './context/AccountContext';
+import { AccountProvider, registerCreator, useAccountContext } from './context/AccountContext';
 import UserPage from './pages/UserPage';
 import { TipProvider } from './context/TipContext';
 import RegisterGlove from './components/RegisterGlove';
 import { EquippedGloveProvider } from './context/EquippedGloveContext';
 import GloveEquipPage from './pages/GloveEquipPage';
+import { MetamaskAccountCreator } from './accounts/MetamaskAccount';
+import { PrivateKeyAccountCreator } from './accounts/PrivateKeyAccount';
+
+registerCreator(new MetamaskAccountCreator());
+registerCreator(new PrivateKeyAccountCreator());
+
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
-  const { account } = useAccount();
+  const { account } = useAccountContext();
   return account ? children : <Navigate to="/login" />;
 };
 

@@ -6,14 +6,10 @@ import {
   onTransactionChangedSubscription,
 } from '../queries';
 import subscriptionClient from '../subscriptionClient';
-import type { IAccount } from '../context/AccountContext';
+import type { Account } from '../accounts/Account';
 
 export async function executeTransaction(
-  account: IAccount, plainValue: string) {
-  if (!account.isConnected) {
-    throw new Error('Account not connected');
-  }
-
+  account: Account, plainValue: string) {
   const unsignedTransactionResponse = await request(GRAPHQL_ENDPOINT, unsignedTransactionQuery, {
     address: account.address.toString(),
     plainValue: plainValue

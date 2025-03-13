@@ -6,10 +6,9 @@ import AddressDisplay from './AddressDisplay';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { account } = useAccount();
+  const account = useAccount();
   const { tip } = useTip();
   const navigate = useNavigate();
-  const address = account?.isConnected ? account.address : null;
 
   const handleLogout = () => {
     account?.disconnect();
@@ -20,8 +19,6 @@ const Navbar: React.FC = () => {
     i18n.changeLanguage(lng);
   };
 
-  const userPagePath = address ? `/user/${address.toString()}` : '/';
-
   return (
     <nav className="bg-gray-800 p-4 text-white flex justify-between items-center fixed top-0 left-0 w-full h-16 z-10">
       <div className="flex items-center space-x-20">
@@ -29,7 +26,7 @@ const Navbar: React.FC = () => {
           HandRoyal
         </Link>
         <div className="flex items-center space-x-6">
-          <Link className="text-lg text-white" to={"/user/" + address?.toString()}>
+          <Link className="text-lg text-white" to={"/user/" + account?.address.toString()}>
             {t('userInfo')}
           </Link>
           <Link className="text-lg text-white" to="/registerGlove">
@@ -43,10 +40,10 @@ const Navbar: React.FC = () => {
             Tip: #{tip.index} 0x{tip.hash.substring(0, 6)}
           </div>
         )}
-        {address && (
+        {account && (
           <div className="flex items-center mr-4">
             <div className="text-sm">
-              Address: <AddressDisplay address={address.toString()} type='user' />
+              Address: <AddressDisplay address={account.address.toString()} type='user' />
             </div>
             <button
               className="bg-gray-600 text-white py-1 px-2 text-xs rounded border border-gray-500 hover:bg-gray-500 ml-2 cursor-pointer"

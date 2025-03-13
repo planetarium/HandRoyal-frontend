@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useEquippedGlove } from '../context/EquippedGloveContext';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
+import { useEquippedGlove } from '../context/EquippedGloveContext';
 import { getUserDocument } from '../queries';
 import { getGloveImage } from '../fetches';
 import { GRAPHQL_ENDPOINT } from '../queries';
@@ -13,7 +13,7 @@ import AddressDisplay from '../components/AddressDisplay';
 const GloveEquipPage: React.FC = () => {
   const { setEquippedGlove, equippedGlove } = useEquippedGlove();
   const navigate = useNavigate();
-  const { account } = useAccount();
+  const account = useAccount();
   const [gloveImages, setGloveImages] = useState<{ [key: string]: string | null }>({});
 
   const { data, error, isLoading } = useQuery({

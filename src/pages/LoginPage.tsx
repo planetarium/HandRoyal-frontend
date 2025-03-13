@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { request } from 'graphql-request';
-import { RawPrivateKey } from '@planetarium/account';
-import { PrivateKeyAccount, MetamaskAccount, useAccount } from '../context/AccountContext';
+import { useAccountContext } from '../context/AccountContext';
 import subscriptionClient from '../subscriptionClient';
 import {
   GRAPHQL_ENDPOINT, 
@@ -48,21 +47,20 @@ type LoginType = 'raw' | 'metamask';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
-  const { account, setAccount } = useAccount();
+  const { account, createAccount } = useAccountContext();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const address = account?.isConnected ? account.address : null;
 
   useEffect(() => {
-    if (!address) return;
+    if (!account) return;
 
     const unsubscribe = subscriptionClient.subscribe(
       {
         query: USER_SUBSCRIPTION,
-        variables: { userId: address.toString() },
+        variables: { userId: account.address.toString() },
       },
       {
         next: (result) => {
@@ -84,7 +82,7 @@ const LoginPage: React.FC = () => {
     return () => {
       unsubscribe();
     };
-  }, [address, navigate]);
+  }, [navigate, account]);
 
   const createUserMutation = useMutation({
     mutationFn: async () => {
@@ -105,23 +103,10 @@ const LoginPage: React.FC = () => {
     }
   });
 
-  const handleLogin = useCallback(async (type: LoginType) => {
+  const handleLogin = useCallback(async (type: LoginType, param?: any) => {
     setIsLoggingIn(true);
     try {
-      let account;
-      if (type === 'raw') {
-        const privateKey = RawPrivateKey.fromHex(privateKeyInput);
-        const privateKeyAccount = new PrivateKeyAccount(privateKey);
-        await privateKeyAccount.connect();
-        account = privateKeyAccount;
-      } else {
-        const metamaskAccount = new MetamaskAccount();
-        await metamaskAccount.connect();
-        account = metamaskAccount;
-      }
-      
-      setAccount(account);
-
+      const account = await createAccount(type, param);
       const data = await queryClient.fetchQuery({
         queryKey: ['checkUser', account.address.toString()],
         queryFn: async () => {
@@ -157,7 +142,7 @@ const LoginPage: React.FC = () => {
       );
       setIsLoggingIn(false);
     }
-  }, [queryClient, privateKeyInput, createUserMutation, navigate, setAccount]);
+  }, [queryClient, createUserMutation, navigate, createAccount]);
 
   const isDisabled = () => {
     return isLoggingIn;
@@ -176,14 +161,9 @@ const LoginPage: React.FC = () => {
             value={privateKeyInput}
             onChange={(e) => setPrivateKeyInput(e.target.value)}
           />
-          {errorMessage && (
-            <div className="text-red-500 italic mb-4">
-              {errorMessage}
-            </div>
-          )}
           <StyledButton
             disabled={isDisabled()}
-            onClick={() => handleLogin('raw')}
+            onClick={() => handleLogin('raw', privateKeyInput)}
           >
             {isLoggingIn ? 'Logging in...' : t('loginButton')}
           </StyledButton>
@@ -202,6 +182,11 @@ const LoginPage: React.FC = () => {
           />
           {isLoggingIn ? 'Logging in...' : t('connectWithMetamask')}
         </StyledButton>
+        {errorMessage && (
+          <div className="text-red-500 italic mt-4 text-center">
+            {errorMessage}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col w-full">
@@ -218,7 +203,16 @@ const LoginPage: React.FC = () => {
               {TEST_ACCOUNTS.map((account) => (
                 <tr key={account.privateKey} className="hover:bg-gray-50">
                   <td className="px-6 py-4 border-b font-mono text-sm break-all">
-                    {account.privateKey}
+                    <button
+                      className="text-left hover:text-blue-600 hover:underline w-full"
+                      onClick={() => setPrivateKeyInput(account.privateKey)}
+                      onDoubleClick={() => {
+                        setPrivateKeyInput(account.privateKey);
+                        handleLogin('raw', account.privateKey);
+                      }}
+                    >
+                      {account.privateKey}
+                    </button>
                   </td>
                   <td className="px-6 py-4 border-b font-mono text-sm break-all">
                     {account.address}

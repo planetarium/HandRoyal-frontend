@@ -4,20 +4,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { request } from 'graphql-request';
 import { Address } from '@planetarium/account';
 import { useQuery } from '@tanstack/react-query';
-import { Clock, Swords } from 'lucide-react';
-import { useAccount } from '../context/AccountContext';
+import { Clock } from 'lucide-react';
+import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { SessionState, PlayerState } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
+import win from '../assets/lose.webp';
 import lose from '../assets/lose.webp';
 import loading from '../assets/loading.webp';
 import type { Session } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
   const { t } = useTranslation();
-  const { account } = useAccount();
+  const account = useRequiredAccount();
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { tip } = useTip();
@@ -41,8 +42,8 @@ export const GamePage: React.FC = () => {
 
   useEffect(() => {
     if (data?.players && account) {
-      const address = account.isConnected ? account.address : null;
-      const currentPlayer = data.players.find(player => Address.fromHex(player!.id).toHex() === address?.toHex());
+      const address = account.address;
+      const currentPlayer = data.players.find(player => Address.fromHex(player!.id).toHex() === address.toHex());
       if (currentPlayer) {
         setPlayerStatus(currentPlayer.state);
       }
@@ -186,8 +187,7 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    const address = account?.isConnected ? account.address : null;
-    if (address && sessionData.metadata?.organizer && Address.fromHex(sessionData.metadata.organizer).toHex() === address.toHex()) {
+    if (sessionData.metadata?.organizer && Address.fromHex(sessionData.metadata.organizer).toHex() === account.address.toHex()) {
       return (
         <div>
           <p className="text-2xl">{t('youAreTheSessionOrganizer')}</p>
