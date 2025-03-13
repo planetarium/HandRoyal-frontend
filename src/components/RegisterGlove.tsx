@@ -5,6 +5,8 @@ import { useAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument, registerGloveAction } from '../queries';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import type { RequestDocument } from 'graphql-request';
+import { registerGlove } from '../fetches';
+const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
 
 const RegisterGlove: React.FC = () => {
   const { account } = useAccount();
@@ -25,13 +27,6 @@ const RegisterGlove: React.FC = () => {
         throw new Error('Missing required fields');
       }
 
-      // Upload the file to the server
-      const formData = new FormData();
-      formData.append('gloveAddress', gloveAddress);
-      if (file) {
-        formData.append('file', file);
-      }
-
       // Call the mutation
       const registerGloveResponse = await request(GRAPHQL_ENDPOINT, registerGloveAction, {
         gloveId: gloveAddress,
@@ -48,6 +43,7 @@ const RegisterGlove: React.FC = () => {
       return txId;
     },
     onSuccess: () => {
+      registerGlove(gloveAddress, file);
       setErrorMessage(null);
       alert('Glove registered successfully!');
     },

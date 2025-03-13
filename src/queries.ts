@@ -103,6 +103,7 @@ export const USER_SUBSCRIPTION = `
   subscription OnUserChanged($userId: Address!) {
     onUserChanged(userId: $userId) {
       id
+      equippedGlove
     }
   }
 `;

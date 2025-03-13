@@ -8,6 +8,7 @@ import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument, joinSessionAction } from '../queries';
 import { SessionState } from '../gql/graphql';
+import { useEquippedGlove } from '../context/EquippedGloveContext';
 import logo from '../assets/logo.webp';
 import StyledButton from '../components/StyledButton';
 import SessionCard from '../components/SessionCard';
@@ -20,6 +21,8 @@ export const JoinSession: React.FC = () => {
   const [error, setError] = useState('');
   const { account } = useAccount();
   const { tip } = useTip();
+  const { equippedGlove } = useEquippedGlove();
+
 
   const { data: sessionData, error: sessionError, isLoading: sessionIsLoading, refetch: sessionRefetch } = useQuery({
     queryKey: ['getSessions'],
@@ -55,7 +58,7 @@ export const JoinSession: React.FC = () => {
 
       const joinSesisonResponse = await request(GRAPHQL_ENDPOINT, joinSessionAction, {
         sessionId,
-        gloveId: null,
+        gloveId: equippedGlove,
       });
       if (!joinSesisonResponse.actionQuery?.joinSession) {
         throw new Error('Failed to join session');

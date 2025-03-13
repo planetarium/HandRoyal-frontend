@@ -5,16 +5,16 @@ import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { getGloveDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
-
+import { getGloveImage } from '../fetches';
+import { MoveType } from '../gql/graphql';
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
-const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
 
 const GlovePage: React.FC = () => {
   const { gloveId } = useParams<{ gloveId: string }>();
   const [images, setImages] = useState<{ [key: string]: string | null }>({
-    rock: null,
-    scissors: null,
-    paper: null,
+    ROCK: null,
+    SCISSORS: null,
+    PAPER: null,
   });
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -28,8 +28,8 @@ const GlovePage: React.FC = () => {
 
   useEffect(() => {
     if (gloveId) {
-      ['rock', 'scissors', 'paper'].forEach(hand => {
-        fetch(`${GLOVE_API_URL}/get-glove-image?gloveAddress=${gloveId}&hand=${hand}`)
+      [MoveType.Rock, MoveType.Scissors, MoveType.Paper].forEach(hand => {
+        getGloveImage(gloveId, hand)
           .then(response => response.blob())
           .then(blob => {
             const url = URL.createObjectURL(blob);
@@ -59,7 +59,7 @@ const GlovePage: React.FC = () => {
         {glove ? (
           <>
             <div className="flex space-x-4 mb-8">
-              {['rock', 'scissors', 'paper'].map(hand => (
+              {['ROCK', 'SCISSORS', 'PAPER'].map(hand => (
                 images[hand] && <img key={hand} alt={`${hand} Glove`} className="w-1/3 h-auto rounded-md" src={images[hand]} />
               ))}
             </div>
