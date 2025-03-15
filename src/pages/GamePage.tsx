@@ -120,6 +120,29 @@ export const GamePage: React.FC = () => {
       );
     }
 
+    if (playerStatus === PlayerState.Lose) {
+      return (
+        <div className="flex flex-col items-center justify-between h-full">
+          <p> </p>
+          <div className="flex flex-col items-center justify-center">
+            <img alt="Lose" className="w-1/4 h-auto object-contain animate-cry mb-6" src={lose} />
+            <p className="text-2xl text-center">{t('lose')}</p>
+          </div>
+          <div className="flex justify-center space-x-4 mb-5">
+            <StyledButton 
+              bgColor = '#FFE55C'
+              shadowColor = '#FF9F0A'
+              onClick={() => navigate(`/result/${sessionId}`)}>
+              {t('viewResults')}
+            </StyledButton>
+            <StyledButton onClick={() => navigate('/')} >
+              {t('backToMain')}
+            </StyledButton>
+          </div>
+        </div>
+      );
+    }
+
     if (sessionData.state === SessionState.Break) {
       {/* 여기에 승리 모션 들어가야함 */}
       return (
@@ -137,29 +160,6 @@ export const GamePage: React.FC = () => {
       return (
         <div className="flex flex-col items-center justify-center">
           <h2 className="text-2xl mb-4">{t('sessionEnded')}</h2>
-          <div className="flex justify-center space-x-4 mb-5">
-            <StyledButton 
-              bgColor = '#FFE55C'
-              shadowColor = '#FF9F0A'
-              onClick={() => navigate(`/result/${sessionId}`)}>
-              {t('viewResults')}
-            </StyledButton>
-            <StyledButton onClick={() => navigate('/')} >
-              {t('backToMain')}
-            </StyledButton>
-          </div>
-        </div>
-      );
-    }
-
-    if (playerStatus === PlayerState.Lose) {
-      return (
-        <div className="flex flex-col items-center justify-between h-full">
-          <p> </p>
-          <div className="flex flex-col items-center justify-center">
-            <img alt="Lose" className="w-1/4 h-auto object-contain animate-cry mb-6" src={lose} />
-            <p className="text-2xl text-center">{t('lose')}</p>
-          </div>
           <div className="flex justify-center space-x-4 mb-5">
             <StyledButton 
               bgColor = '#FFE55C'
