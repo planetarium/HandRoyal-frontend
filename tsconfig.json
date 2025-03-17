@@ -23,7 +23,7 @@
     "outDir": "./dist"
   },
   "include": [
-    "src",
+    "src/**/*",
     ".prettierrc.cjs",
     "eslint.config.js",
     "codegen.ts",
