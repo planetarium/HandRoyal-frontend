@@ -16,7 +16,7 @@ import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import { getGloveImage } from '../fetches';
 import { MoveType } from '../gql/graphql';
 
-export const JoinSession: React.FC = () => {
+export const MainPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState('');
@@ -199,8 +199,8 @@ export const JoinSession: React.FC = () => {
                       id={sessionMetadata.id}
                       maxPlayers={sessionMetadata.maximumUser}
                       prize={sessionMetadata.prize}
-                      state={session.state}
                       prizeImage={prizeImages[sessionMetadata.prize] || logo}
+                      state={session.state}
                     />
                   );
                 })) : (

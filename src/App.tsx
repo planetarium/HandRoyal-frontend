@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GlovePage from './pages/GlovePage';
-import { JoinSession } from './pages/JoinSession';
+import { MainPage } from './pages/JoinSession';
 import { CreateSession } from './pages/CreateSession';
 import { GamePage } from './pages/GamePage';
 import { ResultPage } from './pages/ResultPage';
@@ -34,7 +34,7 @@ const AppContent: React.FC = () => {
           <main>
             <Routes>
               <Route element={<LoginPage />} path="/login" />
-              <Route element={<ProtectedRoute><JoinSession /></ProtectedRoute>} path="/" />
+              <Route element={<ProtectedRoute><MainPage /></ProtectedRoute>} path="/" />
               <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
               <Route element={<ProtectedRoute><GamePage /></ProtectedRoute>} path="/game/:sessionId" />
               <Route element={<ResultPage />} path="/result/:sessionId" />
