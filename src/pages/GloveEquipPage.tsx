@@ -15,6 +15,7 @@ const GloveEquipPage: React.FC = () => {
   const navigate = useNavigate();
   const account = useAccount();
   const [gloveImages, setGloveImages] = useState<{ [key: string]: string | null }>({});
+  const [gloveCounts, setGloveCounts] = useState<{ [key: string]: number }>({});
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['getUser', account],
@@ -34,7 +35,14 @@ const GloveEquipPage: React.FC = () => {
       setGloveImages(prev => ({ ...prev, [defaultGloveId]: defaultImageUrl }));
 
       if (data?.ownedGloves) {
-        const images = await Promise.all(data.ownedGloves.map(async (gloveId: string) => {
+        const counts: { [key: string]: number } = {};
+        data.ownedGloves.forEach((gloveId: string) => {
+          counts[gloveId] = (counts[gloveId] || 0) + 1;
+        });
+        setGloveCounts(counts);
+
+        const uniqueGloveIds = Object.keys(counts);
+        const images = await Promise.all(uniqueGloveIds.map(async (gloveId: string) => {
           const response = await getGloveImage(gloveId, MoveType.Paper);
           const blob = await response.blob();
           return { gloveId, imageUrl: URL.createObjectURL(blob) };
@@ -63,14 +71,15 @@ const GloveEquipPage: React.FC = () => {
         <img src={gloveImages['0000000000000000000000000000000000000000'] || 'defaultImage.png'} alt="Default Glove" className="w-32 h-32 object-cover cursor-pointer" onClick={() => handleEquipGlove('0000000000000000000000000000000000000000')} />
         <AddressDisplay address={'0000000000000000000000000000000000000000'} type="glove" className="mt-2" />
       </div>
-      {data?.ownedGloves?.map((gloveId: string) => (
-        <div key={gloveId} className={`flex flex-col items-center p-2 border-2 ${equippedGlove === gloveId ? 'border-red-500' : 'border-gray-300'}`}>
+      {Object.keys(gloveCounts).map((gloveId: string) => (
+        <div key={gloveId} className={`relative flex flex-col items-center p-2 border-2 ${equippedGlove === gloveId ? 'border-red-500' : 'border-gray-300'}`}>
           <img src={gloveImages[gloveId] || ''} alt="Glove" className="w-32 h-32 object-cover cursor-pointer" onClick={() => handleEquipGlove(gloveId)} />
           <AddressDisplay address={gloveId} type="glove" className="mt-2" />
+          <span className="absolute bottom-0 right-0 bg-white text-black text-xs rounded-full px-1">{gloveCounts[gloveId]}</span>
         </div>
       ))}
     </div>
   );
 };
 
-export default GloveEquipPage; 
+export default GloveEquipPage;

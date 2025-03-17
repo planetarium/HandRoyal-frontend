@@ -6,16 +6,21 @@ import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument, registerGloveAction } from
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import { registerGlove } from '../fetches';
 import type { RequestDocument } from 'graphql-request';
-const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
+import { useNavigate } from 'react-router-dom';
+import { useTip } from '../context/TipContext';
 
 const RegisterGlove: React.FC = () => {
   const account = useRequiredAccount();
+  const navigate = useNavigate();
+  const { tip } = useTip();
   const [gloveAddress, setGloveAddress] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isGloveAddressValid, setIsGloveAddressValid] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [initialTip, setInitialTip] = useState<number | null>(null);
 
   const registerGloveMutation = useMutation({
     mutationFn: async () => {
@@ -38,16 +43,28 @@ const RegisterGlove: React.FC = () => {
 
       return txId;
     },
-    onSuccess: () => {
-      registerGlove(gloveAddress, file);
-      setErrorMessage(null);
-      alert('Glove registered successfully!');
+    onSuccess: async () => {
+      try {
+        await registerGlove(gloveAddress, file);
+        setErrorMessage(null);
+        setIsRegistered(true);
+        setInitialTip(tip?.index ?? 0);
+      } catch (error) {
+        console.error('Failed to register glove:', error);
+        setErrorMessage('Failed to register glove. Please try again.');
+      }
     },
     onError: (error) => {
       console.error('Failed to register glove:', error);
       setErrorMessage('Failed to register glove. Please try again.');
     }
   });
+
+  useEffect(() => {
+    if (isRegistered && initialTip !== null && tip?.index === initialTip + 1) {
+      navigate(`/glove/${gloveAddress}`);
+    }
+  }, [isRegistered, initialTip, tip, navigate, gloveAddress]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
