@@ -13,6 +13,8 @@ import logo from '../assets/logo.webp';
 import StyledButton from '../components/StyledButton';
 import SessionCard from '../components/SessionCard';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
+import { getGloveImage } from '../fetches';
+import { MoveType } from '../gql/graphql';
 
 export const JoinSession: React.FC = () => {
   const { t } = useTranslation();
@@ -22,7 +24,7 @@ export const JoinSession: React.FC = () => {
   const account = useRequiredAccount();
   const { tip } = useTip();
   const { equippedGlove } = useEquippedGlove();
-
+  const [prizeImages, setPrizeImages] = useState<{ [key: string]: string | null }>({});
 
   const { data: sessionData, error: sessionError, isLoading: sessionIsLoading, refetch: sessionRefetch } = useQuery({
     queryKey: ['getSessions'],
@@ -46,6 +48,30 @@ export const JoinSession: React.FC = () => {
       userRefetch();
     }
   }, [tip, sessionRefetch, userRefetch]);
+
+  useEffect(() => {
+    const fetchPrizeImages = async () => {
+      if (sessionData) {
+        const promises = sessionData.map(async (session) => {
+          if (session?.metadata?.prize) {
+            const response = await getGloveImage(session.metadata.prize, MoveType.Paper);
+            const blob = await response.blob();
+            return { [session.metadata.prize]: URL.createObjectURL(blob) };
+          }
+          return null;
+        });
+        const images = await Promise.all(promises);
+        const imagesMap = images.reduce((acc, curr) => {
+          if (curr !== null) {
+            return { ...acc, ...curr };
+          }
+          return acc;
+        }, {} as { [key: string]: string | null });
+        setPrizeImages(imagesMap);
+      }
+    };
+    fetchPrizeImages();
+  }, [sessionData]);
 
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
@@ -174,6 +200,7 @@ export const JoinSession: React.FC = () => {
                       maxPlayers={sessionMetadata.maximumUser}
                       prize={sessionMetadata.prize}
                       state={session.state}
+                      prizeImage={prizeImages[sessionMetadata.prize] || logo}
                     />
                   );
                 })) : (

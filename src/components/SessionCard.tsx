@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Users, Clock, Crown, Trophy } from 'lucide-react';
 import { SessionState } from '../gql/graphql';
 import StyledButton from './StyledButton';
-import logo from '../assets/logo.webp';
 import AddressDisplay from './AddressDisplay';
 
 interface SessionCardProps {
@@ -16,6 +15,7 @@ interface SessionCardProps {
   state: SessionState;
   handleJoin: (id: string) => void;
   handleSpectate: (id: string) => void;
+  prizeImage: string;
 }
 
 const SessionCard: React.FC<SessionCardProps> = ({
@@ -27,7 +27,8 @@ const SessionCard: React.FC<SessionCardProps> = ({
   blocksLeft,
   state,
   handleJoin,
-  handleSpectate
+  handleSpectate,
+  prizeImage
 }) => {
   const { t } = useTranslation();
 
@@ -61,7 +62,7 @@ const SessionCard: React.FC<SessionCardProps> = ({
       }}
     >
       <div className="w-16 h-16 bg-gray-200 rounded-full mr-3 flex-shrink-0">
-        <img alt="logo" className="w-full h-full object-cover rounded-full" src={logo} />
+        <img alt="prize" className="w-full h-full object-cover rounded-full" src={prizeImage} />
       </div>
       <div className="flex flex-col flex-grow">
         <h3
