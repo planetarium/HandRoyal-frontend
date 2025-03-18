@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Search, Swords } from 'lucide-react';
 import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument, joinSessionAction } from '../queries';
+import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument } from '../queries';
 import { SessionState } from '../gql/graphql';
-import { useEquippedGlove } from '../context/EquippedGloveContext';
 import logo from '../assets/logo.webp';
 import StyledButton from '../components/StyledButton';
 import SessionCard from '../components/SessionCard';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
-import { getGloveImage } from '../fetches';
-import { MoveType } from '../gql/graphql';
 
 export const MainPage: React.FC = () => {
   const { t } = useTranslation();
@@ -23,7 +19,6 @@ export const MainPage: React.FC = () => {
   const [error, setError] = useState('');
   const account = useRequiredAccount();
   const { tip } = useTip();
-  const { equippedGlove } = useEquippedGlove();
   const [prizeImages, setPrizeImages] = useState<{ [key: string]: string | null }>({});
 
   const { data: sessionData, error: sessionError, isLoading: sessionIsLoading, refetch: sessionRefetch } = useQuery({
@@ -49,81 +44,16 @@ export const MainPage: React.FC = () => {
     }
   }, [tip, sessionRefetch, userRefetch]);
 
-  useEffect(() => {
-    const fetchPrizeImages = async () => {
-      if (sessionData) {
-        const promises = sessionData.map(async (session) => {
-          if (session?.metadata?.prize) {
-            const response = await getGloveImage(session.metadata.prize, MoveType.Paper);
-            const blob = await response.blob();
-            return { [session.metadata.prize]: URL.createObjectURL(blob) };
-          }
-          return null;
-        });
-        const images = await Promise.all(promises);
-        const imagesMap = images.reduce((acc, curr) => {
-          if (curr !== null) {
-            return { ...acc, ...curr };
-          }
-          return acc;
-        }, {} as { [key: string]: string | null });
-        setPrizeImages(imagesMap);
-      }
-    };
-    fetchPrizeImages();
-  }, [sessionData]);
-
-  const joinSessionMutation = useMutation({
-    mutationFn: async (sessionId: string) => {
-      const joinSesisonResponse = await request(GRAPHQL_ENDPOINT, joinSessionAction, {
-        sessionId,
-        gloveId: equippedGlove,
-      });
-      if (!joinSesisonResponse.actionQuery?.joinSession) {
-        throw new Error('Failed to join session');
-      }
-      
-      const plainValue = joinSesisonResponse.actionQuery.joinSession;
-      const txId = await executeTransaction(account, plainValue);
-      await waitForTransaction(txId);
-    },
-    onSuccess: () => {
-    },
-    onError: (error) => {
-      console.error('Failed to join session:', error);
-    }
-  });
-
-  const handleJoin = async (id: string) => {
-    if (!validateSessionIdLength(id)) {
-      setError(t('invalidSessionIdLength'));
-      return;
-    }
-
-    try {
-      await joinSessionMutation.mutateAsync(id);
-      navigate(`/game/${id}`);
-    } catch (error) {
-      console.error('Failed to join session:', error);
-      setError(t('failedToJoinSession'));
-    }
+  const handleJoin = (id: string) => {
+    navigate(`/join/${id}`);
   };
 
   const handleSpectate = (id: string) => {
-    if (!validateSessionIdLength(id)) {
-      setError(t('invalidSessionIdLength'));
-      return;
-    }
-
     navigate(`/result/${id}`);
   };
 
   const handleCreate = () => {
     navigate('/create');
-  };
-
-  const validateSessionIdLength = (id: string): boolean => {
-    return id.length === 40;
   };
 
   // 필터링된 세션 데이터

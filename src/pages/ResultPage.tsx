@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Swords, Eye, EyeOff, Crown } from 'lucide-react';
 import { getSessionDocument, GRAPHQL_ENDPOINT } from '../queries';
-import { PlayerState, SessionState, type Match, type MoveType } from '../gql/graphql';
+import { PlayerState, SessionState, type Match } from '../gql/graphql';
 import { useTip } from '../context/TipContext';
 import AddressDisplay from '../components/AddressDisplay';
 import StyledButton from '../components/StyledButton';

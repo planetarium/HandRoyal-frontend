@@ -8,7 +8,10 @@ export const getUserDocument = graphql(/* GraphQL */ `
       user(userId: $address) {
         id
         registeredGloves
-        ownedGloves
+        ownedGloves {
+          id
+          count
+        }
         equippedGlove
         sessionId
       }
@@ -31,18 +34,7 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
         state
         players {
           id
-          glove
-        }
-        rounds {
-          height
-          matches {
-            move1 {
-              type
-            }
-            move2 {
-              type
-            }
-          }
+          gloves
         }
         creationHeight
         startHeight
@@ -69,25 +61,35 @@ export const getSessionDocument = graphql(/* GraphQL */ `
           minimumUser
           remainingUser
           startAfter
+          maxRounds
           roundLength
           roundInterval
+          initialHealthPoint
         }
         state
         players {
           id
-          glove
+          gloves
           state
         }
-        rounds {
+        phases {
           height
           matches {
-            move1 {
-              playerIndex
-              type
-            }
-            move2 {
-              playerIndex
-              type
+            startHeight
+            players
+            state
+            rounds {
+              condition1 {
+                healthPoint
+                gloveUsed
+                submission
+              }
+              condition2 {
+                healthPoint
+                gloveUsed
+                submission
+              }
+              winner
             }
           }
         }
@@ -130,17 +132,6 @@ export const GLOVE_SUBSCRIPTION = `
   }
 `;
 
-export const getGloveDocument = graphql(/* GraphQL */ `
-  query GetGlove($gloveId: Address!) {
-    stateQuery {
-      glove(gloveId: $gloveId) {
-        id
-        author
-      }
-    }
-  }
-`);
-
 export const createSessionAction = graphql(/* GraphQL */ `
   query CreateSessionAction(
     $sessionId: Address!,
@@ -149,8 +140,10 @@ export const createSessionAction = graphql(/* GraphQL */ `
     $minimumUser: Int!,
     $remainingUser: Int!,
     $startAfter: Long!,
+    $maxRounds: Int!,
     $roundLength: Long!,
-    $roundInterval: Long!
+    $roundInterval: Long!,
+    $initialHealthPoint: Int!
   ) {
     actionQuery {
       createSession(
@@ -160,8 +153,10 @@ export const createSessionAction = graphql(/* GraphQL */ `
         minimumUser: $minimumUser,
         remainingUser: $remainingUser,
         startAfter: $startAfter,
+        maxRounds: $maxRounds,
         roundLength: $roundLength,
-        roundInterval: $roundInterval
+        roundInterval: $roundInterval,
+        initialHealthPoint: $initialHealthPoint
       )
     }
   }
@@ -184,9 +179,9 @@ export const createUserAction = graphql(/* GraphQL */ `
 `);
 
 export const submitMoveAction = graphql(/* GraphQL */ `
-  query SubmitMoveAction($sessionId: Address!, $move: MoveType!) {
+  query SubmitMoveAction($sessionId: Address!, $gloveIndex: Int!) {
     actionQuery {
-      submitMove(sessionId: $sessionId, move: $move)
+      submitMove(sessionId: $sessionId, gloveIndex: $gloveIndex)
     }
   }
 `);
