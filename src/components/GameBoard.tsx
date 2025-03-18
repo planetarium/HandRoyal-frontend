@@ -4,42 +4,42 @@ import { useMutation } from '@tanstack/react-query';
 import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
-import { MoveType, SessionState } from '../gql/graphql';
+import { MatchState } from '../gql/graphql';
 import { useRequiredAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, submitMoveAction } from '../queries';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
 import { executeTransaction } from '../utils/transaction';
-import type { Session } from '../gql/graphql';
-import type { HandType } from '../types/types';
+import { getLocalGloveImage } from '../fetches';
+import type { Session , Match } from '../gql/graphql';
 
 interface GameBoardProps {
-  round: number;
-  blocksLeft: number;
+  blockIndex: number;
   data: Session | undefined;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
+const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   const { t } = useTranslation();
   const account = useRequiredAccount();
   const [submitting, setSubmitting] = useState(false);
-  const [selectedHand, setSelectedHand] = useState<HandType | null>(null);
-  const [gameBoardState, setGameBoardState] = useState<GameBoardState>({myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null});
+  const [selectedHand, setSelectedHand] = useState<number | null>(null);
+  const [match, setMatch] = useState<Match | null>(null);
+  const [gameBoardState, setGameBoardState] = useState<GameBoardState>({opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null, myHealthPoint: 100, opponentHealthPoint: 100, maxHealthPoint: 100});
 
   interface GameBoardState {
-    myMove: MoveType;
-    opponentMove: MoveType;
     opponentAddress: string | null;
     myGloveAddress: string | null;
     opponentGloveAddress: string | null;
+    myHealthPoint: number;
+    opponentHealthPoint: number;
+    maxHealthPoint: number;
   }
 
   const submitMoveMutation = useMutation({
-    mutationFn: async (move: HandType) => {
-      const moveType = move === 'rock' ? MoveType.Rock : move === 'paper' ? MoveType.Paper : MoveType.Scissors;
+    mutationFn: async (gloveIndex: number) => {
       const submitMoveResponse = await request(GRAPHQL_ENDPOINT, submitMoveAction, {
         sessionId: data?.metadata?.id,
-        move: moveType
+        gloveIndex: gloveIndex
       });
 
       if (!submitMoveResponse.actionQuery?.submitMove) {
@@ -59,27 +59,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
     }
   });
 
+  const remainingBlocks =  match?.state === MatchState.Active ? blockIndex - match?.startHeight : blockIndex - data?.metadata?.roundLength - match?.startHeight;
+
   const getFuseWidth = () => {
-    if (!data?.metadata) return '0%';
+    if (!match) return '0%';
     
-    const maxInterval = data.state === SessionState.Ready 
-      ? (data.startHeight - (data.creationHeight ?? 0))
-      : data.metadata.roundLength;
-    
-    const remainingBlocks = blocksLeft;
+    const maxInterval = (match.state === MatchState.Active ? data?.metadata?.roundLength : data?.metadata?.roundInterval) ?? 0;
     const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
     return `${percentage}%`;
   };
 
   const getFuseColor = () => {
-    if (!data?.metadata) return 'bg-gray-300';
+    if (!match) return 'bg-gray-300';
     
-    const maxInterval = data.state === SessionState.Ready 
-      ? (data.startHeight - (data.creationHeight ?? 0))
-      : data.metadata.roundLength;
-    
-    const remainingBlocks = blocksLeft;
-    const percentage = (remainingBlocks / maxInterval) * 100;
+    const maxInterval = (match.state === MatchState.Active ? data?.metadata?.roundLength : data?.metadata?.roundInterval) ?? 0;
+    const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
 
     if (percentage > 66) return 'bg-green-500';
     if (percentage > 33) return 'bg-yellow-500';
@@ -88,23 +82,28 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
 
   useEffect(() => {
     const updateGameBoardState = async () => {
-      const props: GameBoardState = {myMove: MoveType.None, opponentMove: MoveType.None, opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null};
+      const props: GameBoardState = {
+        opponentAddress: null,
+        myGloveAddress: null,
+        opponentGloveAddress: null,
+        myHealthPoint: data?.metadata?.initialHealthPoint ?? 100,
+        opponentHealthPoint: data?.metadata?.initialHealthPoint ?? 100,
+        maxHealthPoint: data?.metadata?.initialHealthPoint ?? 100
+      };
       const address = account.address;
-      if (data?.rounds && data.players) {
+      if (data?.phases && data.players) {
         const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === address.toHex());
-        const currentRound = data.rounds[data.rounds.length - 1];
-        if (currentRound?.matches) {
-          const match = currentRound.matches.find(match => {
-            return (match?.move1 && match.move1.playerIndex === currentPlayerIndex) || 
-                    (match?.move2 && match.move2.playerIndex === currentPlayerIndex);
-          });  
-          if (match && match.move1 && match.move2) {
-            const opponentMove = match.move1.playerIndex === currentPlayerIndex ? match.move2 : match.move1;
-            props.myMove = match.move1.playerIndex === currentPlayerIndex ? match.move1.type : match.move2.type;
-            props.opponentAddress = data.players[opponentMove.playerIndex]?.id;
-            props.opponentMove = opponentMove.type;
-            props.myGloveAddress = data.players[currentPlayerIndex]?.glove;
-            props.opponentGloveAddress = data.players[opponentMove.playerIndex]?.glove;
+        const currentPhase = data.phases[data.phases.length - 1];
+        if (currentPhase?.matches) {
+          const match = currentPhase.matches.find(match => {
+            return (match?.players?.[0] && match.players?.[0] === currentPlayerIndex) || 
+                    (match?.players?.[1] && match.players?.[1] === currentPlayerIndex);
+          });
+          if (match) {
+            setMatch(match);
+          }
+          else {
+            setMatch(null);
           }
         }
       }
@@ -127,17 +126,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
       <p className="text-2xl font-bold text-center mb-2" 
         style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
       >
-        {t('round') + ' ' + round}
+        {t('phase') + ' ' + data?.phases?.length}
       </p>
       {/* blocks left */}
       <div className="relative h-12 mb-8">
         {/* 추후에 시계 연출 추가할 예정. 파이가 줄어드는 모양으로 표시하고, 숫자도 안에 같이 표시해서 컴팩트하고 가시성 좋게 */}
         <div className="flex justify-center items-center text-center mb-4">
-          <Clock className="w-5 h-5 mr-1" />{blocksLeft}
+          <Clock className="w-5 h-5 mr-1" />{remainingBlocks}
         </div>
         <div className="w-full max-w-sm mx-auto relative mt-2">
           <div className="absolute -left-8 translate-y-[-50%]">
-            {blocksLeft > 0 && (
+            {remainingBlocks > 0 && (
               <span className="inline-block text-2xl">
                 💣
               </span>
@@ -153,7 +152,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
             className="absolute top-1/2 transition-all duration-1000 ease-linear"
             style={{ left: getFuseWidth(), transform: 'translate(-50%, -70%)' }}
           >
-            {blocksLeft > 0 && (
+            {remainingBlocks > 0 && (
               <span className="inline-block animate-pulse text-2xl">
                 🔥
               </span>
@@ -162,43 +161,66 @@ const GameBoard: React.FC<GameBoardProps> = ({ round, blocksLeft, data }) => {
         </div>
       </div>
 
+      {/* 현재 제출 및 체력 상태 표시 영역 */}
       <div className="flex items-center justify-center space-x-4 mb-4">
         <MoveDisplay 
+          currentHp={100}
           gloveAddress={gameBoardState.myGloveAddress ?? ''} 
-          moveType={gameBoardState.myMove} 
-          userAddress={'you'} 
+          maxHp={100}
+          userAddress={'you'}
         />
         <Swords className="w-20 h-20" color="white" />
         <MoveDisplay 
-          gloveAddress={gameBoardState.opponentGloveAddress ?? ''} 
-          moveType={gameBoardState.opponentMove} 
+          currentHp={100} 
+          gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
+          maxHp={100}
           userAddress={gameBoardState.opponentAddress ?? ''}
         />
       </div>
       
-      <div className="flex justify-center space-x-4 mb-4 p-6">
-        <button
-          className={`p-2 rounded cursor-pointer ${selectedHand === 'rock' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
-          disabled={submitting}
-          onClick={() => setSelectedHand('rock')}
-        >
-          ✊ {t('rock')}
-        </button>
-        <button
-          className={`p-2 rounded cursor-pointer ${selectedHand === 'paper' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
-          disabled={submitting}
-          onClick={() => setSelectedHand('paper')}
-        >
-          ✋ {t('paper')}
-        </button>
-        <button
-          className={`p-2 rounded cursor-pointer ${selectedHand === 'scissors' ? (submitting ? 'bg-gray-300' : 'bg-blue-500 text-white') : 'bg-white text-black'}`}
-          disabled={submitting}
-          onClick={() => setSelectedHand('scissors')}
-        >
-          ✌️ {t('scissors')}
-        </button>
+      {/* 글러브 선택 UI */}
+      <div className="flex flex-col items-center space-y-4 mb-4 p-6">
+        <div className="flex flex-wrap justify-center gap-4 max-w-4xl">
+          {data?.players?.map((player, index) => {
+            if (!player?.gloves) return null;
+            
+            const isSelected = selectedHand === index;
+            const gloveImage = getLocalGloveImage(player.gloves[index]);
+            
+            return (
+              <div
+                key={index}
+                className={`relative w-48 h-64 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+                  isSelected 
+                    ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50' 
+                    : 'hover:shadow-lg hover:shadow-white/20'
+                }`}
+                onClick={() => setSelectedHand(index)}
+              >
+                <img
+                  alt={`Glove ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  src={gloveImage}
+                />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-black/80 p-4 rounded-lg text-white">
+                      <h3 className="font-bold mb-2">{t('gloveStats')}</h3>
+                      <div className="space-y-1">
+                        <p>{t('attack')}: 100</p>
+                        <p>{t('defense')}: 100</p>
+                        <p>{t('speed')}: 100</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {/* 제출 버튼 */}
       <div className="flex justify-center">
         <StyledButton 
           bgColor='#FFE55C' 

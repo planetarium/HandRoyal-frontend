@@ -1,16 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { request } from 'graphql-request';
-import { getGloveDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
-import { getGloveImage } from '../fetches';
-import { MoveType } from '../gql/graphql';
-const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
 const GlovePage: React.FC = () => {
-  const { gloveId } = useParams<{ gloveId: string }>();
   const [images, setImages] = useState<{ [key: string]: string | null }>({
     ROCK: null,
     SCISSORS: null,
@@ -18,7 +11,7 @@ const GlovePage: React.FC = () => {
   });
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { data, error, isLoading } = useQuery({
+/*  const { data, error, isLoading } = useQuery({
     queryKey: ['getGlove', gloveId],
     queryFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, getGloveDocument, { gloveId });
@@ -43,7 +36,16 @@ const GlovePage: React.FC = () => {
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
-  const glove = data;
+  const glove = data;*/
+  const glove = {
+    id: '0x1234567890abcdef',
+    author: 'John Doe',
+    images: {
+      ROCK: 'https://example.com/rock.png',
+      SCISSORS: 'https://example.com/scissors.png',
+      PAPER: 'https://example.com/paper.png'
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center w-full mx-auto bg-gray-700 rounded-lg border border-black">
