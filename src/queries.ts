@@ -163,9 +163,9 @@ export const createSessionAction = graphql(/* GraphQL */ `
 `);
 
 export const joinSessionAction = graphql(/* GraphQL */ `
-  query JoinSessionAction($sessionId: Address!, $gloveId: Address) {
+  query JoinSessionAction($sessionId: Address!, $gloves: [Address!]!) {
     actionQuery {
-      joinSession(sessionId: $sessionId, gloveId: $gloveId)
+      joinSession(sessionId: $sessionId, gloves: $gloves)
     }
   }
 `);

@@ -51,7 +51,7 @@ const JoinPage: React.FC = () => {
     mutationFn: async (sessionId: string) => {
       const joinSesisonResponse = await request(GRAPHQL_ENDPOINT, joinSessionAction, {
         sessionId,
-        gloveId: equippedGlove,
+        gloves: Object.entries(selectedGloves).flatMap(([key, count]) => Array(count).fill(key)),
       });
       if (!joinSesisonResponse.actionQuery?.joinSession) {
         throw new Error('Failed to join session');
@@ -96,10 +96,10 @@ const JoinPage: React.FC = () => {
 
     setSelectedGloves(prev => {
       const currentCount = prev[gloveId] || 0;
-      const gloveCount = userData?.ownedGloves?.filter(g => g?.id === gloveId)?.length || 0;
+      const availableCount = userData?.ownedGloves?.find(g => g?.id === gloveId)?.count || 0;
       
       // 해당 글러브의 최대 개수에 도달한 경우
-      if (currentCount >= gloveCount) {
+      if (currentCount >= availableCount) {
         return prev;
       }
       
