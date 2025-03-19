@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
 import { MatchState } from '../gql/graphql';
 import { useRequiredAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, submitMoveAction } from '../queries';
+import { GRAPHQL_ENDPOINT, submitMoveAction, getUserDocument } from '../queries';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
 import { executeTransaction } from '../utils/transaction';
 import { getLocalGloveImage } from '../fetches';
-import type { Session , Match } from '../gql/graphql';
+import type { Session, Match } from '../gql/graphql';
 
 interface GameBoardProps {
   blockIndex: number;
@@ -37,6 +37,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
 
   const submitMoveMutation = useMutation({
     mutationFn: async (gloveIndex: number) => {
+      const selectedGlove = userData?.ownedGloves?.[gloveIndex];
+      if (!selectedGlove?.id) {
+        throw new Error('Selected glove not found');
+      }
+
       const submitMoveResponse = await request(GRAPHQL_ENDPOINT, submitMoveAction, {
         sessionId: data?.metadata?.id,
         gloveIndex: gloveIndex
@@ -56,6 +61,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     onError: (error) => {
       console.error('Failed to submit move:', error);
       setSubmitting(false);
+    }
+  });
+
+  const { data: userData } = useQuery({
+    queryKey: ['getUser', account?.address],
+    queryFn: async () => {
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
+      return response.stateQuery?.user;
     }
   });
 
@@ -115,7 +128,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   }, [data, account]);
 
   const handleSubmit = () => {
-    if (selectedHand) {
+    if (selectedHand !== null) {
       setSubmitting(true);
       submitMoveMutation.mutate(selectedHand);
     }
@@ -181,15 +194,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       {/* 글러브 선택 UI */}
       <div className="flex flex-col items-center space-y-4 mb-4 p-6">
         <div className="flex flex-wrap justify-center gap-4 max-w-4xl">
-          {data?.players?.map((player, index) => {
-            if (!player?.gloves) return null;
+          {userData?.ownedGloves?.map((glove, index) => {
+            if (!glove?.id) return null;
             
             const isSelected = selectedHand === index;
-            const gloveImage = getLocalGloveImage(player.gloves[index]);
+            const gloveImage = getLocalGloveImage(glove.id);
             
             return (
               <div
-                key={index}
+                key={glove.id}
                 className={`relative w-48 h-64 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 transform hover:scale-105 ${
                   isSelected 
                     ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50' 
