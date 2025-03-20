@@ -75,8 +75,8 @@ export const CreateSession: React.FC = () => {
       },
       {
         next: (result) => {
-          const data = result.data as { onSessionChanged: { state: string } };
-          if (data.onSessionChanged.state === 'READY') {
+          const data = result.data as { onSessionChanged: { sessionState: string } };
+          if (data.onSessionChanged.sessionState === 'READY') {
             navigate(`/game/${sessionId}`);
           }
         },
