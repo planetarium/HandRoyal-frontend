@@ -65,6 +65,7 @@ export const getSessionDocument = graphql(/* GraphQL */ `
           roundLength
           roundInterval
           initialHealthPoint
+          numberOfGloves
         }
         state
         players {
