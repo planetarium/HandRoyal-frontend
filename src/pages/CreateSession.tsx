@@ -14,6 +14,8 @@ import {
 import subscriptionClient from '../subscriptionClient';
 import StyledButton from '../components/StyledButton';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
+import { getLocalGloveImage } from '../fetches';
+
 interface GameRules {
   maximumUser: number,
   minimumUser: number,
@@ -24,6 +26,12 @@ interface GameRules {
   roundInterval: number,
   initialHealthPoint: number
 }
+
+const GLOVES = [
+  '0x0000000000000000000000000000000000000000',
+  '0x0000000000000000000000000000000000000001',
+  '0x0000000000000000000000000000000000000002'
+];
 
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
@@ -316,7 +324,7 @@ export const CreateSession: React.FC = () => {
             onChange={(e) => setSelectedPrize(e.target.value)}
           >
             <option value="">{t('selectPrize')}</option>
-            {(data?.registeredGloves || []).map(glove => (
+            {GLOVES.map(glove => (
               <option key={glove} value={glove}>{glove}</option>
             ))}
           </select>
