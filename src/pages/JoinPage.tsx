@@ -12,7 +12,7 @@ import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import { useEquippedGlove } from '../context/EquippedGloveContext';
 import AddressDisplay from '../components/AddressDisplay';
 import { SessionState } from '../gql/graphql';
-
+import { useTip } from '../context/TipContext';
 interface GloveSelection {
   [gloveId: string]: number; // 글러브 ID를 키로, 선택된 개수를 값으로 가지는 객체
 }
@@ -27,7 +27,7 @@ const JoinPage: React.FC = () => {
   const [selectedGloves, setSelectedGloves] = useState<GloveSelection>({});
   const [totalSelected, setTotalSelected] = useState(0);
   const [error, setError] = useState('');
-  const MAX_SELECTIONS = 5;
+  const tip = useTip();
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ['getUser', account?.address],
@@ -88,9 +88,11 @@ const JoinPage: React.FC = () => {
     fetchGloveImages();
   }, [userData]);
 
+  const MAX_SELECTIONS = sessionData?.metadata?.numberOfGloves ?? -1;
+
   const handleGloveClick = (gloveId: string) => {
-    if (totalSelected >= MAX_SELECTIONS && !selectedGloves[gloveId]) {
-      // 이미 최대 선택 개수에 도달했고, 새로운 글러브를 선택하려는 경우
+    if (totalSelected >= MAX_SELECTIONS) {
+      // 이미 최대 선택 개수에 도달했을 경우우
       return;
     }
 
@@ -138,19 +140,21 @@ const JoinPage: React.FC = () => {
       return <p className="text-center">{t('noGlovesOwned')}</p>;
     }
 
-    // 중복된 글러브 ID를 제거하고 고유한 글러브 목록 생성
-    
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {userData.ownedGloves.map((gloveInfo) => {
           const gloveId = gloveInfo?.id;
-          const count = userData.ownedGloves?.filter(g => g === gloveId)?.length || 0;
+          const count = gloveInfo?.count || 0;
           const selectedCount = selectedGloves[gloveId] || 0;
-          
+
           return (
-            <div 
+            <div
               key={gloveId} 
-              className="bg-white rounded-lg p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+              className={`bg-white rounded-lg p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow relative ${
+                selectedCount > 0 
+                  ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50' 
+                  : 'hover:shadow-lg'
+              }`}
               onClick={() => handleGloveClick(gloveId)}
             >
               <div className="relative">
@@ -159,19 +163,20 @@ const JoinPage: React.FC = () => {
                   className="w-full h-40 object-contain mb-2" 
                   src={gloveImages[gloveId] || 'placeholder.png'}
                 />
-                <div className="absolute bottom-0 right-0 bg-gray-800 text-white px-2 py-1 rounded-tl-md">
-                  {count}x
-                </div>
               </div>
+              <p className="text-center text-xs mt-2 truncate">{gloveId}</p>
               <div className="flex justify-center mt-2">
                 {[...Array(count)].map((_, i) => (
                   <div 
                     key={i} 
-                    className={`w-4 h-4 mx-1 rounded-full border-2 border-gray-500 ${i < selectedCount ? 'bg-blue-500' : 'bg-transparent'}`}
+                    className={`w-4 h-4 mx-1 rounded-full border-2 transition-all duration-300 ${
+                      i < selectedCount 
+                        ? 'border-yellow-400 bg-yellow-400 shadow-md shadow-yellow-400/50 scale-110' 
+                        : 'border-gray-300 bg-transparent'
+                    }`}
                   />
                 ))}
               </div>
-              <p className="text-center text-xs mt-2 truncate">{gloveId}</p>
             </div>
           );
         })}
@@ -188,7 +193,7 @@ const JoinPage: React.FC = () => {
       return <p className="text-center text-red-500">{t('sessionNotFound')}</p>;
     }
 
-    const { metadata, state, players } = sessionData;
+    const { metadata, creationHeight, players } = sessionData;
     
     return (
       <div className="bg-white rounded-lg p-4 shadow-md mb-6 w-full">
@@ -218,8 +223,9 @@ const JoinPage: React.FC = () => {
             
             <div className="flex items-center mb-2">
               <Clock className="mr-2 h-5 w-5" />
-              <span className="font-semibold">{t('state')}:</span>
-              <span className="ml-2">{state === SessionState.Ready ? t('ready') : t('active')}</span>
+              <span className="font-semibold">
+                {t('blocksLeft', { count: creationHeight + metadata?.startAfter - (tip.tip?.index ?? 0)})}
+              </span>
             </div>
           </div>
         </div>
@@ -254,14 +260,16 @@ const JoinPage: React.FC = () => {
       </div>
       
       <div className="flex space-x-4 mt-4">
-        <StyledButton onClick={() => navigate('/')}>
-          {t('cancel')}
-        </StyledButton>
         <StyledButton 
-          disabled={totalSelected === 0 || !sessionData || sessionData.state !== SessionState.Ready} 
+          bgColor = '#FFE55C'
+          disabled={totalSelected !== MAX_SELECTIONS || !sessionData || sessionData.state !== SessionState.Ready}
+          shadowColor = '#FF9F0A' 
           onClick={handleJoin}
         >
           {t('join')}
+        </StyledButton>
+        <StyledButton onClick={() => navigate('/')}>
+          {t('cancel')}
         </StyledButton>
       </div>
     </div>
