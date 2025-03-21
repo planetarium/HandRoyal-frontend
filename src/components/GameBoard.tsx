@@ -82,7 +82,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   const getFuseWidth = () => {
     if (!data) return '0%';
     
-    const maxInterval = data.sessionState === SessionState.Active ? 30 : 60; // 임시 값으로 설정
+    const maxInterval = data.currentInterval;
     const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
     return `${percentage}%`;
   };
