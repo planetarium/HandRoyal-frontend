@@ -43,6 +43,68 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
   }
 `);
 
+export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
+  query GetUserScopedSession($sessionId: Address!, $userId: Address!) {
+    stateQuery {
+      userScopedSession(sessionId: $sessionId, userId: $userId) {
+        sessionId
+        height
+        organizerAddress
+        sessionState
+        opponentAddress
+        myGloves
+        opponentGloves
+        currentUserMatchState
+        currentInterval
+        intervalEndHeight
+        currentUserRound {
+          winner
+          condition1 {
+            healthPoint
+            gloveUsed
+            submission
+          }
+          condition2 {
+            healthPoint
+            gloveUsed
+            submission
+          }
+        }
+      }
+    }
+  }
+`);
+
+export const getSessionHeaderDocument = graphql(/* GraphQL */ `
+  query GetSessionHeader($sessionId: Address!) {
+    stateQuery {
+      session(sessionId: $sessionId) {
+        metadata {
+          id
+          organizer
+          prize
+          maximumUser
+          minimumUser
+          remainingUser
+          startAfter
+          maxRounds
+          roundLength
+          roundInterval
+          initialHealthPoint
+          numberOfGloves
+        }
+        state
+        players {
+          id
+          gloves
+        }
+        creationHeight
+        startHeight
+      }
+    }
+  }
+`);
+
 export const isValidSessionIdDocument = graphql(/* GraphQL */ `
   query IsValidSessionId($sessionId: Address!) {
     isValidSessionId(sessionId: $sessionId)
@@ -114,7 +176,29 @@ export const USER_SUBSCRIPTION = `
 export const SESSION_SUBSCRIPTION = `
   subscription OnSessionChanged($sessionId: Address!, $userId: Address!) {
     onSessionChanged(sessionId: $sessionId, userId: $userId) {
-      state
+      sessionId
+      height
+      organizerAddress
+      sessionState
+      userPlayerIndex
+      opponentAddress
+      myGloves
+      opponentGloves
+      currentUserMatchState
+      intervalEndHeight
+      currentUserRound {
+        winner
+        condition1 {
+            healthPoint
+            gloveUsed
+            submission
+        }
+        condition2 {
+            healthPoint
+            gloveUsed
+            submission
+        }
+      } 
     }
   }
 `;

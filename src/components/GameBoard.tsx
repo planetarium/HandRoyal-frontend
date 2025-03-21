@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
-import { MatchState } from '../gql/graphql';
 import { useRequiredAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, submitMoveAction, getUserDocument } from '../queries';
+import { SessionState } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
 import { executeTransaction } from '../utils/transaction';
 import { getLocalGloveImage } from '../fetches';
-import type { Session, Match } from '../gql/graphql';
+import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 interface GameBoardProps {
   blockIndex: number;
-  data: Session | undefined;
+  data: NonNullable<NonNullable<GetUserScopedSessionQuery['stateQuery']>['userScopedSession']>;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
@@ -23,8 +22,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   const account = useRequiredAccount();
   const [submitting, setSubmitting] = useState(false);
   const [selectedHand, setSelectedHand] = useState<number | null>(null);
-  const [match, setMatch] = useState<Match | null>(null);
-  const [gameBoardState, setGameBoardState] = useState<GameBoardState>({opponentAddress: null, myGloveAddress: null, opponentGloveAddress: null, myHealthPoint: 100, opponentHealthPoint: 100, maxHealthPoint: 100});
+  const [gameBoardState, setGameBoardState] = useState<GameBoardState>({
+    opponentAddress: null,
+    myGloveAddress: null,
+    opponentGloveAddress: null,
+    myHealthPoint: 100,
+    opponentHealthPoint: 100,
+    maxHealthPoint: 100
+  });
 
   interface GameBoardState {
     opponentAddress: string | null;
@@ -43,7 +48,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       }
 
       const submitMoveResponse = await request(GRAPHQL_ENDPOINT, submitMoveAction, {
-        sessionId: data?.metadata?.id,
+        sessionId: data?.sessionId,
         gloveIndex: gloveIndex
       });
 
@@ -72,20 +77,20 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     }
   });
 
-  const remainingBlocks =  match?.state === MatchState.Active ? blockIndex - match?.startHeight : blockIndex - data?.metadata?.roundLength - match?.startHeight;
+  const remainingBlocks = data ? data.intervalEndHeight - blockIndex : 0;
 
   const getFuseWidth = () => {
-    if (!match) return '0%';
+    if (!data) return '0%';
     
-    const maxInterval = (match.state === MatchState.Active ? data?.metadata?.roundLength : data?.metadata?.roundInterval) ?? 0;
+    const maxInterval = data.sessionState === SessionState.Active ? 30 : 60; // 임시 값으로 설정
     const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
     return `${percentage}%`;
   };
 
   const getFuseColor = () => {
-    if (!match) return 'bg-gray-300';
+    if (!data) return 'bg-gray-300';
     
-    const maxInterval = (match.state === MatchState.Active ? data?.metadata?.roundLength : data?.metadata?.roundInterval) ?? 0;
+    const maxInterval = data.currentInterval;
     const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
 
     if (percentage > 66) return 'bg-green-500';
@@ -94,38 +99,19 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   };
 
   useEffect(() => {
-    const updateGameBoardState = async () => {
-      const props: GameBoardState = {
-        opponentAddress: null,
-        myGloveAddress: null,
-        opponentGloveAddress: null,
-        myHealthPoint: data?.metadata?.initialHealthPoint ?? 100,
-        opponentHealthPoint: data?.metadata?.initialHealthPoint ?? 100,
-        maxHealthPoint: data?.metadata?.initialHealthPoint ?? 100
-      };
-      const address = account.address;
-      if (data?.phases && data.players) {
-        const currentPlayerIndex = data.players.findIndex(player => player && Address.fromHex(player.id).toHex() === address.toHex());
-        const currentPhase = data.phases[data.phases.length - 1];
-        if (currentPhase?.matches) {
-          const match = currentPhase.matches.find(match => {
-            return (match?.players?.[0] && match.players?.[0] === currentPlayerIndex) || 
-                    (match?.players?.[1] && match.players?.[1] === currentPlayerIndex);
-          });
-          if (match) {
-            setMatch(match);
-          }
-          else {
-            setMatch(null);
-          }
-        }
-      }
-
-      setGameBoardState(props);
+    const props: GameBoardState = {
+      opponentAddress: data.opponentAddress || null,
+      myGloveAddress: data.myGloves?.[0] || null,
+      opponentGloveAddress: data.opponentGloves?.[0] || null,
+      myHealthPoint: data.currentUserRound?.condition1?.healthPoint ?? 100,
+      opponentHealthPoint: data.currentUserRound?.condition2?.healthPoint ?? 100,
+      maxHealthPoint: 100
     };
 
-    updateGameBoardState();
-  }, [data, account]);
+    console.error(props);
+
+    setGameBoardState(props);
+  }, [data]);
 
   const handleSubmit = () => {
     if (selectedHand !== null) {
@@ -139,7 +125,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       <p className="text-2xl font-bold text-center mb-2" 
         style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
       >
-        {t('phase') + ' ' + data?.phases?.length}
+        {t('phase') + ' ' + (data?.currentUserRound ? 1 : 0)}
       </p>
       {/* blocks left */}
       <div className="relative h-12 mb-8">
@@ -177,16 +163,16 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       {/* 현재 제출 및 체력 상태 표시 영역 */}
       <div className="flex items-center justify-center space-x-4 mb-4">
         <MoveDisplay 
-          currentHp={100}
+          currentHp={gameBoardState.myHealthPoint}
           gloveAddress={gameBoardState.myGloveAddress ?? ''} 
-          maxHp={100}
+          maxHp={gameBoardState.maxHealthPoint}
           userAddress={'you'}
         />
         <Swords className="w-20 h-20" color="white" />
         <MoveDisplay 
-          currentHp={100} 
+          currentHp={gameBoardState.opponentHealthPoint} 
           gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
-          maxHp={100}
+          maxHp={gameBoardState.maxHealthPoint}
           userAddress={gameBoardState.opponentAddress ?? ''}
         />
       </div>

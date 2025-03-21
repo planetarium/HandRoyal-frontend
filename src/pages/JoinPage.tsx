@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Users, Clock, Crown, Trophy } from 'lucide-react';
-import { GRAPHQL_ENDPOINT, getUserDocument, joinSessionAction, getSessionDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, getUserDocument, joinSessionAction, getSessionHeaderDocument } from '../queries';
 import { useRequiredAccount } from '../context/AccountContext';
 import StyledButton from '../components/StyledButton';
 import { getLocalGloveImage } from '../fetches';
@@ -37,15 +37,21 @@ const JoinPage: React.FC = () => {
     }
   });
 
-  const { data: sessionData, isLoading: sessionLoading } = useQuery({
+  const { data: sessionData, isLoading: sessionLoading, refetch: sessionRefetch } = useQuery({
     queryKey: ['getSession', sessionId],
     queryFn: async () => {
       if (!sessionId) return null;
-      const response = await request(GRAPHQL_ENDPOINT, getSessionDocument, { sessionId });
+      const response = await request(GRAPHQL_ENDPOINT, getSessionHeaderDocument, { sessionId });
       return response.stateQuery?.session;
     },
     enabled: !!sessionId,
   });
+
+  useEffect(() => {
+    if (tip) {
+      sessionRefetch();
+    }
+  }, [tip, sessionRefetch]);
 
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
@@ -193,7 +199,38 @@ const JoinPage: React.FC = () => {
       return <p className="text-center text-red-500">{t('sessionNotFound')}</p>;
     }
 
-    const { metadata, creationHeight, players } = sessionData;
+    const { metadata, creationHeight, players, state } = sessionData;
+
+    // 세션이 Ready 상태가 아닐 때 표시할 UI
+    if (state !== SessionState.Ready) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="bg-white rounded-lg p-6 shadow-md mb-6 w-full max-w-md text-center">
+            <h2 className="text-xl font-bold mb-4">{t('sessionNotReady')}</h2>
+            <p className="text-gray-600 mb-6">
+              {state === SessionState.Active 
+                ? t('sessionAlreadyStarted')
+                : state === SessionState.Ended
+                  ? t('sessionAlreadyEnded')
+                  : t('sessionNotAvailable')
+              }
+            </p>
+            <div className="flex justify-center space-x-4">
+              <StyledButton 
+                bgColor="#FFE55C"
+                shadowColor="#FF9F0A"
+                onClick={() => navigate(`/game/${sessionId}`)}
+              >
+                {t('watchGame')}
+              </StyledButton>
+              <StyledButton onClick={() => navigate('/')}>
+                {t('backToMain')}
+              </StyledButton>
+            </div>
+          </div>
+        </div>
+      );
+    }
     
     return (
       <div className="bg-white rounded-lg p-4 shadow-md mb-6 w-full">
@@ -212,9 +249,7 @@ const JoinPage: React.FC = () => {
               <span className="font-semibold">{t('prize')}:</span>
               <AddressDisplay address={metadata?.prize} className="ml-2" type='glove' />
             </div>
-          </div>
-          
-          <div>
+
             <div className="flex items-center mb-2">
               <Users className="mr-2 h-5 w-5" />
               <span className="font-semibold">{t('players')}:</span>
@@ -226,6 +261,33 @@ const JoinPage: React.FC = () => {
               <span className="font-semibold">
                 {t('blocksLeft', { count: creationHeight + metadata?.startAfter - (tip.tip?.index ?? 0)})}
               </span>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('maxRounds')}:</span>
+              <span className="ml-2">{metadata?.maxRounds}</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('roundLength')}:</span>
+              <span className="ml-2">{metadata?.roundLength} {t('blocks')}</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('roundInterval')}:</span>
+              <span className="ml-2">{metadata?.roundInterval} {t('blocks')}</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('initialHP')}:</span>
+              <span className="ml-2">{metadata?.initialHealthPoint} HP</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('selectableGloves')}:</span>
+              <span className="ml-2">{metadata?.numberOfGloves} {t('gloves')}</span>
             </div>
           </div>
         </div>
@@ -246,32 +308,36 @@ const JoinPage: React.FC = () => {
       
       {renderSessionInfo()}
       
-      <div className="w-full mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl">{t('selectGloves')}</h2>
-          <div className="flex items-center">
-            <span className="mr-2">{totalSelected}/{MAX_SELECTIONS}</span>
-            <StyledButton onClick={resetSelections}>
-              {t('reset')}
+      {sessionData?.state === SessionState.Ready && (
+        <>
+          <div className="w-full mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-xl">{t('selectGloves')}</h2>
+              <div className="flex items-center">
+                <span className="mr-2">{totalSelected}/{MAX_SELECTIONS}</span>
+                <StyledButton onClick={resetSelections}>
+                  {t('reset')}
+                </StyledButton>
+              </div>
+            </div>
+            {renderGlove()}
+          </div>
+          
+          <div className="flex space-x-4 mt-4">
+            <StyledButton 
+              bgColor = '#FFE55C'
+              disabled={totalSelected !== MAX_SELECTIONS}
+              shadowColor = '#FF9F0A' 
+              onClick={handleJoin}
+            >
+              {t('join')}
+            </StyledButton>
+            <StyledButton onClick={() => navigate('/')}>
+              {t('cancel')}
             </StyledButton>
           </div>
-        </div>
-        {renderGlove()}
-      </div>
-      
-      <div className="flex space-x-4 mt-4">
-        <StyledButton 
-          bgColor = '#FFE55C'
-          disabled={totalSelected !== MAX_SELECTIONS || !sessionData || sessionData.state !== SessionState.Ready}
-          shadowColor = '#FF9F0A' 
-          onClick={handleJoin}
-        >
-          {t('join')}
-        </StyledButton>
-        <StyledButton onClick={() => navigate('/')}>
-          {t('cancel')}
-        </StyledButton>
-      </div>
+        </>
+      )}
     </div>
   );
 };
