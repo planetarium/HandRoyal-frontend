@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Users, Clock, Crown, Trophy } from 'lucide-react';
-import { GRAPHQL_ENDPOINT, getUserDocument, joinSessionAction, getSessionDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, getUserDocument, joinSessionAction, getSessionHeaderDocument } from '../queries';
 import { useRequiredAccount } from '../context/AccountContext';
 import StyledButton from '../components/StyledButton';
 import { getLocalGloveImage } from '../fetches';
@@ -37,15 +37,21 @@ const JoinPage: React.FC = () => {
     }
   });
 
-  const { data: sessionData, isLoading: sessionLoading } = useQuery({
+  const { data: sessionData, isLoading: sessionLoading, refetch: sessionRefetch } = useQuery({
     queryKey: ['getSession', sessionId],
     queryFn: async () => {
       if (!sessionId) return null;
-      const response = await request(GRAPHQL_ENDPOINT, getSessionDocument, { sessionId });
+      const response = await request(GRAPHQL_ENDPOINT, getSessionHeaderDocument, { sessionId });
       return response.stateQuery?.session;
     },
     enabled: !!sessionId,
   });
+
+  useEffect(() => {
+    if (tip) {
+      sessionRefetch();
+    }
+  }, [tip, sessionRefetch]);
 
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
@@ -212,9 +218,7 @@ const JoinPage: React.FC = () => {
               <span className="font-semibold">{t('prize')}:</span>
               <AddressDisplay address={metadata?.prize} className="ml-2" type='glove' />
             </div>
-          </div>
-          
-          <div>
+
             <div className="flex items-center mb-2">
               <Users className="mr-2 h-5 w-5" />
               <span className="font-semibold">{t('players')}:</span>
@@ -226,6 +230,33 @@ const JoinPage: React.FC = () => {
               <span className="font-semibold">
                 {t('blocksLeft', { count: creationHeight + metadata?.startAfter - (tip.tip?.index ?? 0)})}
               </span>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('maxRounds')}:</span>
+              <span className="ml-2">{metadata?.maxRounds}</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('roundLength')}:</span>
+              <span className="ml-2">{metadata?.roundLength} {t('blocks')}</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('roundInterval')}:</span>
+              <span className="ml-2">{metadata?.roundInterval} {t('blocks')}</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('initialHP')}:</span>
+              <span className="ml-2">{metadata?.initialHealthPoint} HP</span>
+            </div>
+
+            <div className="flex items-center mb-2">
+              <span className="font-semibold">{t('selectableGloves')}:</span>
+              <span className="ml-2">{metadata?.numberOfGloves} {t('gloves')}</span>
             </div>
           </div>
         </div>
