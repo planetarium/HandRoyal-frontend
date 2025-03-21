@@ -199,7 +199,38 @@ const JoinPage: React.FC = () => {
       return <p className="text-center text-red-500">{t('sessionNotFound')}</p>;
     }
 
-    const { metadata, creationHeight, players } = sessionData;
+    const { metadata, creationHeight, players, state } = sessionData;
+
+    // 세션이 Ready 상태가 아닐 때 표시할 UI
+    if (state !== SessionState.Ready) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="bg-white rounded-lg p-6 shadow-md mb-6 w-full max-w-md text-center">
+            <h2 className="text-xl font-bold mb-4">{t('sessionNotReady')}</h2>
+            <p className="text-gray-600 mb-6">
+              {state === SessionState.Active 
+                ? t('sessionAlreadyStarted')
+                : state === SessionState.Ended
+                  ? t('sessionAlreadyEnded')
+                  : t('sessionNotAvailable')
+              }
+            </p>
+            <div className="flex justify-center space-x-4">
+              <StyledButton 
+                bgColor="#FFE55C"
+                shadowColor="#FF9F0A"
+                onClick={() => navigate(`/game/${sessionId}`)}
+              >
+                {t('watchGame')}
+              </StyledButton>
+              <StyledButton onClick={() => navigate('/')}>
+                {t('backToMain')}
+              </StyledButton>
+            </div>
+          </div>
+        </div>
+      );
+    }
     
     return (
       <div className="bg-white rounded-lg p-4 shadow-md mb-6 w-full">
@@ -277,32 +308,36 @@ const JoinPage: React.FC = () => {
       
       {renderSessionInfo()}
       
-      <div className="w-full mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl">{t('selectGloves')}</h2>
-          <div className="flex items-center">
-            <span className="mr-2">{totalSelected}/{MAX_SELECTIONS}</span>
-            <StyledButton onClick={resetSelections}>
-              {t('reset')}
+      {sessionData?.state === SessionState.Ready && (
+        <>
+          <div className="w-full mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-xl">{t('selectGloves')}</h2>
+              <div className="flex items-center">
+                <span className="mr-2">{totalSelected}/{MAX_SELECTIONS}</span>
+                <StyledButton onClick={resetSelections}>
+                  {t('reset')}
+                </StyledButton>
+              </div>
+            </div>
+            {renderGlove()}
+          </div>
+          
+          <div className="flex space-x-4 mt-4">
+            <StyledButton 
+              bgColor = '#FFE55C'
+              disabled={totalSelected !== MAX_SELECTIONS}
+              shadowColor = '#FF9F0A' 
+              onClick={handleJoin}
+            >
+              {t('join')}
+            </StyledButton>
+            <StyledButton onClick={() => navigate('/')}>
+              {t('cancel')}
             </StyledButton>
           </div>
-        </div>
-        {renderGlove()}
-      </div>
-      
-      <div className="flex space-x-4 mt-4">
-        <StyledButton 
-          bgColor = '#FFE55C'
-          disabled={totalSelected !== MAX_SELECTIONS || !sessionData || sessionData.state !== SessionState.Ready}
-          shadowColor = '#FF9F0A' 
-          onClick={handleJoin}
-        >
-          {t('join')}
-        </StyledButton>
-        <StyledButton onClick={() => navigate('/')}>
-          {t('cancel')}
-        </StyledButton>
-      </div>
+        </>
+      )}
     </div>
   );
 };
