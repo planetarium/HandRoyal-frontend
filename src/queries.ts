@@ -50,6 +50,7 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         sessionId
         height
         organizerAddress
+        playerState
         sessionState
         opponentAddress
         myGloves
