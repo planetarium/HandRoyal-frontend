@@ -43,6 +43,36 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
   }
 `);
 
+export const getSessionHeaderDocument = graphql(/* GraphQL */ `
+  query GetSessionHeader($sessionId: Address!) {
+    stateQuery {
+      session(sessionId: $sessionId) {
+        metadata {
+          id
+          organizer
+          prize
+          maximumUser
+          minimumUser
+          remainingUser
+          startAfter
+          maxRounds
+          roundLength
+          roundInterval
+          initialHealthPoint
+          numberOfGloves
+        }
+        state
+        players {
+          id
+          gloves
+        }
+        creationHeight
+        startHeight
+      }
+    }
+  }
+`);
+
 export const isValidSessionIdDocument = graphql(/* GraphQL */ `
   query IsValidSessionId($sessionId: Address!) {
     isValidSessionId(sessionId: $sessionId)
