@@ -90,7 +90,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   const getFuseColor = () => {
     if (!data) return 'bg-gray-300';
     
-    const maxInterval = data.sessionState === SessionState.Active ? 30 : 60; // 임시 값으로 설정
+    const maxInterval = data.currentInterval;
     const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
 
     if (percentage > 66) return 'bg-green-500';

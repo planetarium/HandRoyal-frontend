@@ -55,6 +55,7 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         myGloves
         opponentGloves
         currentUserMatchState
+        currentInterval
         intervalEndHeight
         currentUserRound {
           winner
