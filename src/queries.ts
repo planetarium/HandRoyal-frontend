@@ -43,6 +43,37 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
   }
 `);
 
+export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
+  query GetUserScopedSession($sessionId: Address!, $userId: Address!) {
+    stateQuery {
+      userScopedSession(sessionId: $sessionId, userId: $userId) {
+        sessionId
+        height
+        organizerAddress
+        sessionState
+        opponentAddress
+        myGloves
+        opponentGloves
+        currentUserMatchState
+        intervalEndHeight
+        currentUserRound {
+          winner
+          condition1 {
+            healthPoint
+            gloveUsed
+            submission
+          }
+          condition2 {
+            healthPoint
+            gloveUsed
+            submission
+          }
+        }
+      }
+    }
+  }
+`);
+
 export const getSessionHeaderDocument = graphql(/* GraphQL */ `
   query GetSessionHeader($sessionId: Address!) {
     stateQuery {
@@ -146,9 +177,10 @@ export const SESSION_SUBSCRIPTION = `
     onSessionChanged(sessionId: $sessionId, userId: $userId) {
       sessionId
       height
+      organizerAddress
       sessionState
       userPlayerIndex
-      opponentPlayerIndex
+      opponentAddress
       myGloves
       opponentGloves
       currentUserMatchState

@@ -2,43 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Clock } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Address } from '@planetarium/account';
+import { request } from 'graphql-request';
 import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { SessionState, PlayerState } from '../gql/graphql';
-import { SESSION_SUBSCRIPTION } from '../queries';
+import { GRAPHQL_ENDPOINT, getUserScopedSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
 import win from '../assets/lose.webp';
 import lose from '../assets/lose.webp';
 import loading from '../assets/loading.webp';
-import subscriptionClient from '../subscriptionClient';
-
-export interface SessionSubscriptionData {
-  onSessionChanged: {
-    sessionId: string;
-    sessionState: SessionState;
-    height: number;
-    intervalEndHeight: number;
-    currentUserRound: {
-      winner: string | null;
-      condition1: {
-        healthPoint: number;
-        gloveUsed: string;
-        submission: string;
-      };
-      condition2: {
-        healthPoint: number;
-        gloveUsed: string;
-        submission: string;
-      };
-    } | null;
-    userPlayerIndex: number;
-    opponentPlayerIndex: number;
-    currentUserMatchState: string;
-    myGloves: string[];
-    opponentGloves: string[];
-  };
-}
+import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
   const { t } = useTranslation();
@@ -48,65 +24,41 @@ export const GamePage: React.FC = () => {
   const { tip } = useTip();
   const [showNoSessionMessage, setShowNoSessionMessage] = useState(false);
   const [playerStatus, setPlayerStatus] = useState<PlayerState | null>(null);
-  const [subscriptionData, setSubscriptionData] = useState<SessionSubscriptionData['onSessionChanged'] | null>(null);
 
-  useEffect(() => {
-    if (!sessionId || !account?.address) return;
-
-    const unsubscribe = subscriptionClient.subscribe(
-      {
-        query: SESSION_SUBSCRIPTION,
-        variables: {
-          sessionId: sessionId,
+  const { data: sessionData, isLoading, refetch } = useQuery<GetUserScopedSessionQuery>({
+    queryKey: ['getUserScopedSession', sessionId, account?.address],
+    queryFn: async () => {
+      if (!sessionId || !account?.address) {
+        throw new Error('Session ID and user address are required');
+      }
+      return request<GetUserScopedSessionQuery>(
+        GRAPHQL_ENDPOINT,
+        getUserScopedSessionDocument,
+        {
+          sessionId,
           userId: account.address.toString()
         }
-      },
-      {
-        next: (result) => {
-          console.log(result);
-          if (result?.data) {
-            setSubscriptionData((result.data as unknown as SessionSubscriptionData).onSessionChanged);
-          }
-        },
-        error: (error) => {
-          console.error('Subscription error:', error);
-        },
-        complete: () => {
-          console.log('Subscription completed');
-        }
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
-  }, [sessionId, account?.address]);
+      );
+    },
+    enabled: !!sessionId && !!account?.address && !!tip,
+  });
 
   useEffect(() => {
-    if (!sessionId) {
-      setShowNoSessionMessage(true);
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
-    }
-  }, [sessionId, navigate]);
+    refetch();
+  }, [tip, refetch]);
 
-  const blocksLeft = () => {
-    if (!subscriptionData || !tip) return 0;
-    
-    switch (subscriptionData.sessionState) {
-      case SessionState.Ready:
-        return subscriptionData.intervalEndHeight - tip.index;
-      case SessionState.Active:
-        return subscriptionData.intervalEndHeight - tip.index;
-      default:
-        return 0;
-    }
-  };
-
-  if (!subscriptionData) {
+  if (isLoading || !sessionData?.stateQuery?.userScopedSession) {
+    console.error(isLoading);
+    console.error(sessionData?.stateQuery?.userScopedSession);
     return <p>{t('loading')}</p>;
   }
+
+  const session = sessionData.stateQuery.userScopedSession;
+
+  const blocksLeft = () => {
+    if (!session || !tip) return 0;
+    return session.intervalEndHeight - tip.index;
+  };
 
   const renderContent = () => {
     if (showNoSessionMessage) {
@@ -159,7 +111,7 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (subscriptionData.sessionState === SessionState.Ended) {
+    if (session.sessionState === SessionState.Ended) {
       return (
         <div className="flex flex-col items-center justify-center">
           <h2 className="text-2xl mb-4">{t('sessionEnded')}</h2>
@@ -178,7 +130,7 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (subscriptionData.sessionState === SessionState.Ready) {
+    if (session.sessionState === SessionState.Ready) {
       return (
         <div className="flex flex-col items-center justify-center">
           <img alt="Loading" className="w-1/4 h-auto object-contain animate-swing mb-6" src={loading} />
@@ -190,8 +142,25 @@ export const GamePage: React.FC = () => {
       );
     }
 
+    if (account.address.equals(Address.fromHex(session.organizerAddress))) {
+      return (
+        <div>
+          <p className="text-2xl">{t('youAreTheSessionOrganizer')}</p>
+          <StyledButton 
+            bgColor = '#FFE55C'
+            shadowColor = '#FF9F0A'
+            onClick={() => navigate(`/result/${sessionId}`)}>
+          {t('spectate')}
+          </StyledButton>
+          <StyledButton onClick={() => navigate('/')} >
+            {t('backToMain')}
+          </StyledButton>
+        </div>
+      )
+    }
+
     return (
-      <GameBoard blockIndex={tip?.index || 0} data={subscriptionData} />
+      <GameBoard blockIndex={tip?.index || 0} data={session} />
     );
   };
 

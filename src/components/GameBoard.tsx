@@ -3,18 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
-import { SessionState } from '../gql/graphql';
 import { useRequiredAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, submitMoveAction, getUserDocument } from '../queries';
+import { SessionState } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
 import { executeTransaction } from '../utils/transaction';
 import { getLocalGloveImage } from '../fetches';
-import type { SessionSubscriptionData } from '../pages/GamePage';
+import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 interface GameBoardProps {
   blockIndex: number;
-  data: SessionSubscriptionData['onSessionChanged'] | undefined;
+  data: NonNullable<NonNullable<GetUserScopedSessionQuery['stateQuery']>['userScopedSession']>;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
@@ -99,20 +99,18 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   };
 
   useEffect(() => {
-    const updateGameBoardState = async () => {
-      const props: GameBoardState = {
-        opponentAddress: null,
-        myGloveAddress: data?.myGloves[0] || null,
-        opponentGloveAddress: data?.opponentGloves[0] || null,
-        myHealthPoint: data?.currentUserRound?.condition1.healthPoint ?? 100,
-        opponentHealthPoint: data?.currentUserRound?.condition2.healthPoint ?? 100,
-        maxHealthPoint: 100
-      };
-
-      setGameBoardState(props);
+    const props: GameBoardState = {
+      opponentAddress: data.opponentAddress || null,
+      myGloveAddress: data.myGloves?.[0] || null,
+      opponentGloveAddress: data.opponentGloves?.[0] || null,
+      myHealthPoint: data.currentUserRound?.condition1?.healthPoint ?? 100,
+      opponentHealthPoint: data.currentUserRound?.condition2?.healthPoint ?? 100,
+      maxHealthPoint: 100
     };
 
-    updateGameBoardState();
+    console.error(props);
+
+    setGameBoardState(props);
   }, [data]);
 
   const handleSubmit = () => {
