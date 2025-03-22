@@ -29,7 +29,7 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, ma
       <div className="text-center text-black w-full bg-white">
         <div className="w-full max-w-[300px] mx-auto">
           <p className="whitespace-nowrap text-ellipsis">
-            {gloveAddress}
+          {gloveAddress === '' ? t('ui:notSubmitted') : t(`glove:${gloveAddress}.name`)}
           </p>
         </div>
       </div>

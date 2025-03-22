@@ -42,11 +42,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
 
   const submitMoveMutation = useMutation({
     mutationFn: async (gloveIndex: number) => {
-      const selectedGlove = userData?.ownedGloves?.[gloveIndex];
-      if (!selectedGlove?.id) {
-        throw new Error('Selected glove not found');
-      }
-
+      console.error('sessionId: ' + data?.sessionId);
+      console.error('gloveIndex: ' + gloveIndex);
       const submitMoveResponse = await request(GRAPHQL_ENDPOINT, submitMoveAction, {
         sessionId: data?.sessionId,
         gloveIndex: gloveIndex
@@ -66,14 +63,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     onError: (error) => {
       console.error('Failed to submit move:', error);
       setSubmitting(false);
-    }
-  });
-
-  const { data: userData } = useQuery({
-    queryKey: ['getUser', account?.address],
-    queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
-      return response.stateQuery?.user;
     }
   });
 
@@ -101,14 +90,12 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   useEffect(() => {
     const props: GameBoardState = {
       opponentAddress: data.opponentAddress || null,
-      myGloveAddress: data.myGloves?.[0] || null,
-      opponentGloveAddress: data.opponentGloves?.[0] || null,
-      myHealthPoint: data.currentUserRound?.condition1?.healthPoint ?? 100,
-      opponentHealthPoint: data.currentUserRound?.condition2?.healthPoint ?? 100,
+      myGloveAddress: (!!data.myGloves && !!data.myCondition?.submission) ? data.myGloves?.[data.myCondition?.submission] : null,
+      opponentGloveAddress: (!!data.opponentGloves && !!data.opponentCondition?.submission) ? data.opponentGloves?.[data.opponentCondition?.submission] : null,
+      myHealthPoint: data.myCondition?.healthPoint ?? 100,
+      opponentHealthPoint: data.opponentCondition?.healthPoint ?? 100,
       maxHealthPoint: 100
     };
-
-    console.error(props);
 
     setGameBoardState(props);
   }, [data]);
@@ -189,43 +176,64 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       
       {/* 글러브 선택 UI */}
       <div className="flex flex-col items-center space-y-4 mb-4 p-6">
-        <div className="flex flex-wrap justify-center gap-4 max-w-4xl">
-          {userData?.ownedGloves?.map((glove, index) => {
-            if (!glove?.id) return null;
-            
-            const isSelected = selectedHand === index;
-            const gloveImage = getLocalGloveImage(glove.id);
-            
-            return (
-              <div
-                key={glove.id}
-                className={`relative w-48 h-64 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 transform hover:scale-105 ${
-                  isSelected 
-                    ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50' 
-                    : 'hover:shadow-lg hover:shadow-white/20'
-                }`}
-                onClick={() => setSelectedHand(index)}
-              >
-                <img
-                  alt={`Glove ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  src={gloveImage}
-                />
-                <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-black/80 p-4 rounded-lg text-white">
-                      <h3 className="font-bold mb-2">{t('ui:gloveStats')}</h3>
-                      <div className="space-y-1">
-                        <p>{t('ui:attack')}: 100</p>
-                        <p>{t('ui:defense')}: 100</p>
-                        <p>{t('ui:speed')}: 100</p>
+        <div className="flex justify-center relative h-[300px] w-full max-w-4xl">
+          <div className="flex justify-center w-full">
+            {data?.myGloves?.map((gloveId, index) => {
+              if (data?.myCondition?.gloveUsed?.[index] === true) {
+                return null;
+              }
+              const isSelected = selectedHand === index;
+              const gloveImage = getLocalGloveImage(gloveId);
+              const totalCards = data.myGloves?.length ?? 0;
+              const cardWidth = 192; // w-48 = 12rem = 192px
+              const containerWidth = 896; // max-w-4xl = 56rem = 896px
+              const totalPadding = 72; // p-6 * 3 = 1.5rem * 3 = 24px * 3
+              const cardBorder = 4; // border-2 = 2px * 2
+              const effectiveCardWidth = cardWidth + cardBorder;
+              const availableWidth = containerWidth - totalPadding - effectiveCardWidth;
+              const spacing = totalCards > 1 
+                ? (100 - (effectiveCardWidth / availableWidth * 100)) / (totalCards - 1) 
+                : 0;
+              
+              return (
+                <div
+                  key={index}
+                  className={`absolute w-48 h-64 rounded-lg overflow-hidden border-2 bg-gray-100 border-black cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 hover:-translate-y-4 ${
+                    isSelected 
+                      ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-10 -translate-y-4' 
+                      : 'hover:shadow-lg hover:shadow-white/20'
+                  }`}
+                  style={{
+                    left: `${index * spacing}%`,
+                    zIndex: isSelected ? 10 : index,
+                  }}
+                  onClick={() => setSelectedHand(isSelected ? -1 : index)}
+                >
+                  <div className="flex flex-col items-center justify-center border-b-2 border-black bg-gray-900 p-1">
+                    <p className="text-center text-white text-sm">{t(`glove:${gloveId}.name`)}</p>
+                  </div>
+                  <img
+                    alt={gloveId}
+                    className="w-full h-full object-cover"
+                    src={gloveImage}
+                  />
+                  <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 m-6">
+                      <div className="bg-black/80 p-4 rounded-lg text-white">
+                        <h3 className="font-bold mb-2">{t(`glove:${gloveId}.name`)}</h3>
+                        <div className="space-y-1 text-xs">
+                          <p>{t('ui:type')}: {t(`glove:${gloveId}.type`)}</p>
+                          <p>{t('ui:damage')}: {t(`glove:${gloveId}.damage`)}</p>
+                          <p>{t('ui:description')}</p>
+                          <p className='text-2xs'>{t(`glove:${gloveId}.description`)}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
