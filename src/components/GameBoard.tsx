@@ -125,7 +125,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       <p className="text-2xl font-bold text-center mb-2" 
         style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
       >
-        {t('phase') + ' ' + (data?.currentUserRound ? 1 : 0)}
+        {t('phase')}&nbsp;{((data?.currentPhaseIndex ?? -1) + 1)}
+      </p>
+      <p className="text-md font-bold text-center mb-4" 
+        style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+      >
+        {t('survivors')}:&nbsp;{(data?.playersLeft ?? -1)}
+      </p>
+      <p className="text-xl font-bold text-center mb-2" 
+        style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+      >
+        {t('round')}&nbsp;{((data?.currentUserRoundIndex ?? -1) + 1)}
       </p>
       {/* blocks left */}
       <div className="relative h-12 mb-8">
