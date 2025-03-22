@@ -25,6 +25,14 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, ma
       <div className="w-full h-64 bg-white rounded-t-lg flex items-center justify-center">
         <img alt={gloveAddress} className="w-32 h-32 object-cover" src={moveImage ?? undefined} />
       </div>
+      {/* 장갑 이름 공간 */}
+      <div className="text-center text-black w-full bg-white">
+        <div className="w-full max-w-[300px] mx-auto">
+          <p className="whitespace-nowrap text-ellipsis">
+            {gloveAddress}
+          </p>
+        </div>
+      </div>
       {/* HP 표시 공간 */}
       <div className="w-full p-2 bg-gray-700">
         <div className="relative w-full h-6 bg-gray-800 rounded-full overflow-hidden">

@@ -58,6 +58,9 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         currentUserMatchState
         currentInterval
         intervalEndHeight
+        playersLeft
+        currentPhaseIndex
+        currentUserRoundIndex
         currentUserRound {
           winner
           condition1 {
