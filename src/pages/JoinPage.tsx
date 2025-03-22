@@ -128,7 +128,7 @@ const JoinPage: React.FC = () => {
 
   const handleJoin = async () => {
     if (!sessionId) {
-      setError(t('invalidSessionId'));
+      setError(t('ui:invalidSessionId'));
       return;
     }
 
@@ -137,13 +137,13 @@ const JoinPage: React.FC = () => {
       navigate(`/game/${sessionId}`);
     } catch (error) {
       console.error('Failed to join session:', error);
-      setError(t('failedToJoinSession'));
+      setError(t('ui:failedToJoinSession'));
     }
   };
 
   const renderGlove = () => {
     if (!userData?.ownedGloves || userData.ownedGloves.length === 0) {
-      return <p className="text-center">{t('noGlovesOwned')}</p>;
+      return <p className="text-center">{t('ui:noGlovesOwned')}</p>;
     }
 
     return (
@@ -192,11 +192,11 @@ const JoinPage: React.FC = () => {
 
   const renderSessionInfo = () => {
     if (sessionLoading) {
-      return <p className="text-center">{t('loading')}</p>;
+      return <p className="text-center">{t('ui:loading')}</p>;
     }
 
     if (!sessionData) {
-      return <p className="text-center text-red-500">{t('sessionNotFound')}</p>;
+      return <p className="text-center text-red-500">{t('ui:sessionNotFound')}</p>;
     }
 
     const { metadata, creationHeight, players, state } = sessionData;
@@ -206,13 +206,13 @@ const JoinPage: React.FC = () => {
       return (
         <div className="flex flex-col items-center">
           <div className="bg-white rounded-lg p-6 shadow-md mb-6 w-full max-w-md text-center">
-            <h2 className="text-xl font-bold mb-4">{t('sessionNotReady')}</h2>
+            <h2 className="text-xl font-bold mb-4">{t('ui:sessionNotReady')}</h2>
             <p className="text-gray-600 mb-6">
               {state === SessionState.Active 
-                ? t('sessionAlreadyStarted')
+                ? t('ui:sessionAlreadyStarted')
                 : state === SessionState.Ended
-                  ? t('sessionAlreadyEnded')
-                  : t('sessionNotAvailable')
+                  ? t('ui:sessionAlreadyEnded')
+                  : t('ui:sessionNotAvailable')
               }
             </p>
             <div className="flex justify-center space-x-4">
@@ -221,10 +221,10 @@ const JoinPage: React.FC = () => {
                 shadowColor="#FF9F0A"
                 onClick={() => navigate(`/game/${sessionId}`)}
               >
-                {t('watchGame')}
+                {t('ui:watchGame')}
               </StyledButton>
               <StyledButton onClick={() => navigate('/')}>
-                {t('backToMain')}
+                {t('ui:backToMain')}
               </StyledButton>
             </div>
           </div>
@@ -234,60 +234,60 @@ const JoinPage: React.FC = () => {
     
     return (
       <div className="bg-white rounded-lg p-4 shadow-md mb-6 w-full">
-        <h2 className="text-xl font-bold mb-2">{t('sessionInfo')}</h2>
+        <h2 className="text-xl font-bold mb-2">{t('ui:sessionInfo')}</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="flex items-center mb-2">
               <Crown className="mr-2 h-5 w-5" />
-              <span className="font-semibold">{t('organizer')}:</span>
+              <span className="font-semibold">{t('ui:organizer')}:</span>
               <AddressDisplay address={metadata?.organizer} className="ml-2" type='user' />
             </div>
             
             <div className="flex items-center mb-2">
               <Trophy className="mr-2 h-5 w-5" />
-              <span className="font-semibold">{t('prize')}:</span>
+              <span className="font-semibold">{t('ui:prize')}:</span>
               <AddressDisplay address={metadata?.prize} className="ml-2" type='glove' />
             </div>
 
             <div className="flex items-center mb-2">
               <Users className="mr-2 h-5 w-5" />
-              <span className="font-semibold">{t('players')}:</span>
+              <span className="font-semibold">{t('ui:players')}:</span>
               <span className="ml-2">{players?.length || 0} / {metadata?.maximumUser || 0}</span>
             </div>
             
             <div className="flex items-center mb-2">
               <Clock className="mr-2 h-5 w-5" />
               <span className="font-semibold">
-                {t('blocksLeft', { count: creationHeight + metadata?.startAfter - (tip.tip?.index ?? 0)})}
+                {t('ui:blocksLeft', { count: creationHeight + metadata?.startAfter - (tip.tip?.index ?? 0)})}
               </span>
             </div>
           </div>
           
           <div>
             <div className="flex items-center mb-2">
-              <span className="font-semibold">{t('maxRounds')}:</span>
+              <span className="font-semibold">{t('ui:maxRounds')}:</span>
               <span className="ml-2">{metadata?.maxRounds}</span>
             </div>
 
             <div className="flex items-center mb-2">
-              <span className="font-semibold">{t('roundLength')}:</span>
-              <span className="ml-2">{metadata?.roundLength} {t('blocks')}</span>
+              <span className="font-semibold">{t('ui:roundLength')}:</span>
+              <span className="ml-2">{metadata?.roundLength} {t('ui:blocks')}</span>
             </div>
 
             <div className="flex items-center mb-2">
-              <span className="font-semibold">{t('roundInterval')}:</span>
-              <span className="ml-2">{metadata?.roundInterval} {t('blocks')}</span>
+              <span className="font-semibold">{t('ui:roundInterval')}:</span>
+              <span className="ml-2">{metadata?.roundInterval} {t('ui:blocks')}</span>
             </div>
 
             <div className="flex items-center mb-2">
-              <span className="font-semibold">{t('initialHP')}:</span>
+              <span className="font-semibold">{t('ui:initialHP')}:</span>
               <span className="ml-2">{metadata?.initialHealthPoint} HP</span>
             </div>
 
             <div className="flex items-center mb-2">
-              <span className="font-semibold">{t('selectableGloves')}:</span>
-              <span className="ml-2">{metadata?.numberOfGloves} {t('gloves')}</span>
+              <span className="font-semibold">{t('ui:selectableGloves')}:</span>
+              <span className="ml-2">{metadata?.numberOfGloves} {t('ui:gloves')}</span>
             </div>
           </div>
         </div>
@@ -296,13 +296,13 @@ const JoinPage: React.FC = () => {
   };
 
   if (isLoading || sessionLoading) {
-    return <p className="text-center">{t('loading')}</p>;
+    return <p className="text-center">{t('ui:loading')}</p>;
   }
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-4">{t('joinSession')}</h1>
-      <p className="mb-4">{t('sessionId')}: {sessionId}</p>
+      <h1 className="text-2xl font-bold mb-4">{t('ui:joinSession')}</h1>
+      <p className="mb-4">{t('ui:sessionId')}: {sessionId}</p>
       
       {error && <p className="text-red-500 mb-4">{error}</p>}
       
@@ -312,11 +312,11 @@ const JoinPage: React.FC = () => {
         <>
           <div className="w-full mb-4">
             <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl">{t('selectGloves')}</h2>
+              <h2 className="text-xl">{t('ui:selectGloves')}</h2>
               <div className="flex items-center">
                 <span className="mr-2">{totalSelected}/{MAX_SELECTIONS}</span>
                 <StyledButton onClick={resetSelections}>
-                  {t('reset')}
+                  {t('ui:reset')}
                 </StyledButton>
               </div>
             </div>
@@ -330,10 +330,10 @@ const JoinPage: React.FC = () => {
               shadowColor = '#FF9F0A' 
               onClick={handleJoin}
             >
-              {t('join')}
+              {t('ui:join')}
             </StyledButton>
             <StyledButton onClick={() => navigate('/')}>
-              {t('cancel')}
+              {t('ui:cancel')}
             </StyledButton>
           </div>
         </>

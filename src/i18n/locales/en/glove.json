@@ -1,0 +1,26 @@
+{
+  "0000000000000000000000000000000000000000": {
+    "name": "Basic Rock",
+    "type": "rock",
+    "description": "Win against scissors, lose against paper",
+    "damage": 40,
+    "abilities": {
+    }
+  },
+  "0000000000000000000000000000000000000001": {
+    "name": "Basic Paper",
+    "type": "paper",
+    "description": "Win against rock, lose against scissors",
+    "damage": 40,
+    "abilities": {
+    }
+  },
+  "0000000000000000000000000000000000000002": {
+    "name": "Basic Scissors",
+    "type": "scissors",
+    "description": "Win against paper, lose against rock",
+    "damage": 40,
+    "abilities": {
+    }
+  }
+}

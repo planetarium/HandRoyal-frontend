@@ -27,8 +27,8 @@ const UserPage: React.FC = () => {
   const glovesPerPage = 10;
   const [currentRegisteredPage, setCurrentRegisteredPage] = React.useState(0);
 
-  if (isLoading) return <p>{t('loading')}</p>;
-  if (error) return <p>{t('error')}: {error.message}</p>;
+  if (isLoading) return <p>{t('ui:loading')}</p>;
+  if (error) return <p>{t('ui:error')}: {error.message}</p>;
 
   const handleBack = () => {
     navigate(-1);
@@ -61,7 +61,7 @@ const UserPage: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center w-full mx-auto bg-gray-700 border-2 border-black rounded-lg text-white">
       <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
-        <h1 className="text-4xl font-bold" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('userInfo')}</h1>
+        <h1 className="text-2xl font-bold mb-4" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('ui:userInfo')}</h1>
       </div>
       <div className="flex flex-col items-center p-4 space-y-4">
         {data ? (
@@ -69,10 +69,10 @@ const UserPage: React.FC = () => {
             <div className="flex flex-col items-center">
               {/* 자랑할 만한 대표 글러브 선택할 수 있게? 바꾸기 */}
             </div>
-            <p className="text-lg">{t('User ID')}: {data.id}</p>
+            <p className="text-lg">{t('ui:userId')}: {data.id}</p>
             <div className="w-full">
               <div className="bg-gray-600 p-4 rounded shadow mb-4">
-                <p className="text-lg">{t('ownedGloves')}</p>
+                <p className="text-lg">{t('ui:ownedGloves')}</p>
                 {data.ownedGloves && data.ownedGloves.length > 0 ? (
                   <div className="flex flex-col gap-1 text-sm">
                     {data.ownedGloves.slice(currentOwnedPage * glovesPerPage, (currentOwnedPage + 1) * glovesPerPage).map((glove, index) => (
@@ -80,7 +80,7 @@ const UserPage: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">{t('noGlovesFound')}</p>
+                  <p className="text-gray-500">{t('ui:noGlovesFound')}</p>
                 )}
               </div>
               <div className="flex justify-center space-x-6">
@@ -94,7 +94,7 @@ const UserPage: React.FC = () => {
             </div>
             <div className="w-full">
               <div className="flex flex-col bg-gray-600 p-4 rounded shadow mb-4">
-                <p className="text-lg">{t('registeredGloves')}</p>
+                <p className="text-lg">{t('ui:registeredGloves')}</p>
                 {data.registeredGloves && data.registeredGloves.length > 0 ? (
                   <div className="flex flex-col gap-1 text-sm">
                     {data.registeredGloves.slice(currentRegisteredPage * glovesPerPage, (currentRegisteredPage + 1) * glovesPerPage).map((glove, index) => (
@@ -102,7 +102,7 @@ const UserPage: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">{t('noGlovesFound')}</p>
+                  <p className="text-gray-500">{t('ui:noGlovesFound')}</p>
                 )}
               </div>
               <div className="flex justify-center space-x-6">
@@ -115,11 +115,11 @@ const UserPage: React.FC = () => {
               </div>
             </div>
             <StyledButton onClick={handleBack}>
-              {t('goBack')}
+              {t('ui:goBack')}
             </StyledButton>
           </>
         ) : (
-          <p className="text-red-500">{t('User not found')}</p>
+          <p className="text-red-500">{t('ui:userNotFound')}</p>
         )}
       </div>
     </div>

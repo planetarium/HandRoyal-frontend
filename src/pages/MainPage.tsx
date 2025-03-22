@@ -67,14 +67,14 @@ export const MainPage: React.FC = () => {
       {userData?.sessionId && userData.sessionId !== "0000000000000000000000000000000000000000" ? (
         <div className="flex justify-between items-center bg-gradient-to-r from-yellow-200 to-blue-200 p-6 rounded-lg border-2 border-black w-full mb-6">
           <div>
-            <h3 className="text-xl font-bold text-blue-800">{t('alreadyJoinedSession')}</h3>
+            <h3 className="text-xl font-bold text-blue-800">{t('ui:alreadyJoinedSession')}</h3>
             <p className="text-gray-700 font-mono">{userData.sessionId}</p>
           </div>
           <StyledButton 
             bgColor = '#FFE55C'
             shadowColor = '#FF9F0A'
             onClick={() => navigate(`/game/${userData.sessionId}`)}>
-            {t('rejoin')}
+            {t('ui:rejoin')}
           </StyledButton>
         </div>
       ) : null}
@@ -84,7 +84,7 @@ export const MainPage: React.FC = () => {
             className="text-2xl text-center text-white font-extrabold"
             style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
           >
-            {t('sessionList')}
+            {t('ui:sessionList')}
           </p>
         </div>
         <div className="p-6">
@@ -92,7 +92,7 @@ export const MainPage: React.FC = () => {
             <div className="relative">
               <input
                 className="w-full pl-12 py-2 border border-black border-2 bg-gray-100 rounded-xl focus:bg-white"
-                placeholder={t('enterSessionId')}
+                placeholder={t('ui:enterSessionId')}
                 type="text"
                 value={sessionId}
                 onChange={(e) => {
@@ -104,8 +104,8 @@ export const MainPage: React.FC = () => {
             </div>
           </div>
           {error && <p className="text-red-500">{error}</p>}
-          {sessionIsLoading && <p>{t('loading')}</p>}
-          {sessionError && <p className="text-red-500">{t('error')}: {sessionError.message}</p>}
+          {sessionIsLoading && <p>{t('ui:loading')}</p>}
+          {sessionError && <p className="text-red-500">{t('ui:error')}: {sessionError.message}</p>}
           <div className="session-list overflow-hidden w-full max-w-4xl">
             <div className="text-center text-white mb-2">
               <div className="flex items-center justify-center">
@@ -135,12 +135,12 @@ export const MainPage: React.FC = () => {
                   );
                 })) : (
                   <div className="flex justify-center items-center p-6 rounded-lg w-full border-2 bg-gray-500 border-gray-600">
-                    <p className="text-gray-400"><i>{t('noSessionFound')}</i></p>
+                    <p className="text-gray-400"><i>{t('ui:noSessionFound')}</i></p>
                   </div>)}
             </div>
           </div>
           <p className="mt-4 text-center text-gray-300 cursor-pointer mt-10" onClick={handleCreate}>
-            <i>{t('createNewSession')}</i>
+            <i>{t('ui:createNewSession')}</i>
           </p>
         </div>
       </div>

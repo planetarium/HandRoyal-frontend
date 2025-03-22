@@ -54,7 +54,7 @@ const GlovePage: React.FC = () => {
           className="text-4xl text-white font-bold"
           style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
         >
-          {t('gloveInfo')}
+          {t('ui:gloveInfo')}
         </h1>
       </div>
       <div className="flex flex-col items-center p-4 w-full mx-auto text-white">
@@ -65,14 +65,14 @@ const GlovePage: React.FC = () => {
                 images[hand] && <img key={hand} alt={`${hand} Glove`} className="w-1/3 h-auto rounded-md" src={images[hand]} />
               ))}
             </div>
-            <p className="mb-2 text-md">{t('gloveId')}: {glove.id}</p>
-            <p className="mb-2 text-md">{t('gloveAuthor')}: {glove.author}</p>
+            <p className="mb-2 text-md">{t('ui:gloveId')}: {glove.id}</p>
+            <p className="mb-2 text-md">{t('ui:gloveAuthor')}: {glove.author}</p>
           </>
         ) : (
-          <p className="text-red-500">{t('gloveNotFound')}</p>
+          <p className="text-red-500">{t('ui:gloveNotFound')}</p>
         )}
         <StyledButton onClick={() => navigate(-1)}>
-          {t('goBack')}
+          {t('ui:goBack')}
         </StyledButton>
       </div>
     </div>

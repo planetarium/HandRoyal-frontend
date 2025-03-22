@@ -127,15 +127,15 @@ export const ResultPage: React.FC = () => {
 
   const renderContent = () => {
     if (isLoading) {
-      return <p className="text-center">{t('loading')}</p>;
+      return <p className="text-center">{t('ui:loading')}</p>;
     }
 
     if (error || !data) {
       return (
         <div className="text-center">
-          <p>{t('invalidSession', { sessionId: sessionId })}</p>
+          <p>{t('ui:invalidSession', { sessionId: sessionId })}</p>
           <StyledButton onClick={() => navigate('/')}>
-            {t('backToMain')}
+            {t('ui:backToMain')}
           </StyledButton>
         </div>
       );
@@ -144,10 +144,10 @@ export const ResultPage: React.FC = () => {
     if (data.state === SessionState.Ready) {
       return (
         <div className="text-center">
-          <p>{t('waitingForGameToStart')}</p>
-          <p>{t('blocksLeft', { count: blocksLeft() })}</p>
+          <p>{t('ui:waitingForGameToStart')}</p>
+          <p>{t('ui:blocksLeft', { count: blocksLeft() })}</p>
           <StyledButton onClick={() => navigate('/')}>
-            {t('backToMain')}
+            {t('ui:backToMain')}
           </StyledButton>
         </div>
       );
@@ -156,11 +156,11 @@ export const ResultPage: React.FC = () => {
     return (
       <div className="flex flex-col justify-between items-center text-center p-6 h-full">
         <div className="mb-4 flex-grow">
-          <p className='text-xl mb-2'>{t('sessionId')}:&nbsp;{sessionId}</p>
-          <p className='text-xl mb-2'>{t('organizer')}:&nbsp;<AddressDisplay address={data.metadata?.organizer} type='user' /></p>
-          <p className='text-xl mb-2'>{t('prize')}:&nbsp;<AddressDisplay address={data.metadata?.prize} type='glove' /></p>
+          <p className='text-xl mb-2'>{t('ui:sessionId')}:&nbsp;{sessionId}</p>
+          <p className='text-xl mb-2'>{t('ui:organizer')}:&nbsp;<AddressDisplay address={data.metadata?.organizer} type='user' /></p>
+          <p className='text-xl mb-2'>{t('ui:prize')}:&nbsp;<AddressDisplay address={data.metadata?.prize} type='glove' /></p>
           <p className='text-xl mb-2'>
-            {t('participants')}:&nbsp;{data.players?.length}
+            {t('ui:participants')}:&nbsp;{data.players?.length}
             <button className="ml-2 text-white cursor-pointer" onClick={toggleParticipants}>
               {showParticipants ? <EyeOff className="inline-block w-5 h-5" /> : <Eye className="inline-block w-5 h-5" />}
             </button>
@@ -173,13 +173,13 @@ export const ResultPage: React.FC = () => {
             </div>
           )}
           {data.state === SessionState.Ended ?
-            <p className='text-xl mt-2 mb-4'>{t('winner')}:&nbsp;<AddressDisplay address={getWinner()} type='user'/></p> :
-            <p className='text-xl mt-2 mb-4'>{t('playersLeft')}:&nbsp;{data.players?.filter(player => player?.state !== PlayerState.Lose).length}</p>}
-          <p className='text-xl mb-4'>{t('matches')}:&nbsp;{data.rounds?.length}</p>
+            <p className='text-xl mt-2 mb-4'>{t('ui:winner')}:&nbsp;<AddressDisplay address={getWinner()} type='user'/></p> :
+            <p className='text-xl mt-2 mb-4'>{t('ui:playersLeft')}:&nbsp;{data.players?.filter(player => player?.state !== PlayerState.Lose).length}</p>}
+          <p className='text-xl mb-4'>{t('ui:matches')}:&nbsp;{data.rounds?.length}</p>
           {data.rounds?.map((round, index) => (
             <div key={index} className="mb-4">
               <span className="mb-2 cursor-pointer" onClick={() => toggleRoundVisibility(index)}>
-                {t('round')}&nbsp;{index + 1}
+                {t('ui:round')}&nbsp;{index + 1}
                 {showRounds[index] ? ' ▼' : ' ▶'}
               </span>
               {showRounds[index] && (
@@ -197,15 +197,15 @@ export const ResultPage: React.FC = () => {
           ))}
           {(() => {
             switch(data.state) {
-              case SessionState.Active: return <p className='text-sm text-center'>{t('roundActive', { count: blocksLeft() })}</p>
-              case SessionState.Break: return <p className='text-sm text-center'>{t('roundBreak', { count: blocksLeft() })}</p>
+              case SessionState.Active: return <p className='text-sm text-center'>{t('ui:roundActive', { count: blocksLeft() })}</p>
+              case SessionState.Break: return <p className='text-sm text-center'>{t('ui:roundBreak', { count: blocksLeft() })}</p>
               default: return null
             }
           })()}
         </div>
         <div className="text-center mt-6">
           <StyledButton onClick={() => navigate('/')}>
-            {t('backToMain')}
+            {t('ui:backToMain')}
           </StyledButton>
         </div>
       </div>
@@ -223,7 +223,7 @@ export const ResultPage: React.FC = () => {
             className="text-4xl text-center text-white font-extrabold"
             style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
           >
-            {t('sessionResults')}
+            {t('ui:sessionResults')}
           </p>
         </div>
         <div className="flex flex-col justify-center flex-grow">
