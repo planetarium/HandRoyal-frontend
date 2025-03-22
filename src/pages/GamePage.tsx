@@ -50,7 +50,7 @@ export const GamePage: React.FC = () => {
   if (isLoading || !sessionData?.stateQuery?.userScopedSession) {
     console.error(isLoading);
     console.error(sessionData?.stateQuery?.userScopedSession);
-    return <p>{t('loading')}</p>;
+    return <p>{t('ui:loading')}</p>;
   }
 
   const session = sessionData.stateQuery.userScopedSession;
@@ -62,7 +62,7 @@ export const GamePage: React.FC = () => {
 
   const renderContent = () => {
     if (showNoSessionMessage) {
-      return <p className="text-red-500 text-center mb-4">{t('noSessionFound')}</p>;
+      return <p className="text-red-500 text-center mb-4">{t('ui:noSessionFound')}</p>;
     }
 
     if (playerStatus === PlayerState.Won) {
@@ -71,17 +71,17 @@ export const GamePage: React.FC = () => {
           <p> </p>
           <div className="flex flex-col items-center justify-center">
             <img alt="Win" className="w-1/4 h-auto object-contain animate-cry mb-6" src={win} />
-            <p className="text-2xl text-center">{t('win')}</p>
+            <p className="text-2xl text-center">{t('ui:win')}</p>
           </div>
           <div className="flex justify-center space-x-4 mb-5">
             <StyledButton 
               bgColor = '#FFE55C'
               shadowColor = '#FF9F0A'
               onClick={() => navigate(`/result/${sessionId}`)}>
-              {t('viewResults')}
+              {t('ui:viewResults')}
             </StyledButton>
             <StyledButton onClick={() => navigate('/')} >
-              {t('backToMain')}
+              {t('ui:backToMain')}
             </StyledButton>
           </div>
         </div>
@@ -94,17 +94,17 @@ export const GamePage: React.FC = () => {
           <p> </p>
           <div className="flex flex-col items-center justify-center">
             <img alt="Lose" className="w-1/4 h-auto object-contain animate-cry mb-6" src={lose} />
-            <p className="text-2xl text-center">{t('lose')}</p>
+            <p className="text-2xl text-center">{t('ui:lose')}</p>
           </div>
           <div className="flex justify-center space-x-4 mb-5">
             <StyledButton 
               bgColor = '#FFE55C'
               shadowColor = '#FF9F0A'
               onClick={() => navigate(`/result/${sessionId}`)}>
-              {t('viewResults')}
+              {t('ui:viewResults')}
             </StyledButton>
             <StyledButton onClick={() => navigate('/')} >
-              {t('backToMain')}
+              {t('ui:backToMain')}
             </StyledButton>
           </div>
         </div>
@@ -114,16 +114,16 @@ export const GamePage: React.FC = () => {
     if (session.sessionState === SessionState.Ended) {
       return (
         <div className="flex flex-col items-center justify-center">
-          <h2 className="text-2xl mb-4">{t('sessionEnded')}</h2>
+          <h2 className="text-2xl mb-4">{t('ui:sessionEnded')}</h2>
           <div className="flex justify-center space-x-4 mb-5">
             <StyledButton 
               bgColor = '#FFE55C'
               shadowColor = '#FF9F0A'
               onClick={() => navigate(`/result/${sessionId}`)}>
-              {t('viewResults')}
+              {t('ui:viewResults')}
             </StyledButton>
             <StyledButton onClick={() => navigate('/')} >
-              {t('backToMain')}
+              {t('ui:backToMain')}
             </StyledButton>
           </div>
         </div>
@@ -134,7 +134,7 @@ export const GamePage: React.FC = () => {
       return (
         <div className="flex flex-col items-center justify-center">
           <img alt="Loading" className="w-1/4 h-auto object-contain animate-swing mb-6" src={loading} />
-          <p className="text-2xl text-white text-center mt-4">{t('waitingForGameToStart')}</p>
+          <p className="text-2xl text-white text-center mt-4">{t('ui:waitingForGameToStart')}</p>
           <div className="flex items-center justify-center text-xl mt-5">
             <Clock className="w-5 h-5 mr-1" />{blocksLeft()}
           </div>
@@ -145,15 +145,15 @@ export const GamePage: React.FC = () => {
     if (account.address.equals(Address.fromHex(session.organizerAddress))) {
       return (
         <div>
-          <p className="text-2xl">{t('youAreTheSessionOrganizer')}</p>
+          <p className="text-2xl">{t('ui:youAreTheSessionOrganizer')}</p>
           <StyledButton 
             bgColor = '#FFE55C'
             shadowColor = '#FF9F0A'
             onClick={() => navigate(`/result/${sessionId}`)}>
-          {t('spectate')}
+            {t('ui:spectate')}
           </StyledButton>
           <StyledButton onClick={() => navigate('/')} >
-            {t('backToMain')}
+            {t('ui:backToMain')}
           </StyledButton>
         </div>
       )
@@ -172,7 +172,7 @@ export const GamePage: React.FC = () => {
             className="text-4xl text-center text-white font-extrabold"
             style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
           >
-            {t('gameBoardTitle')}
+            {t('ui:gameBoardTitle')}
           </p>
         </div>
         <div className="flex flex-col justify-center flex-grow">

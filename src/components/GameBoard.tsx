@@ -125,17 +125,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       <p className="text-2xl font-bold text-center mb-2" 
         style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
       >
-        {t('phase')}&nbsp;{((data?.currentPhaseIndex ?? -1) + 1)}
+        {t('ui:phase')}&nbsp;{((data?.currentPhaseIndex ?? -1) + 1)}
       </p>
       <p className="text-md font-bold text-center mb-4" 
         style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
       >
-        {t('survivors')}:&nbsp;{(data?.playersLeft ?? -1)}
+        {t('ui:survivors')}:&nbsp;{(data?.playersLeft ?? -1)}
       </p>
       <p className="text-xl font-bold text-center mb-2" 
         style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
       >
-        {t('round')}&nbsp;{((data?.currentUserRoundIndex ?? -1) + 1)}
+        {t('ui:round')}&nbsp;{((data?.currentUserRoundIndex ?? -1) + 1)}
       </p>
       {/* blocks left */}
       <div className="relative h-12 mb-8">
@@ -214,11 +214,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
                     <div className="bg-black/80 p-4 rounded-lg text-white">
-                      <h3 className="font-bold mb-2">{t('gloveStats')}</h3>
+                      <h3 className="font-bold mb-2">{t('ui:gloveStats')}</h3>
                       <div className="space-y-1">
-                        <p>{t('attack')}: 100</p>
-                        <p>{t('defense')}: 100</p>
-                        <p>{t('speed')}: 100</p>
+                        <p>{t('ui:attack')}: 100</p>
+                        <p>{t('ui:defense')}: 100</p>
+                        <p>{t('ui:speed')}: 100</p>
                       </div>
                     </div>
                   </div>
@@ -236,7 +236,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
           shadowColor='#FF9F0A'
           onClick={handleSubmit}
         >
-          {t('submit')}
+          {t('ui:submit')}
         </StyledButton>
       </div>
     </div>

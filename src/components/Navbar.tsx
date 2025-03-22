@@ -27,10 +27,10 @@ const Navbar: React.FC = () => {
         </Link>
         <div className="flex items-center space-x-6">
           <Link className="text-lg text-white" to={"/user/" + account?.address.toString()}>
-            {t('userInfo')}
+            {t('ui:userInfo')}
           </Link>
           <Link className="text-lg text-white" to="/registerGlove">
-            {t('registerGlove')}
+            {t('ui:registerGlove')}
           </Link>
         </div>
       </div>
@@ -49,11 +49,11 @@ const Navbar: React.FC = () => {
               className="bg-gray-600 text-white py-1 px-2 text-xs rounded border border-gray-500 hover:bg-gray-500 ml-2 cursor-pointer"
               onClick={handleLogout}
             >
-              {t('logoutButton')}
+              {t('ui:logoutButton')}
             </button>
           </div>
         )}
-        <span className="text-sm font-medium mr-2">{t('language')}</span>
+        <span className="text-sm font-medium mr-2">{t('ui:language')}</span>
         <select
           className="bg-gray-700 text-white p-1 rounded text-sm cursor-pointer"
           value={i18n.language}

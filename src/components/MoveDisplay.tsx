@@ -47,7 +47,7 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, ma
       </div>
       {/* 플레이어 주소 공간 */}
       <div className="flex w-full items-center justify-center text-sm text-white p-1 bg-gray-800 rounded-b">
-        {userAddress === 'you' ? t('you') : <AddressDisplay address={userAddress} type='user' />}
+        {userAddress === 'you' ? t('ui:you') : <AddressDisplay address={userAddress} type='user' />}
       </div>
     </div>
   );
