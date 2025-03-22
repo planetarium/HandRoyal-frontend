@@ -170,7 +170,7 @@ const JoinPage: React.FC = () => {
                   src={gloveImages[gloveId] || 'placeholder.png'}
                 />
               </div>
-              <p className="text-center text-xs mt-2 truncate">{gloveId}</p>
+              <p className="text-center text-xs mt-2 truncate">{t(`glove:${gloveId}.name`)}</p>
               <div className="flex justify-center mt-2">
                 {[...Array(count)].map((_, i) => (
                   <div 

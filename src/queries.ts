@@ -49,31 +49,29 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
       userScopedSession(sessionId: $sessionId, userId: $userId) {
         sessionId
         height
-        organizerAddress
-        playerState
         sessionState
+        organizerAddress
         opponentAddress
+        currentInterval
         myGloves
         opponentGloves
-        currentUserMatchState
-        currentInterval
-        intervalEndHeight
         playersLeft
         currentPhaseIndex
         currentUserRoundIndex
-        currentUserRound {
-          winner
-          condition1 {
-            healthPoint
-            gloveUsed
-            submission
-          }
-          condition2 {
-            healthPoint
-            gloveUsed
-            submission
-          }
+        myCondition {
+          healthPoint
+          gloveUsed
+          submission
         }
+        opponentCondition {
+          healthPoint
+          gloveUsed
+          submission
+        }
+        lastRoundWinner
+        currentUserMatchState
+        playerState
+        intervalEndHeight
       }
     }
   }

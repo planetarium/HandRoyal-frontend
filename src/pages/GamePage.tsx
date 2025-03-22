@@ -48,8 +48,6 @@ export const GamePage: React.FC = () => {
   }, [tip, refetch]);
 
   if (isLoading || !sessionData?.stateQuery?.userScopedSession) {
-    console.error(isLoading);
-    console.error(sessionData?.stateQuery?.userScopedSession);
     return <p>{t('ui:loading')}</p>;
   }
 
