@@ -17,7 +17,12 @@ export const registerGlove = (gloveAddress: string, file: File | null) =>
 }
 
 export const getLocalGloveImage = (gloveId: string) => {
-  return `$src/assets/gloves/${gloveId}.webp`;
+  try {
+    return new URL(`/src/assets/gloves/${gloveId}.jpg`, import.meta.url).href;
+  } catch (error) {
+    console.error(`Failed to load glove image for ${gloveId}:`, error);
+    return '';
+  }
 }
 
 export const getGloveImage = (gloveId: string | null, hand: string) => {

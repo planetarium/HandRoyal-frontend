@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 interface AddressDisplayProps {
@@ -9,6 +10,7 @@ interface AddressDisplayProps {
 
 const AddressDisplay: React.FC<AddressDisplayProps> = ({ type, address, className, shorten = true }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleClick = (address: string | undefined) => {
     if (address) {
@@ -28,7 +30,7 @@ const AddressDisplay: React.FC<AddressDisplayProps> = ({ type, address, classNam
 
   const displayAddress = (address: string | undefined) => {
     if (address) {
-      return <span className={`cursor-pointer hover:underline ${className}`} onClick={() => handleClick(address)}>{shortenAddress(address)}</span>;
+      return <span className={`cursor-pointer hover:underline ${className}`} onClick={() => handleClick(address)}>{type === 'glove' ? t(`glove:${address}.name`) : shortenAddress(address)}</span>;
     }
 
     return 'UNDEFINED';
