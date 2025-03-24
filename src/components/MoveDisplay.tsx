@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AddressDisplay from './AddressDisplay';
-import { getLocalGloveImage } from '../fetches';
+import { getLocalGloveImage, getGloveImage } from '../fetches';
 
 interface MoveDisplayProps {
   gloveAddress: string;
@@ -12,18 +12,13 @@ interface MoveDisplayProps {
 
 const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, maxHp, currentHp }) => {
   const { t } = useTranslation();
-  const [moveImage, setMoveImage] = useState<string | null>(null);
   const hpPercentage = (currentHp / maxHp) * 100;
-
-  useEffect(() => {
-    setMoveImage(getLocalGloveImage(gloveAddress));
-  }, [gloveAddress]);
 
   return (
     <div className="flex flex-col items-center rounded-lg w-full border-2 border-black bg-gray-600 shadow-md">
       {/* 이미지 공간 */}
-      <div className="w-full h-64 bg-white rounded-t-lg flex items-center justify-center">
-        <img alt={gloveAddress} className="w-32 h-32 object-cover" src={moveImage ?? undefined} />
+      <div className="w-full h-70 bg-white rounded-t-lg flex items-center justify-center">
+        {gloveAddress === '' ? null : <img alt={gloveAddress} className="w-64 h-64 object-cover" src={getLocalGloveImage(gloveAddress)} />}
       </div>
       {/* 장갑 이름 공간 */}
       <div className="text-center text-black w-full bg-white">

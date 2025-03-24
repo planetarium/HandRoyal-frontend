@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StyledButton from '../components/StyledButton';
+import { getLocalGloveImage } from '../fetches';
 
 const GlovePage: React.FC = () => {
   const [images, setImages] = useState<{ [key: string]: string | null }>({
@@ -11,41 +12,7 @@ const GlovePage: React.FC = () => {
   });
   const navigate = useNavigate();
   const { t } = useTranslation();
-/*  const { data, error, isLoading } = useQuery({
-    queryKey: ['getGlove', gloveId],
-    queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getGloveDocument, { gloveId });
-      return response.stateQuery?.glove || null;
-    }
-  });
-
-  useEffect(() => {
-    if (gloveId) {
-      [MoveType.Rock, MoveType.Scissors, MoveType.Paper].forEach(hand => {
-        getGloveImage(gloveId, hand)
-          .then(response => response.blob())
-          .then(blob => {
-            const url = URL.createObjectURL(blob);
-            setImages(prevImages => ({ ...prevImages, [hand]: url }));
-          })
-          .catch(err => console.error(`Failed to fetch ${hand} image:`, err));
-      });
-    }
-  }, [gloveId]);
-
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-
-  const glove = data;*/
-  const glove = {
-    id: '0x1234567890abcdef',
-    author: 'John Doe',
-    images: {
-      ROCK: 'https://example.com/rock.png',
-      SCISSORS: 'https://example.com/scissors.png',
-      PAPER: 'https://example.com/paper.png'
-    }
-  };
+  const { gloveId } = useParams<{ gloveId: string }>();
 
   return (
     <div className="flex flex-col items-center justify-center w-full mx-auto bg-gray-700 rounded-lg border border-black">
@@ -58,19 +25,15 @@ const GlovePage: React.FC = () => {
         </h1>
       </div>
       <div className="flex flex-col items-center p-4 w-full mx-auto text-white">
-        {glove ? (
-          <>
-            <div className="flex space-x-4 mb-8">
-              {['ROCK', 'SCISSORS', 'PAPER'].map(hand => (
-                images[hand] && <img key={hand} alt={`${hand} Glove`} className="w-1/3 h-auto rounded-md" src={images[hand]} />
-              ))}
-            </div>
-            <p className="mb-2 text-md">{t('ui:gloveId')}: {glove.id}</p>
-            <p className="mb-2 text-md">{t('ui:gloveAuthor')}: {glove.author}</p>
-          </>
-        ) : (
-          <p className="text-red-500">{t('ui:gloveNotFound')}</p>
-        )}
+        <div className="flex space-x-4 mb-8">
+            <img key={gloveId} alt={`${gloveId} Glove`} className="max-w-96 h-auto" src={getLocalGloveImage(gloveId ?? '')} />
+        </div>
+        <p className="mb-2 text-2xl">{t(`glove:${gloveId}.name`)}</p>
+        <p className="mb-2 text-sm">{t('ui:glovetype')}: {t(`glove:${gloveId}.type`)}</p>
+        <p className="mb-2 text-sm">{t('ui:damage')}: {t(`glove:${gloveId}.damage`)}</p>
+        <p className="mb-2 text-md">{t(`glove:${gloveId}.description`)}</p>
+      </div>
+      <div className="flex flex-col items-center p-4 w-full mx-auto">
         <StyledButton onClick={() => navigate(-1)}>
           {t('ui:goBack')}
         </StyledButton>
