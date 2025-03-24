@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
 import { useRequiredAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, submitMoveAction, getUserDocument } from '../queries';
-import { MatchState, SessionState } from '../gql/graphql';
+import { GRAPHQL_ENDPOINT, submitMoveAction } from '../queries';
+import { MatchState } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
 import { executeTransaction } from '../utils/transaction';
@@ -67,25 +67,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   });
 
   const remainingBlocks = data ? data.intervalEndHeight - blockIndex : 0;
-
-  const getFuseWidth = () => {
-    if (!data) return '0%';
-    
-    const maxInterval = data.currentInterval;
-    const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
-    return `${percentage}%`;
-  };
-
-  const getFuseColor = () => {
-    if (!data) return 'bg-gray-300';
-    
-    const maxInterval = data.currentInterval;
-    const percentage = Math.max(0, Math.min(100, (remainingBlocks / maxInterval) * 100));
-
-    if (percentage > 66) return 'bg-green-500';
-    if (percentage > 33) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
+  const fusePercentage = data ? Math.max(0, Math.min(100, (remainingBlocks / data.currentInterval) * 100)) : 0;
 
   useEffect(() => {
     const props: GameBoardState = {
@@ -118,201 +100,182 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   };
 
   return (
-    <div className="flex flex-col p-6">
-      <p className="text-2xl font-bold text-center mb-2" 
-        style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
-      >
-        {t('ui:phase')}&nbsp;{((data?.currentPhaseIndex ?? -1) + 1)}
-      </p>
-      <p className="text-md font-bold text-center mb-4" 
-        style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
-      >
-        {t('ui:survivors')}:&nbsp;{(data?.playersLeft ?? -1)}
-      </p>
-      {data?.currentUserMatchState !== MatchState.Ended ? (
-        <>
-        <p className="text-xl font-bold text-center mb-2" 
-          style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
-        >
-          {t('ui:round')}&nbsp;{((data?.currentUserRoundIndex ?? -1) + 1)}
-        </p>
-        
-        <p className="text-lg font-bold text-center mb-2" 
-          style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
-        >
+    <div className="relative h-full w-full max-w-md mx-auto bg-slate-800 text-white overflow-hidden rounded-lg">
+      {/* 상단 정보 바 - 컴팩트하게 한 줄로 표시 */}
+      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 border-b border-slate-700">
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col">
+            <span className="text-xs text-slate-400">{t('ui:phase')}</span>
+            <span className="text-sm font-bold">{((data?.currentPhaseIndex ?? -1) + 1)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-slate-400">{t('ui:round')}</span>
+            <span className="text-sm font-bold">{((data?.currentUserRoundIndex ?? -1) + 1)}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded-full">
+          <span className="text-xs">{t('ui:survivors')}:</span>
+          <span className="text-sm font-bold">{data?.playersLeft ?? -1}</span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <Clock className="h-3.5 w-3.5" />
+          <span className="text-sm font-bold">{remainingBlocks}</span>
+        </div>
+      </div>
+
+      {/* 게임 상태 표시 */}
+      {data?.currentUserMatchState !== MatchState.Ended && (
+        <div className={`px-3 py-1 text-center text-xs font-medium ${
+          data?.currentUserMatchState === MatchState.Active ? 'bg-green-500/20' : 'bg-yellow-500/20'
+        }`}>
           {data?.currentUserMatchState === MatchState.Active ? t('ui:matchActive') : t('ui:matchBreak')}
-        </p>
-
-        {/* blocks left */}
-        <div className="relative h-12 mb-8">
-          {/* 추후에 시계 연출 추가할 예정. 파이가 줄어드는 모양으로 표시하고, 숫자도 안에 같이 표시해서 컴팩트하고 가시성 좋게 */}
-          <div className="flex justify-center items-center text-center mb-4">
-            <Clock className="w-5 h-5 mr-1" />{remainingBlocks}
-          </div>
-          <div className="w-full max-w-sm mx-auto relative mt-2">
-            <div className="absolute -left-8 translate-y-[-50%]">
-              {remainingBlocks > 0 && (
-                <span className="inline-block text-2xl">
-                  💣
-                </span>
-              )}
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all duration-1000 ease-linear ${getFuseColor()}`}
-                style={{ width: getFuseWidth() }}
-              />
-            </div>
-            <div 
-              className="absolute top-1/2 transition-all duration-1000 ease-linear"
-              style={{ left: getFuseWidth(), transform: 'translate(-50%, -70%)' }}
-            >
-              {remainingBlocks > 0 && (
-                <span className="inline-block animate-pulse text-2xl">
-                  🔥
-                </span>
-              )}
-            </div>
-          </div>
         </div>
+      )}
 
-        {/* 상대 보유 글러브 표시 영역 */}
-        <div className="flex flex-wrap justify-center gap-2 mb-4">
-          {data?.opponentGloves?.map((gloveId, index) => (
-            <div
-              key={index}
-              className={`w-12 h-16 rounded-lg overflow-hidden border-2 border-black bg-gray-100 relative ${
-                data?.opponentCondition?.gloveUsed?.[index] ? 'opacity-50' : ''
-              }`}
-            >
-              <div className="flex flex-col h-full">
-                <div className="h-full">
-                  <img
-                    alt={gloveId}
-                    className="w-full h-full object-cover"
-                    src={getLocalGloveImage(gloveId)}
-                  />
-                </div>
-                {data?.opponentCondition?.gloveUsed?.[index] && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <span className="text-white text-2xl">✗</span>
-                  </div>
-                )}
+      {/* 타이머 퓨즈 - 슬림한 디자인 */}
+      <div className="relative h-1.5 w-full bg-slate-700">
+        <div
+          style={{ width: `${fusePercentage}%` }}
+          className={`h-full transition-all duration-1000 ease-linear ${
+            fusePercentage > 66 ? "bg-green-500" : fusePercentage > 33 ? "bg-yellow-500" : "bg-red-500"
+          }`}
+        />
+        <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 text-xs">💣</div>
+        {/* eslint-disable-next-line react/jsx-sort-props, react/jsx-max-props-per-line */}
+        <div
+          style={{ left: `${fusePercentage}%` }}
+          className="absolute top-1/2 transform -translate-y-1/2 transition-all duration-1000 ease-linear text-xs"
+        >
+          🔥
+        </div>
+      </div>
+
+      {/* 상대 보유 글러브 표시 영역 */}
+      <div className="flex flex-wrap justify-center gap-2 p-2">
+        {data?.opponentGloves?.map((gloveId, index) => (
+          <div
+            key={index}
+            className={`w-12 h-14 rounded-lg overflow-hidden border-2 border-black bg-gray-100 relative ${
+              data?.opponentCondition?.gloveUsed?.[index] ? 'opacity-50' : ''
+            }`}
+          >
+            <div className="flex flex-col h-full">
+              <div className="h-full">
+                <img
+                  alt={gloveId}
+                  className="w-full h-full object-cover"
+                  src={getLocalGloveImage(gloveId)}
+                />
               </div>
+              {data?.opponentCondition?.gloveUsed?.[index] && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <span className="text-white text-xl">✗</span>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
 
-        {/* 현재 제출 및 체력 상태 표시 영역 */}
-        <div className="flex items-center justify-center space-x-4 mb-4">
-          <MoveDisplay 
-            currentHp={gameBoardState.myHealthPoint < 0 ? 0 : gameBoardState.myHealthPoint}
-            gloveAddress={gameBoardState.myGloveAddress ?? ''} 
-            maxHp={gameBoardState.maxHealthPoint}
-            userAddress={'you'}
-          />
-          <Swords className="w-20 h-20" color="white" />
-          <MoveDisplay 
-            currentHp={gameBoardState.opponentHealthPoint < 0 ? 0 : gameBoardState.opponentHealthPoint}
-            gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
-            maxHp={gameBoardState.maxHealthPoint}
-            userAddress={gameBoardState.opponentAddress ?? ''}
-          />
-        </div>
-        
-        {/* 글러브 선택 UI */}
-        <div className="flex flex-col items-center space-y-4 mb-4 p-6">
-          <div className="flex justify-center relative h-[300px] w-full max-w-4xl">
-            <div className="flex justify-center w-full">
-              {(() => {
-                // 사용 가능한 글러브만 필터링하되, 원본 인덱스 정보 유지
-                const availableGloves = data?.myGloves?.map((gloveId, index) => ({
-                  gloveId,
-                  originalIndex: index,
-                  isUsed: data?.myCondition?.gloveUsed?.[index] === true
-                })).filter(glove => !glove.isUsed) ?? [];
+      {/* 현재 제출 및 체력 상태 표시 영역 */}
+      <div className="flex items-center justify-center space-x-1 py-0.5">
+        <MoveDisplay 
+          currentHp={gameBoardState.myHealthPoint < 0 ? 0 : gameBoardState.myHealthPoint}
+          gloveAddress={gameBoardState.myGloveAddress ?? ''} 
+          maxHp={gameBoardState.maxHealthPoint}
+          userAddress={'you'} 
+        />
+        <Swords className="w-16 h-16" color="white" />
+        <MoveDisplay 
+          currentHp={gameBoardState.opponentHealthPoint < 0 ? 0 : gameBoardState.opponentHealthPoint}
+          gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
+          maxHp={gameBoardState.maxHealthPoint}
+          userAddress={gameBoardState.opponentAddress ?? ''}
+        />
+      </div>
+      
+      {/* 글러브 선택 UI */}
+      <div className="flex flex-col items-center space-y-4 p-4">
+        <div className="flex justify-center relative h-[150px] w-full">
+          <div className="flex justify-center w-full">
+            {(() => {
+              // 사용 가능한 글러브만 필터링하되, 원본 인덱스 정보 유지
+              const availableGloves = data?.myGloves?.map((gloveId, index) => ({
+                gloveId,
+                originalIndex: index,
+                isUsed: data?.myCondition?.gloveUsed?.[index] === true
+              })).filter(glove => !glove.isUsed) ?? [];
 
-                const totalCards = availableGloves.length;
-                const cardWidth = 192; // w-48 = 12rem = 192px
-                const containerWidth = 896; // max-w-4xl = 56rem = 896px
-                const totalPadding = 72; // p-6 * 3 = 1.5rem * 3 = 24px * 3
-                const cardBorder = 4; // border-2 = 2px * 2
-                const effectiveCardWidth = cardWidth + cardBorder;
-                const availableWidth = containerWidth - totalPadding - effectiveCardWidth;
-                const spacing = totalCards > 1 
-                  ? (100 - (effectiveCardWidth / availableWidth * 100)) / (totalCards - 1) 
-                  : 0;
+              const totalCards = availableGloves.length;
+              const cardWidth = 120; // w-30 = 7.5rem = 120px
+              const containerWidth = 896; // max-w-4xl = 56rem = 896px
+              const totalPadding = 72; // p-6 * 3 = 1.5rem * 3 = 24px * 3
+              const cardBorder = 4; // border-2 = 2px * 2
+              const effectiveCardWidth = cardWidth + cardBorder;
+              const availableWidth = containerWidth - totalPadding - effectiveCardWidth;
+              const spacing = totalCards > 1 
+                ? (100 - (effectiveCardWidth / availableWidth * 100)) / (totalCards - 1) 
+                : 0;
 
-                return availableGloves.map((glove, displayIndex) => {
-                  const isSelected = selectedHand === glove.originalIndex;
-                  const gloveImage = getLocalGloveImage(glove.gloveId);
-                  
-                  return (
-                    <div
-                      key={glove.originalIndex}
-                      className={`absolute w-48 h-64 rounded-lg overflow-hidden border-2 bg-gray-100 border-black cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 hover:-translate-y-4 ${
-                        isSelected 
-                          ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-10 -translate-y-4' 
-                          : 'hover:shadow-lg hover:shadow-white/20'
-                      }`}
-                      style={{
-                        left: `${displayIndex * spacing}%`,
-                        zIndex: isSelected ? 10 : displayIndex,
-                      }}
-                      onClick={() => setSelectedHand(isSelected ? -1 : glove.originalIndex)}
-                    >
-                      <div className="flex flex-col items-center justify-center border-b-2 border-black bg-gray-900 p-1">
-                        <p className="text-center text-white text-sm">{t(`glove:${glove.gloveId}.name`)}</p>
-                      </div>
-                      <img
-                        alt={glove.gloveId}
-                        className="w-full h-full object-cover"
-                        src={gloveImage}
-                      />
-                      <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 m-6">
-                          <div className="bg-black/80 p-4 rounded-lg text-white">
-                            <h3 className="font-bold mb-2">{t(`glove:${glove.gloveId}.name`)}</h3>
-                            <div className="space-y-1 text-xs">
-                              <p>{t('ui:type')}: {t(`glove:${glove.gloveId}.type`)}</p>
-                              <p>{t('ui:damage')}: {t(`glove:${glove.gloveId}.damage`)}</p>
-                              <p>{t('ui:description')}</p>
-                              <p className='text-2xs'>{t(`glove:${glove.gloveId}.description`)}</p>
-                            </div>
+              return availableGloves.map((glove, displayIndex) => {
+                const isSelected = selectedHand === glove.originalIndex;
+                const gloveImage = getLocalGloveImage(glove.gloveId);
+                
+                return (
+                  <div
+                    key={glove.originalIndex}
+                    className={`absolute w-30 h-40 rounded-lg overflow-hidden border-2 bg-gray-100 border-black cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 hover:-translate-y-4 ${
+                      isSelected 
+                        ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-10 -translate-y-4' 
+                        : 'hover:shadow-lg hover:shadow-white/20'
+                    }`}
+                    style={{
+                      left: `${displayIndex * spacing}%`,
+                      zIndex: isSelected ? 10 : displayIndex,
+                    }}
+                    onClick={() => setSelectedHand(isSelected ? -1 : glove.originalIndex)}
+                  >
+                    <div className="flex flex-col items-center justify-center border-b-2 border-black bg-gray-900 p-0.5">
+                      <p className="text-center text-white text-2xs">{t(`glove:${glove.gloveId}.name`)}</p>
+                    </div>
+                    <img
+                      alt={glove.gloveId}
+                      className="w-full h-full object-cover"
+                      src={gloveImage}
+                    />
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 m-2">
+                        <div className="bg-black/80 p-1.5 rounded-lg text-white">
+                          <h3 className="font-bold mb-0.5 text-2xs">{t(`glove:${glove.gloveId}.name`)}</h3>
+                          <div className="space-y-0.5 text-2xs">
+                            <p>{t('ui:type')}: {t(`glove:${glove.gloveId}.type`)}</p>
+                            <p>{t('ui:damage')}: {t(`glove:${glove.gloveId}.damage`)}</p>
+                            <p>{t('ui:description')}</p>
+                            <p className='text-2xs'>{t(`glove:${glove.gloveId}.description`)}</p>
                           </div>
                         </div>
                       </div>
                     </div>
-                  );
-                });
-              })()}
-            </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
+      </div>
 
-        {/* 제출 버튼 */}
-        <div className="flex justify-center">
-          <StyledButton 
-            bgColor='#FFE55C' 
-            shadowColor='#FF9F0A'
-            onClick={handleSubmit}
-          >
-            {t('ui:submit')}
-          </StyledButton>
-        </div></>) :
-        <div className="flex flex-col items-center justify-center">
-        <p className="text-xl font-bold text-center mb-2" 
-          style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+      {/* 제출 버튼 */}
+      <div className="flex justify-center p-4">
+        <StyledButton 
+          bgColor='#FFE55C' 
+          shadowColor='#FF9F0A'
+          onClick={handleSubmit}
         >
-          {t('ui:matchEnded')}
-        </p>
-        <p className="text-xl font-bold text-center mb-2" 
-          style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
-        >
-          {t('ui:expectedBlocksForNextMatch')}: {(data?.intervalEndHeight ?? 0) - (blockIndex ?? 0)}
-        </p>
-        </div>
-       }
+          {t('ui:submit')}
+        </StyledButton>
+      </div>
     </div>
   );
 };
