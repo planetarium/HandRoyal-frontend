@@ -165,14 +165,6 @@ export const GamePage: React.FC = () => {
   return (
     <div className="flex justify-center">
       <div className="flex flex-col justify-between bg-gray-700 rounded-lg text-white border-black border-2 min-h-[calc(100vh-180px)] w-full">
-        <div className="flex items-center justify-center rounded-t-lg p-6 bg-gray-900">
-          <p
-            className="text-4xl text-center text-white font-extrabold"
-            style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
-          >
-            {t('ui:gameBoardTitle')}
-          </p>
-        </div>
         <div className="flex flex-col justify-center flex-grow">
           {renderContent()}
         </div>
