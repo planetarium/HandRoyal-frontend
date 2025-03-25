@@ -157,23 +157,48 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
         {data?.opponentGloves?.map((gloveId, index) => (
           <div
             key={index}
-            className={`w-12 h-14 rounded-lg overflow-hidden border-2 border-black bg-gray-100 relative ${
-              data?.opponentCondition?.gloveUsed?.[index] ? 'opacity-50' : ''
-            }`}
+            className="group/glove relative"
           >
-            <div className="flex flex-col h-full">
-              <div className="h-full">
-                <img
-                  alt={gloveId}
-                  className="w-full h-full object-cover"
-                  src={getLocalGloveImage(gloveId)}
-                />
-              </div>
-              {data?.opponentCondition?.gloveUsed?.[index] && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <span className="text-white text-xl">✗</span>
+            <div
+              className={`w-12 h-14 rounded-lg overflow-hidden border-2 border-black bg-gray-100 relative ${
+                data?.opponentCondition?.gloveUsed?.[index] ? 'opacity-50' : ''
+              }`}
+            >
+              <div className="flex flex-col h-full">
+                <div className="h-full">
+                  <img
+                    alt={gloveId}
+                    className="w-full h-full object-cover"
+                    src={getLocalGloveImage(gloveId)}
+                  />
                 </div>
-              )}
+                {data?.opponentCondition?.gloveUsed?.[index] && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <span className="text-white text-xl">✗</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* 호버 시 표시될 큰 모달 */}
+            <div className="invisible group-hover/glove:visible absolute z-20 -bottom-2 left-1/2 transform -translate-x-1/2 translate-y-full">
+              <div className="bg-black/90 p-3 rounded-lg text-white w-48 shadow-lg">
+                <div className="flex gap-3 items-start mb-2">
+                  <div className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20">
+                    <img
+                      alt={gloveId}
+                      className="w-full h-full object-cover"
+                      src={getLocalGloveImage(gloveId)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-sm mb-1">{t(`glove:${gloveId}.name`)}</h3>
+                    <p className="text-xs text-slate-300">{t(`glove:${gloveId}.type`)}</p>
+                    <p className="text-xs text-yellow-400">{t(`glove:${gloveId}.damage`)}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400">{t(`glove:${gloveId}.description`)}</p>
+              </div>
+              <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-black/90 rotate-45" />
             </div>
           </div>
         ))}
