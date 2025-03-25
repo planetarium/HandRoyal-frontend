@@ -65,6 +65,7 @@
   "waitingForRoundToStart": "엄청난 승리모션",
   "waitingForSession": "세션이 생성되기를 기다리는 중...",
   "waitingInterval": "세션 시작까지 걸리는 블록 수",
+  "win": "게임에서 승리했습니다",
   "winner": "승자",
   "you": "당신",
   "youAreTheSessionOrganizer": "당신은 세션 주최자입니다",

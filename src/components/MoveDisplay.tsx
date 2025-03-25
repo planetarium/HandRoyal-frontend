@@ -17,8 +17,8 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, ma
   return (
     <div className="flex flex-col items-center rounded-lg w-full border-2 border-black bg-gray-600 shadow-md">
       {/* 이미지 공간 */}
-      <div className="w-full h-50 bg-white rounded-t-lg flex items-center justify-center">
-        {gloveAddress === '' ? null : <img alt={gloveAddress} className="w-64 h-64 object-cover" src={getLocalGloveImage(gloveAddress)} />}
+      <div className="w-full h-30 bg-white rounded-t-lg flex items-center justify-center">
+        {gloveAddress === '' ? null : <img alt={gloveAddress} className="w-30 h-30 object-cover" src={getLocalGloveImage(gloveAddress)} />}
       </div>
       {/* 장갑 이름 공간 */}
       <div className="text-center text-black w-full bg-white">
