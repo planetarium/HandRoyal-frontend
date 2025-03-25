@@ -262,9 +262,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                     }}
                     onClick={() => setSelectedHand(isSelected ? -1 : glove.originalIndex)}
                   >
-                    <div className="flex flex-col items-center justify-center border-b-2 border-black bg-gray-900 p-0.5">
-                      <p className="text-center text-white text-2xs">{t(`glove:${glove.gloveId}.name`)}</p>
-                    </div>
                     <img
                       alt={glove.gloveId}
                       className="w-full h-full object-cover"
@@ -273,12 +270,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                     <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 m-2">
                         <div className="bg-black/80 p-1.5 rounded-lg text-white">
-                          <h3 className="font-bold mb-0.5 text-2xs">{t(`glove:${glove.gloveId}.name`)}</h3>
                           <div className="space-y-0.5 text-2xs">
-                            <p>{t('ui:type')}: {t(`glove:${glove.gloveId}.type`)}</p>
-                            <p>{t('ui:damage')}: {t(`glove:${glove.gloveId}.damage`)}</p>
-                            <p>{t('ui:description')}</p>
-                            <p className='text-2xs'>{t(`glove:${glove.gloveId}.description`)}</p>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-sm mb-1">{t(`glove:${glove.gloveId}.name`)}</h3>
+                              <p className="text-xs text-slate-300">{t(`glove:${glove.gloveId}.type`)}</p>
+                              <p className="text-xs text-yellow-400">{t(`glove:${glove.gloveId}.damage`)}</p>
+                            </div>
+                            <p className="text-xs text-slate-400">{t(`glove:${glove.gloveId}.description`)}</p>
                           </div>
                         </div>
                       </div>
