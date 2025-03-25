@@ -62,11 +62,21 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
           healthPoint
           gloveUsed
           submission
+          activeEffectData {
+            type
+            duration
+            parameters
+          }
         }
         opponentCondition {
           healthPoint
           gloveUsed
           submission
+          activeEffectData {
+            type
+            duration
+            parameters
+          }
         }
         lastRoundWinner
         currentUserMatchState

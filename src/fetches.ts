@@ -18,7 +18,7 @@ export const registerGlove = (gloveAddress: string, file: File | null) =>
 
 export const getLocalGloveImage = (gloveId: string) => {
   try {
-    return new URL(`/src/assets/gloves/${gloveId}.jpg`, import.meta.url).href;
+    return new URL(`/src/assets/gloves/${gloveId}.png`, import.meta.url).href;
   } catch (error) {
     console.error(`Failed to load glove image for ${gloveId}:`, error);
     return '';
