@@ -3,15 +3,16 @@ import type { Account, AccountCreator } from './Account';
 
 type Ethereum = NonNullable<typeof window.ethereum>;
 
-const HAND_ROYAL_CHAIN_ID = '0xa8c';
+export const RPC_URL = import.meta.env.VITE_CHAIN_RPC_URL;
+const HAND_ROYAL_CHAIN_ID = import.meta.env.VITE_CHAIN_ID;
 const HAND_ROYAL_CHAIN_CONFIG = {
   chainId: HAND_ROYAL_CHAIN_ID,
-  chainName: "HandRoyal",
+  chainName: import.meta.env.VITE_CHAIN_NAME,
   rpcUrls: [
-    "http://localhost:5259/rpc/"
+    RPC_URL + "/rpc/"
   ],
   iconUrls: [
-    "http://localhost:5259/logo.png"
+    RPC_URL + "/logo.png"
   ],
   nativeCurrency: {
     name: "NCG",
