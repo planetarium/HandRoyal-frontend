@@ -11,8 +11,6 @@ import { SessionState, PlayerState } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getUserScopedSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
-import win from '../assets/lose.webp';
-import lose from '../assets/lose.webp';
 import loading from '../assets/loading.webp';
 import type { GetUserScopedSessionQuery } from '../gql/graphql';
 

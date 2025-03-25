@@ -10,6 +10,8 @@ import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
 import { executeTransaction } from '../utils/transaction';
 import { getLocalGloveImage } from '../fetches';
+import win from '../assets/win.png';
+import lose from '../assets/lose.png';
 import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 interface GameBoardProps {
@@ -100,7 +102,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   };
 
   return (
-    <div className="relative h-full w-full max-w-md mx-auto bg-slate-800 text-white overflow-hidden rounded-lg">
+    <div className="relative h-full w-full mx-auto bg-slate-800 text-white overflow-hidden rounded-lg">
       {/* 상단 정보 바 - 컴팩트하게 한 줄로 표시 */}
       <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 border-b border-slate-700">
         <div className="flex items-center gap-2">
@@ -152,153 +154,173 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
         </div>
       </div>
 
-      {/* 상대 보유 글러브 표시 영역 */}
-      <div className="flex flex-wrap justify-center gap-2 p-2">
-        {data?.opponentGloves?.map((gloveId, index) => (
-          <div
-            key={index}
-            className="group/glove relative"
-          >
-            <div
-              className={`w-12 h-14 rounded-lg overflow-hidden border-2 border-black bg-gray-100 relative ${
-                data?.opponentCondition?.gloveUsed?.[index] ? 'opacity-50' : ''
-              }`}
-            >
-              <div className="flex flex-col h-full">
-                <div className="h-full">
-                  <img
-                    alt={gloveId}
-                    className="w-full h-full object-cover"
-                    src={getLocalGloveImage(gloveId)}
-                  />
-                </div>
-                {data?.opponentCondition?.gloveUsed?.[index] && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <span className="text-white text-xl">✗</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            {/* 호버 시 표시될 큰 모달 */}
-            <div className="invisible group-hover/glove:visible absolute z-20 -bottom-2 left-1/2 transform -translate-x-1/2 translate-y-full">
-              <div className="bg-black/90 p-3 rounded-lg text-white w-48 shadow-lg">
-                <div className="flex gap-3 items-start mb-2">
-                  <div className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20">
-                    <img
-                      alt={gloveId}
-                      className="w-full h-full object-cover"
-                      src={getLocalGloveImage(gloveId)}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-sm mb-1">{t(`glove:${gloveId}.name`)}</h3>
-                    <p className="text-xs text-slate-300">{t(`glove:${gloveId}.type`)}</p>
-                    <p className="text-xs text-yellow-400">{t(`glove:${gloveId}.damage`)}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-400">{t(`glove:${gloveId}.description`)}</p>
-              </div>
-              <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-black/90 rotate-45" />
-            </div>
+      {data?.currentUserMatchState === MatchState.Break ? (
+        <div className="flex flex-col items-center justify-center h-[calc(100%-120px)] p-4">
+          <div className="flex flex-col items-center justify-center mt-auto mb-20">
+            {data.lastRoundWinner === 'you' ? (
+              <>
+                <img alt="Win" className="w-1/3 h-auto object-contain animate-cry mb-6" src={win} />
+                <p className="text-2xl text-center">{t('ui:win')}</p>
+              </>
+            ) : (
+              <>
+                <img alt="Lose" className="w-1/3 h-auto object-contain animate-cry mb-6" src={lose} />
+                <p className="text-2xl text-center">{t('ui:lose')}</p>
+              </>
+            )}
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <>
+          {/* 상대 보유 글러브 표시 영역 */}
+          <div className="flex flex-wrap justify-center gap-2 p-4 w-full">
+            {data?.opponentGloves?.map((gloveId, index) => (
+              <div
+                key={index}
+                className="group/glove relative"
+              >
+                <div
+                  className={`w-12 h-14 rounded-lg overflow-hidden border-2 border-black bg-gray-100 relative ${
+                    data?.opponentCondition?.gloveUsed?.[index] ? 'opacity-50' : ''
+                  }`}
+                >
+                  <div className="flex flex-col h-full">
+                    <div className="h-full">
+                      <img
+                        alt={gloveId}
+                        className="w-full h-full object-cover"
+                        src={getLocalGloveImage(gloveId)}
+                      />
+                    </div>
+                    {data?.opponentCondition?.gloveUsed?.[index] && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <span className="text-white text-xl">✗</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* 호버 시 표시될 큰 모달 */}
+                <div className="invisible group-hover/glove:visible absolute z-20 -bottom-2 left-1/2 transform -translate-x-1/2 translate-y-full">
+                  <div className="bg-black/90 p-3 rounded-lg text-white w-48 shadow-lg">
+                    <div className="flex gap-3 items-start mb-2">
+                      <div className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20">
+                        <img
+                          alt={gloveId}
+                          className="w-full h-full object-cover"
+                          src={getLocalGloveImage(gloveId)}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-sm mb-1">{t(`glove:${gloveId}.name`)}</h3>
+                        <p className="text-xs text-slate-300">{t(`glove:${gloveId}.type`)}</p>
+                        <p className="text-xs text-yellow-400">{t(`glove:${gloveId}.damage`)}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-400">{t(`glove:${gloveId}.description`)}</p>
+                  </div>
+                  <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-black/90 rotate-45" />
+                </div>
+              </div>
+            ))}
+          </div>
 
-      {/* 현재 제출 및 체력 상태 표시 영역 */}
-      <div className="flex items-center justify-center space-x-1 py-0.5">
-        <MoveDisplay 
-          currentHp={gameBoardState.myHealthPoint < 0 ? 0 : gameBoardState.myHealthPoint}
-          gloveAddress={gameBoardState.myGloveAddress ?? ''} 
-          maxHp={gameBoardState.maxHealthPoint}
-          userAddress={'you'} 
-        />
-        <Swords className="w-16 h-16" color="white" />
-        <MoveDisplay 
-          currentHp={gameBoardState.opponentHealthPoint < 0 ? 0 : gameBoardState.opponentHealthPoint}
-          gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
-          maxHp={gameBoardState.maxHealthPoint}
-          userAddress={gameBoardState.opponentAddress ?? ''}
-        />
-      </div>
+          {/* 현재 제출 및 체력 상태 표시 영역 */}
+          <div className="flex items-center justify-center space-x-4 py-2 w-full">
+            <MoveDisplay 
+              currentHp={gameBoardState.myHealthPoint < 0 ? 0 : gameBoardState.myHealthPoint}
+              gloveAddress={gameBoardState.myGloveAddress ?? ''} 
+              maxHp={gameBoardState.maxHealthPoint}
+              userAddress={'you'} 
+            />
+            <Swords className="w-16 h-16" color="white" />
+            <MoveDisplay 
+              currentHp={gameBoardState.opponentHealthPoint < 0 ? 0 : gameBoardState.opponentHealthPoint}
+              gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
+              maxHp={gameBoardState.maxHealthPoint}
+              userAddress={gameBoardState.opponentAddress ?? ''}
+            />
+          </div>
       
-      {/* 글러브 선택 UI */}
-      <div className="flex flex-col items-center space-y-4 p-4">
-        <div className="flex justify-center relative h-[150px] w-full">
-          <div className="flex justify-center w-full">
-            {(() => {
-              // 사용 가능한 글러브만 필터링하되, 원본 인덱스 정보 유지
-              const availableGloves = data?.myGloves?.map((gloveId, index) => ({
-                gloveId,
-                originalIndex: index,
-                isUsed: data?.myCondition?.gloveUsed?.[index] === true
-              })).filter(glove => !glove.isUsed) ?? [];
+          {/* 글러브 선택 UI */}
+          <div className="flex flex-col items-center space-y-4 p-4 w-full">
+            <div className="flex justify-center relative h-[100px] w-full">
+              <div className="flex justify-center w-full">
+                {(() => {
+                  // 사용 가능한 글러브만 필터링하되, 원본 인덱스 정보 유지
+                  const availableGloves = data?.myGloves?.map((gloveId, index) => ({
+                    gloveId,
+                    originalIndex: index,
+                    isUsed: data?.myCondition?.gloveUsed?.[index] === true
+                  })).filter(glove => !glove.isUsed) ?? [];
 
-              const totalCards = availableGloves.length;
-              const cardWidth = 120; // w-30 = 7.5rem = 120px
-              const containerWidth = 896; // max-w-4xl = 56rem = 896px
-              const totalPadding = 72; // p-6 * 3 = 1.5rem * 3 = 24px * 3
-              const cardBorder = 4; // border-2 = 2px * 2
-              const effectiveCardWidth = cardWidth + cardBorder;
-              const availableWidth = containerWidth - totalPadding - effectiveCardWidth;
-              const spacing = totalCards > 1 
-                ? (100 - (effectiveCardWidth / availableWidth * 100)) / (totalCards - 1) 
-                : 0;
+                  const totalCards = availableGloves.length;
+                  const cardWidth = 120; // w-30 = 7.5rem = 120px
+                  const containerWidth = 896; // max-w-4xl = 56rem = 896px
+                  const totalPadding = 72; // p-6 * 3 = 1.5rem * 3 = 24px * 3
+                  const cardBorder = 4; // border-2 = 2px * 2
+                  const effectiveCardWidth = cardWidth + cardBorder;
+                  const availableWidth = containerWidth - totalPadding - effectiveCardWidth;
+                  const spacing = totalCards > 1 
+                    ? (100 - (effectiveCardWidth / availableWidth * 100)) / (totalCards - 1) 
+                    : 0;
 
-              return availableGloves.map((glove, displayIndex) => {
-                const isSelected = selectedHand === glove.originalIndex;
-                const gloveImage = getLocalGloveImage(glove.gloveId);
-                
-                return (
-                  <div
-                    key={glove.originalIndex}
-                    className={`absolute w-30 h-40 rounded-lg overflow-hidden border-2 bg-gray-100 border-black cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 hover:-translate-y-4 ${
-                      isSelected 
-                        ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-10 -translate-y-4' 
-                        : 'hover:shadow-lg hover:shadow-white/20'
-                    }`}
-                    style={{
-                      left: `${displayIndex * spacing}%`,
-                      zIndex: isSelected ? 10 : displayIndex,
-                    }}
-                    onClick={() => setSelectedHand(isSelected ? -1 : glove.originalIndex)}
-                  >
-                    <img
-                      alt={glove.gloveId}
-                      className="w-full h-full object-cover"
-                      src={gloveImage}
-                    />
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 m-2">
-                        <div className="bg-black/80 p-1.5 rounded-lg text-white">
-                          <div className="space-y-0.5 text-2xs">
-                            <div className="flex-1">
-                              <h3 className="font-bold text-sm mb-1">{t(`glove:${glove.gloveId}.name`)}</h3>
-                              <p className="text-xs text-slate-300">{t(`glove:${glove.gloveId}.type`)}</p>
-                              <p className="text-xs text-yellow-400">{t(`glove:${glove.gloveId}.damage`)}</p>
+                  return availableGloves.map((glove, displayIndex) => {
+                    const isSelected = selectedHand === glove.originalIndex;
+                    const gloveImage = getLocalGloveImage(glove.gloveId);
+                    
+                    return (
+                      <div
+                        key={glove.originalIndex}
+                        className={`absolute w-25 h-25 rounded-lg overflow-hidden border-2 bg-gray-100 border-black cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 hover:-translate-y-4 ${
+                          isSelected 
+                            ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-10 -translate-y-4' 
+                            : 'hover:shadow-lg hover:shadow-white/20'
+                        }`}
+                        style={{
+                          left: `${displayIndex * spacing}%`,
+                          zIndex: isSelected ? 10 : displayIndex,
+                        }}
+                        onClick={() => setSelectedHand(isSelected ? -1 : glove.originalIndex)}
+                      >
+                        <img
+                          alt={glove.gloveId}
+                          className="w-full h-full object-cover"
+                          src={gloveImage}
+                        />
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all duration-300">
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 m-2">
+                            <div className="bg-black/80 p-1.5 rounded-lg text-white">
+                              <div className="space-y-0.5 text-2xs">
+                                <div className="flex-1">
+                                  <h3 className="font-bold text-sm mb-1">{t(`glove:${glove.gloveId}.name`)}</h3>
+                                  <p className="text-xs text-slate-300">{t(`glove:${glove.gloveId}.type`)}</p>
+                                  <p className="text-xs text-yellow-400">{t(`glove:${glove.gloveId}.damage`)}</p>
+                                </div>
+                                <p className="text-xs text-slate-400">{t(`glove:${glove.gloveId}.description`)}</p>
+                              </div>
                             </div>
-                            <p className="text-xs text-slate-400">{t(`glove:${glove.gloveId}.description`)}</p>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              });
-            })()}
+                    );
+                  });
+                })()}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* 제출 버튼 */}
-      <div className="flex justify-center p-4">
-        <StyledButton 
-          bgColor='#FFE55C' 
-          shadowColor='#FF9F0A'
-          onClick={handleSubmit}
-        >
-          {t('ui:submit')}
-        </StyledButton>
-      </div>
+          {/* 제출 버튼 */}
+          <div className="flex justify-center p-4">
+            <StyledButton 
+              bgColor='#FFE55C' 
+              shadowColor='#FF9F0A'
+              onClick={handleSubmit}
+            >
+              {t('ui:submit')}
+            </StyledButton>
+          </div>
+        </>
+      )}
     </div>
   );
 };

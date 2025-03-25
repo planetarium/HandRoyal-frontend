@@ -65,6 +65,7 @@
   "waitingForRoundToStart": "Waiting for the round to start...",
   "waitingForSession": "Waiting for the session to be created...",
   "waitingInterval": "Number of blocks before starting session",
+  "win": "You have won the game!",
   "winner": "Winner",
   "you": "You",
   "youAreTheSessionOrganizer": "You are the session organizer",
