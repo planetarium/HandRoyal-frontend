@@ -62,7 +62,7 @@ async function switchChain(ethereum: Ethereum) {
   try {
     await ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: HAND_ROYAL_CHAIN_ID }]
+      params: [{ chainId: "0xAA36A7" }]
     });
   } catch (error) {
     console.error('Failed to switch chain:', error);
