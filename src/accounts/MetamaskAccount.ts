@@ -3,15 +3,16 @@ import type { Account, AccountCreator } from './Account';
 
 type Ethereum = NonNullable<typeof window.ethereum>;
 
-const HAND_ROYAL_CHAIN_ID = '0xa8c';
+export const RPC_URL = import.meta.env.VITE_CHAIN_RPC_URL;
+const HAND_ROYAL_CHAIN_ID = import.meta.env.VITE_CHAIN_ID;
 const HAND_ROYAL_CHAIN_CONFIG = {
   chainId: HAND_ROYAL_CHAIN_ID,
-  chainName: "HandRoyal",
+  chainName: import.meta.env.VITE_CHAIN_NAME,
   rpcUrls: [
-    "http://localhost:5259/rpc/"
+    RPC_URL + "/rpc/"
   ],
   iconUrls: [
-    "http://localhost:5259/logo.png"
+    RPC_URL + "/logo.png"
   ],
   nativeCurrency: {
     name: "NCG",
@@ -61,7 +62,7 @@ async function switchChain(ethereum: Ethereum) {
   try {
     await ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: HAND_ROYAL_CHAIN_ID }]
+      params: [{ chainId: "0xAA36A7" }]
     });
   } catch (error) {
     console.error('Failed to switch chain:', error);
