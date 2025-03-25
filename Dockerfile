@@ -1,16 +1,16 @@
 FROM nginx:alpine
 
-# 기본 Nginx 설정 제거
+# Remove default Nginx configuration
 RUN rm -rf /usr/share/nginx/html/*
 
-# 빌드된 앱을 Nginx 서버로 복사
+# Copy built app to Nginx server
 COPY dist/ /usr/share/nginx/html/
 
-# Nginx 설정 파일 복사
+# Copy Nginx configuration file
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# 필요한 포트 노출
+# Expose required port
 EXPOSE 80
 
-# Nginx 실행
+# Run Nginx
 CMD ["nginx", "-g", "daemon off;"] 
