@@ -1,5 +1,3 @@
-import { MoveType } from './gql/graphql';
-
 const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
 
 export const registerGlove = (gloveAddress: string, file: File | null) =>
@@ -18,7 +16,16 @@ export const registerGlove = (gloveAddress: string, file: File | null) =>
     );
 }
 
-export const getGloveImage = (gloveId: string | null, hand: MoveType) => {
+export const getLocalGloveImage = (gloveId: string) => {
+  try {
+    return new URL(`/src/assets/gloves/${gloveId}.jpg`, import.meta.url).href;
+  } catch (error) {
+    console.error(`Failed to load glove image for ${gloveId}:`, error);
+    return '';
+  }
+}
+
+export const getGloveImage = (gloveId: string | null, hand: string) => {
   const url = gloveId
     ? `${GLOVE_API_URL}/get-glove-image?gloveAddress=${gloveId}&hand=${hand}`
     : `${GLOVE_API_URL}/get-glove-image?hand=${hand}`;

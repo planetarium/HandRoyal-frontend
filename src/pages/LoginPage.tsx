@@ -156,7 +156,7 @@ const LoginPage: React.FC = () => {
           <input
             className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
             disabled={isDisabled()}
-            placeholder={t('enterPrivateKey')}
+            placeholder={t('ui:enterPrivateKey')}
             type="password"
             value={privateKeyInput}
             onChange={(e) => setPrivateKeyInput(e.target.value)}
@@ -165,11 +165,11 @@ const LoginPage: React.FC = () => {
             disabled={isDisabled()}
             onClick={() => handleLogin('raw', privateKeyInput)}
           >
-            {isLoggingIn ? 'Logging in...' : t('loginButton')}
+            {isLoggingIn ? 'Logging in...' : t('ui:loginButton')}
           </StyledButton>
         </div>
         <div className="text-center my-4 text-gray-500 flex items-center justify-center">
-          <span className="mx-4">{t('or')}</span>
+          <span className="mx-4">{t('ui:or')}</span>
         </div>
         <StyledButton
           disabled={isDisabled()}
@@ -180,7 +180,7 @@ const LoginPage: React.FC = () => {
             className="w-6 h-6 mr-2"
             src={metamaskIcon}
           />
-          {isLoggingIn ? 'Logging in...' : t('connectWithMetamask')}
+          {isLoggingIn ? 'Logging in...' : t('ui:connectWithMetamask')}
         </StyledButton>
         {errorMessage && (
           <div className="text-red-500 italic mt-4 text-center">
@@ -190,13 +190,13 @@ const LoginPage: React.FC = () => {
       </div>
 
       <div className="flex flex-col w-full">
-        <h2 className="text-xl font-semibold mt-50 mb-4">{t('testAccounts')}</h2>
+        <h2 className="text-xl font-semibold mt-50 mb-4">{t('ui:testAccounts')}</h2>
         <div className="md:overflow-visible overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th className="px-6 py-3 border-b text-left">{t('privateKey')}</th>
-                <th className="px-6 py-3 border-b text-left">{t('address')}</th>
+                <th className="px-6 py-3 border-b text-left">{t('ui:privateKey')}</th>
+                <th className="px-6 py-3 border-b text-left">{t('ui:address')}</th>
               </tr>
             </thead>
             <tbody>

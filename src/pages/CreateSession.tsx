@@ -2,26 +2,34 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { request } from 'graphql-request';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useRequiredAccount } from '../context/AccountContext';
 import { 
   GRAPHQL_ENDPOINT,
   isValidSessionIdDocument,
   SESSION_SUBSCRIPTION,
-  createSessionAction, 
-  getUserDocument
+  createSessionAction,
 } from '../queries';
 import subscriptionClient from '../subscriptionClient';
 import StyledButton from '../components/StyledButton';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
+
 interface GameRules {
   maximumUser: number,
   minimumUser: number,
   remainingUser: number,
   startAfter: number,
+  maxRounds: number,
   roundLength: number,
-  roundInterval: number
+  roundInterval: number,
+  initialHealthPoint: number
 }
+
+const GLOVES = [
+  '0x0000000000000000000000000000000000000000',
+  '0x0000000000000000000000000000000000000001',
+  '0x0000000000000000000000000000000000000002'
+];
 
 export const CreateSession: React.FC = () => {
   const { t } = useTranslation();
@@ -37,21 +45,15 @@ export const CreateSession: React.FC = () => {
     minimumUser: 2,
     remainingUser: 1,
     startAfter: 20,
+    maxRounds: 5,
     roundLength: 20,
     roundInterval: 7,
+    initialHealthPoint: 100
   });
   const [selectedPrize, setSelectedPrize] = useState('');
   const [pollingError, setPollingError] = useState<string | null>(null);
   const isFirstMount = useRef(true);
   const queryClient = useQueryClient();
-  
-  const { data, error, isLoading } = useQuery({
-    queryKey: ['getUser', account],
-    queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account?.address.toString() });
-      return response?.stateQuery?.user;
-    }
-  });
 
   useEffect(() => {
     if (!sessionId) return;
@@ -145,8 +147,10 @@ export const CreateSession: React.FC = () => {
         minimumUser: gameRules.minimumUser,
         remainingUser: gameRules.remainingUser,
         startAfter: gameRules.startAfter,
+        maxRounds: gameRules.maxRounds,
         roundLength: gameRules.roundLength,
-        roundInterval: gameRules.roundInterval
+        roundInterval: gameRules.roundInterval,
+        initialHealthPoint: gameRules.initialHealthPoint
       });
       if (!createSessionResponse.actionQuery?.createSession) {
         throw new Error('Failed to create session');
@@ -172,16 +176,13 @@ export const CreateSession: React.FC = () => {
     }, 30000); // 30 seconds timeout
   };
 
-  if (isLoading) return <p>{t('loading')}</p>;
-  if (error) return <p>{t('error')}: {error.message}</p>;
-
   return (
     <div className="flex flex-col items-center create-session w-full mx-auto bg-gray-700 border-2 border-black rounded-lg text-white">
       <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
         <h1 className="text-2xl font-bold" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('createSession')}</h1>
       </div>
       {pollingError && <p className="text-red-500">{pollingError}</p>}
-      {isPolling && <p className="text-blue-500">{t('creatingSession')}</p>}
+      {isPolling && <p className="text-blue-500">{t('ui:creatingSession')}</p>}
       <div className="w-full p-6 session-form space-y-4">
         <div className="form-group">
           <label className="block text-sm font-medium text-black-700">{t('sessionId')}</label>
@@ -193,7 +194,7 @@ export const CreateSession: React.FC = () => {
               value={(!isSessionIdValid || isFetching) ? 'Checking...' : sessionIdCandidate}
             />
             <button
-              aria-label={t('refresh')}
+              aria-label={t('ui:refresh')}
               className="text-blue-500 text-2xl cursor-pointer"
               disabled={!isSessionIdValid || isFetching || isPolling}
               onClick={generateAndValidateSessionId}
@@ -204,9 +205,9 @@ export const CreateSession: React.FC = () => {
         </div>
 
         <div className="rules-section mt-8 mb-8 space-y-1">
-          <h2 className="text-xl mb-2 text-center">{t('gameRules')}</h2>
+          <h2 className="text-xl mb-2 text-center">{t('ui:gameRules')}</h2>
           <div className="form-group">
-            <label className="block text-sm">{t('maximumUser')}</label>
+            <label className="block text-sm">{t('ui:maximumUser')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
@@ -218,7 +219,7 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm">{t('minimumUser')}</label>
+            <label className="block text-sm">{t('ui:minimumUser')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
@@ -230,7 +231,7 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm">{t('remainingUser')}</label>
+            <label className="block text-sm">{t('ui:remainingUser')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
@@ -242,7 +243,7 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm">{t('startAfter')}</label>
+            <label className="block text-sm">{t('ui:startAfter')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
@@ -254,7 +255,19 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm">{t('roundLength')}</label>
+            <label className="block text-sm">{t('ui:maxRounds')}</label>
+            <input
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
+              disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.maxRounds}
+              onChange={(e) => handleGameRulesChange('maxRounds', e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="block text-sm">{t('ui:roundLength')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
@@ -266,7 +279,7 @@ export const CreateSession: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm">{t('roundInterval')}</label>
+            <label className="block text-sm">{t('ui:roundInterval')}</label>
             <input
               className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
               disabled={isPolling}
@@ -276,17 +289,29 @@ export const CreateSession: React.FC = () => {
               onChange={(e) => handleGameRulesChange('roundInterval', e.target.value)}
             />
           </div>
+
+          <div className="form-group">
+            <label className="block text-sm">{t('ui:initialHealthPoint')}</label>
+            <input
+              className="mt-1 block w-full bg-gray-200 border border-black rounded-md shadow-sm p-2 mb-2 text-black"
+              disabled={isPolling}
+              min="1"
+              type="number"
+              value={gameRules.initialHealthPoint}
+              onChange={(e) => handleGameRulesChange('initialHealthPoint', e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="form-group">
-          <label className="block text-sm font-medium text-black-700">{t('prize')}</label>
+          <label className="block text-sm font-medium text-black-700">{t('ui:prize')}</label>
           <select
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 text-black"
             value={selectedPrize}
             onChange={(e) => setSelectedPrize(e.target.value)}
           >
-            <option value="">{t('selectPrize')}</option>
-            {(data?.registeredGloves || []).map(glove => (
+            <option value="">{t('ui:selectPrize')}</option>
+            {GLOVES.map(glove => (
               <option key={glove} value={glove}>{glove}</option>
             ))}
           </select>
@@ -297,7 +322,7 @@ export const CreateSession: React.FC = () => {
             shadowColor='#FF9F0A'
             onClick={handleCreateSession}
           >
-            {createSessionMutation.isPending ? t('creatingSession') : t('createSessionButton')}
+            {createSessionMutation.isPending ? t('ui:creatingSession') : t('ui:createSessionButton')}
           </StyledButton>
           <StyledButton
             bgColor='#909090'
@@ -306,7 +331,7 @@ export const CreateSession: React.FC = () => {
             textColor="#FFFFFF"
             onClick={() => navigate('/')}
           >
-            {t('cancel')}
+            {t('ui:cancel')}
           </StyledButton>
         </div>
       </div>

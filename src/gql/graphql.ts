@@ -35,16 +35,35 @@ export type BlockHeaderValue = {
   miner: Scalars['Address']['output'];
 };
 
-export type Glove = {
-  __typename?: 'Glove';
-  author: Scalars['Address']['output'];
+export type Condition = {
+  __typename?: 'Condition';
+  gloveUsed?: Maybe<Array<Scalars['Boolean']['output']>>;
+  healthPoint: Scalars['Int']['output'];
+  submission: Scalars['Int']['output'];
+};
+
+export type GloveInfo = {
+  __typename?: 'GloveInfo';
+  count: Scalars['Int']['output'];
   id: Scalars['Address']['output'];
 };
 
 export type GloveRegisteredEventData = {
   __typename?: 'GloveRegisteredEventData';
-  author: Scalars['Address']['output'];
   id: Scalars['Address']['output'];
+  type: GloveType;
+};
+
+export enum GloveType {
+  Paper = 'PAPER',
+  Rock = 'ROCK',
+  Scissors = 'SCISSORS',
+  Special = 'SPECIAL'
+}
+
+export type IGlove = {
+  id: Scalars['Address']['output'];
+  type: GloveType;
 };
 
 export type Input_FavValue = {
@@ -56,21 +75,18 @@ export type Input_FavValue = {
 
 export type Match = {
   __typename?: 'Match';
-  move1?: Maybe<Move>;
-  move2?: Maybe<Move>;
+  players?: Maybe<Array<Scalars['Int']['output']>>;
+  rounds?: Maybe<Array<Maybe<Round>>>;
+  startHeight: Scalars['Long']['output'];
+  state: MatchState;
+  winner: Scalars['Int']['output'];
 };
 
-export type Move = {
-  __typename?: 'Move';
-  playerIndex: Scalars['Int']['output'];
-  type: MoveType;
-};
-
-export enum MoveType {
-  None = 'NONE',
-  Paper = 'PAPER',
-  Rock = 'ROCK',
-  Scissors = 'SCISSORS'
+export enum MatchState {
+  Active = 'ACTIVE',
+  Break = 'BREAK',
+  Ended = 'ENDED',
+  None = 'NONE'
 }
 
 export type Mutation = {
@@ -85,8 +101,11 @@ export type Mutation = {
 
 
 export type MutationCreateSessionArgs = {
+  initialHealthPoint: Scalars['Int']['input'];
+  maxRounds: Scalars['Int']['input'];
   maximumUser: Scalars['Int']['input'];
   minimumUser: Scalars['Int']['input'];
+  numberOfGloves: Scalars['Int']['input'];
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
   prize: Scalars['Address']['input'];
   remainingUser: Scalars['Int']['input'];
@@ -103,7 +122,7 @@ export type MutationCreateUserArgs = {
 
 
 export type MutationJoinSessionArgs = {
-  gloveId?: InputMaybe<Scalars['Address']['input']>;
+  gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
   sessionId: Scalars['Address']['input'];
 };
@@ -122,14 +141,20 @@ export type MutationStageTransactionArgs = {
 
 
 export type MutationSubmitMoveArgs = {
-  move: MoveType;
+  gloveIndex: Scalars['Int']['input'];
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
   sessionId: Scalars['Address']['input'];
 };
 
+export type Phase = {
+  __typename?: 'Phase';
+  height: Scalars['Long']['output'];
+  matches?: Maybe<Array<Maybe<Match>>>;
+};
+
 export type Player = {
   __typename?: 'Player';
-  glove: Scalars['Address']['output'];
+  gloves?: Maybe<Array<Scalars['Address']['output']>>;
   id: Scalars['Address']['output'];
   state: PlayerState;
 };
@@ -178,6 +203,8 @@ export type Query_ActionQuery = {
 
 
 export type Query_ActionQueryCreateSessionArgs = {
+  initialHealthPoint: Scalars['Int']['input'];
+  maxRounds: Scalars['Int']['input'];
   maximumUser: Scalars['Int']['input'];
   minimumUser: Scalars['Int']['input'];
   prize: Scalars['Address']['input'];
@@ -190,7 +217,7 @@ export type Query_ActionQueryCreateSessionArgs = {
 
 
 export type Query_ActionQueryJoinSessionArgs = {
-  gloveId?: InputMaybe<Scalars['Address']['input']>;
+  gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
   sessionId: Scalars['Address']['input'];
 };
 
@@ -201,7 +228,7 @@ export type Query_ActionQueryRegisterGloveArgs = {
 
 
 export type Query_ActionQuerySubmitMoveArgs = {
-  move: MoveType;
+  gloveIndex: Scalars['Int']['input'];
   sessionId: Scalars['Address']['input'];
 };
 
@@ -212,10 +239,11 @@ export type Query_NodeStatus = {
 
 export type Query_StateQuery = {
   __typename?: 'Query_StateQuery';
-  glove?: Maybe<Glove>;
+  glove?: Maybe<IGlove>;
   session?: Maybe<Session>;
   sessions?: Maybe<Array<Maybe<Session>>>;
   user?: Maybe<User>;
+  userScopedSession?: Maybe<SessionEventData>;
 };
 
 
@@ -230,6 +258,12 @@ export type Query_StateQuerySessionArgs = {
 
 
 export type Query_StateQueryUserArgs = {
+  userId: Scalars['Address']['input'];
+};
+
+
+export type Query_StateQueryUserScopedSessionArgs = {
+  sessionId: Scalars['Address']['input'];
   userId: Scalars['Address']['input'];
 };
 
@@ -260,8 +294,9 @@ export type Query_TransactionUnsignedTransactionArgs = {
 
 export type Round = {
   __typename?: 'Round';
-  height: Scalars['Long']['output'];
-  matches?: Maybe<Array<Maybe<Match>>>;
+  condition1?: Maybe<Condition>;
+  condition2?: Maybe<Condition>;
+  winner: Scalars['Int']['output'];
 };
 
 export type Session = {
@@ -269,24 +304,41 @@ export type Session = {
   creationHeight: Scalars['Long']['output'];
   height: Scalars['Long']['output'];
   metadata?: Maybe<SessionMetadata>;
+  phases?: Maybe<Array<Maybe<Phase>>>;
   players?: Maybe<Array<Maybe<Player>>>;
-  rounds?: Maybe<Array<Maybe<Round>>>;
   startHeight: Scalars['Long']['output'];
   state: SessionState;
 };
 
 export type SessionEventData = {
   __typename?: 'SessionEventData';
+  currentInterval: Scalars['Long']['output'];
+  currentPhaseIndex?: Maybe<Scalars['Int']['output']>;
+  currentUserMatchState?: Maybe<MatchState>;
+  currentUserRoundIndex?: Maybe<Scalars['Int']['output']>;
   height: Scalars['Long']['output'];
-  match?: Maybe<Match>;
-  state: SessionState;
+  intervalEndHeight: Scalars['Long']['output'];
+  lastRoundWinner?: Maybe<Scalars['String']['output']>;
+  myCondition?: Maybe<Condition>;
+  myGloves?: Maybe<Array<Scalars['Address']['output']>>;
+  opponentAddress?: Maybe<Scalars['Address']['output']>;
+  opponentCondition?: Maybe<Condition>;
+  opponentGloves?: Maybe<Array<Scalars['Address']['output']>>;
+  organizerAddress?: Maybe<Scalars['Address']['output']>;
+  playerState?: Maybe<PlayerState>;
+  playersLeft?: Maybe<Scalars['Int']['output']>;
+  sessionId?: Maybe<Scalars['Address']['output']>;
+  sessionState: SessionState;
 };
 
 export type SessionMetadata = {
   __typename?: 'SessionMetadata';
   id: Scalars['Address']['output'];
+  initialHealthPoint: Scalars['Int']['output'];
+  maxRounds: Scalars['Int']['output'];
   maximumUser: Scalars['Int']['output'];
   minimumUser: Scalars['Int']['output'];
+  numberOfGloves: Scalars['Int']['output'];
   organizer: Scalars['Address']['output'];
   prize: Scalars['Address']['output'];
   remainingUser: Scalars['Int']['output'];
@@ -297,7 +349,6 @@ export type SessionMetadata = {
 
 export enum SessionState {
   Active = 'ACTIVE',
-  Break = 'BREAK',
   Ended = 'ENDED',
   None = 'NONE',
   Ready = 'READY'
@@ -305,7 +356,7 @@ export enum SessionState {
 
 export type SubmitMoveEventData = {
   __typename?: 'SubmitMoveEventData';
-  move: MoveType;
+  gloveIndex: Scalars['Int']['output'];
   sessionId: Scalars['Address']['output'];
   userId: Scalars['Address']['output'];
 };
@@ -380,7 +431,7 @@ export type User = {
   __typename?: 'User';
   equippedGlove: Scalars['Address']['output'];
   id: Scalars['Address']['output'];
-  ownedGloves?: Maybe<Array<Scalars['Address']['output']>>;
+  ownedGloves?: Maybe<Array<Maybe<GloveInfo>>>;
   registeredGloves?: Maybe<Array<Scalars['Address']['output']>>;
   sessionId: Scalars['Address']['output'];
 };
@@ -389,7 +440,7 @@ export type UserEventData = {
   __typename?: 'UserEventData';
   equippedGlove: Scalars['Address']['output'];
   id: Scalars['Address']['output'];
-  ownedGloves?: Maybe<Array<Scalars['Address']['output']>>;
+  ownedGloves?: Maybe<Array<Maybe<GloveInfo>>>;
   registeredGloves?: Maybe<Array<Scalars['Address']['output']>>;
 };
 
@@ -398,12 +449,27 @@ export type GetUserQueryVariables = Exact<{
 }>;
 
 
-export type GetUserQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', user?: { __typename?: 'User', id: any, registeredGloves?: Array<any> | null, ownedGloves?: Array<any> | null, equippedGlove: any, sessionId: any } | null } | null };
+export type GetUserQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', user?: { __typename?: 'User', id: any, registeredGloves?: Array<any> | null, equippedGlove: any, sessionId: any, ownedGloves?: Array<{ __typename?: 'GloveInfo', id: any, count: number } | null> | null } | null } | null };
 
 export type GetSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetSessionsQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', sessions?: Array<{ __typename?: 'Session', state: SessionState, creationHeight: any, startHeight: any, metadata?: { __typename?: 'SessionMetadata', id: any, organizer: any, prize: any, maximumUser: number, minimumUser: number, remainingUser: number } | null, players?: Array<{ __typename?: 'Player', id: any, glove: any } | null> | null, rounds?: Array<{ __typename?: 'Round', height: any, matches?: Array<{ __typename?: 'Match', move1?: { __typename?: 'Move', type: MoveType } | null, move2?: { __typename?: 'Move', type: MoveType } | null } | null> | null } | null> | null } | null> | null } | null };
+export type GetSessionsQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', sessions?: Array<{ __typename?: 'Session', state: SessionState, creationHeight: any, startHeight: any, metadata?: { __typename?: 'SessionMetadata', id: any, organizer: any, prize: any, maximumUser: number, minimumUser: number, remainingUser: number } | null, players?: Array<{ __typename?: 'Player', id: any, gloves?: Array<any> | null } | null> | null } | null> | null } | null };
+
+export type GetUserScopedSessionQueryVariables = Exact<{
+  sessionId: Scalars['Address']['input'];
+  userId: Scalars['Address']['input'];
+}>;
+
+
+export type GetUserScopedSessionQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', userScopedSession?: { __typename?: 'SessionEventData', sessionId?: any | null, height: any, sessionState: SessionState, organizerAddress?: any | null, opponentAddress?: any | null, currentInterval: any, myGloves?: Array<any> | null, opponentGloves?: Array<any> | null, playersLeft?: number | null, currentPhaseIndex?: number | null, currentUserRoundIndex?: number | null, lastRoundWinner?: string | null, currentUserMatchState?: MatchState | null, playerState?: PlayerState | null, intervalEndHeight: any, myCondition?: { __typename?: 'Condition', healthPoint: number, gloveUsed?: Array<boolean> | null, submission: number } | null, opponentCondition?: { __typename?: 'Condition', healthPoint: number, gloveUsed?: Array<boolean> | null, submission: number } | null } | null } | null };
+
+export type GetSessionHeaderQueryVariables = Exact<{
+  sessionId: Scalars['Address']['input'];
+}>;
+
+
+export type GetSessionHeaderQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', session?: { __typename?: 'Session', state: SessionState, creationHeight: any, startHeight: any, metadata?: { __typename?: 'SessionMetadata', id: any, organizer: any, prize: any, maximumUser: number, minimumUser: number, remainingUser: number, startAfter: any, maxRounds: number, roundLength: any, roundInterval: any, initialHealthPoint: number, numberOfGloves: number } | null, players?: Array<{ __typename?: 'Player', id: any, gloves?: Array<any> | null } | null> | null } | null } | null };
 
 export type IsValidSessionIdQueryVariables = Exact<{
   sessionId: Scalars['Address']['input'];
@@ -417,7 +483,7 @@ export type GetSessionQueryVariables = Exact<{
 }>;
 
 
-export type GetSessionQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', session?: { __typename?: 'Session', state: SessionState, creationHeight: any, startHeight: any, height: any, metadata?: { __typename?: 'SessionMetadata', id: any, organizer: any, prize: any, maximumUser: number, minimumUser: number, remainingUser: number, startAfter: any, roundLength: any, roundInterval: any } | null, players?: Array<{ __typename?: 'Player', id: any, glove: any, state: PlayerState } | null> | null, rounds?: Array<{ __typename?: 'Round', height: any, matches?: Array<{ __typename?: 'Match', move1?: { __typename?: 'Move', playerIndex: number, type: MoveType } | null, move2?: { __typename?: 'Move', playerIndex: number, type: MoveType } | null } | null> | null } | null> | null } | null } | null };
+export type GetSessionQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', session?: { __typename?: 'Session', state: SessionState, creationHeight: any, startHeight: any, height: any, metadata?: { __typename?: 'SessionMetadata', id: any, organizer: any, prize: any, maximumUser: number, minimumUser: number, remainingUser: number, startAfter: any, maxRounds: number, roundLength: any, roundInterval: any, initialHealthPoint: number, numberOfGloves: number } | null, players?: Array<{ __typename?: 'Player', id: any, gloves?: Array<any> | null, state: PlayerState } | null> | null, phases?: Array<{ __typename?: 'Phase', height: any, matches?: Array<{ __typename?: 'Match', startHeight: any, players?: Array<number> | null, state: MatchState, rounds?: Array<{ __typename?: 'Round', winner: number, condition1?: { __typename?: 'Condition', healthPoint: number, gloveUsed?: Array<boolean> | null, submission: number } | null, condition2?: { __typename?: 'Condition', healthPoint: number, gloveUsed?: Array<boolean> | null, submission: number } | null } | null> | null } | null> | null } | null> | null } | null } | null };
 
 export type IsGloveRegisteredQueryVariables = Exact<{
   gloveId: Scalars['Address']['input'];
@@ -426,13 +492,6 @@ export type IsGloveRegisteredQueryVariables = Exact<{
 
 export type IsGloveRegisteredQuery = { __typename?: 'Query', isGloveRegistered: boolean };
 
-export type GetGloveQueryVariables = Exact<{
-  gloveId: Scalars['Address']['input'];
-}>;
-
-
-export type GetGloveQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', glove?: { __typename?: 'Glove', id: any, author: any } | null } | null };
-
 export type CreateSessionActionQueryVariables = Exact<{
   sessionId: Scalars['Address']['input'];
   prize: Scalars['Address']['input'];
@@ -440,8 +499,10 @@ export type CreateSessionActionQueryVariables = Exact<{
   minimumUser: Scalars['Int']['input'];
   remainingUser: Scalars['Int']['input'];
   startAfter: Scalars['Long']['input'];
+  maxRounds: Scalars['Int']['input'];
   roundLength: Scalars['Long']['input'];
   roundInterval: Scalars['Long']['input'];
+  initialHealthPoint: Scalars['Int']['input'];
 }>;
 
 
@@ -449,7 +510,7 @@ export type CreateSessionActionQuery = { __typename?: 'Query', actionQuery?: { _
 
 export type JoinSessionActionQueryVariables = Exact<{
   sessionId: Scalars['Address']['input'];
-  gloveId?: InputMaybe<Scalars['Address']['input']>;
+  gloves: Array<Scalars['Address']['input']> | Scalars['Address']['input'];
 }>;
 
 
@@ -462,7 +523,7 @@ export type CreateUserActionQuery = { __typename?: 'Query', actionQuery?: { __ty
 
 export type SubmitMoveActionQueryVariables = Exact<{
   sessionId: Scalars['Address']['input'];
-  move: MoveType;
+  gloveIndex: Scalars['Int']['input'];
 }>;
 
 
@@ -499,16 +560,17 @@ export type TransactionResultQueryVariables = Exact<{
 export type TransactionResultQuery = { __typename?: 'Query', transaction?: { __typename?: 'Query_Transaction', transactionResult?: { __typename?: 'TxResultValue', txStatus: TxStatus, blockIndex?: any | null, exceptionNames?: Array<string | null> | null } | null } | null };
 
 
-export const GetUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"registeredGloves"}},{"kind":"Field","name":{"kind":"Name","value":"ownedGloves"}},{"kind":"Field","name":{"kind":"Name","value":"equippedGlove"}},{"kind":"Field","name":{"kind":"Name","value":"sessionId"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
-export const GetSessionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"organizer"}},{"kind":"Field","name":{"kind":"Name","value":"prize"}},{"kind":"Field","name":{"kind":"Name","value":"maximumUser"}},{"kind":"Field","name":{"kind":"Name","value":"minimumUser"}},{"kind":"Field","name":{"kind":"Name","value":"remainingUser"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"players"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"glove"}}]}},{"kind":"Field","name":{"kind":"Name","value":"rounds"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"matches"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"move1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}}]}},{"kind":"Field","name":{"kind":"Name","value":"move2"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"creationHeight"}},{"kind":"Field","name":{"kind":"Name","value":"startHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetSessionsQuery, GetSessionsQueryVariables>;
+export const GetUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"registeredGloves"}},{"kind":"Field","name":{"kind":"Name","value":"ownedGloves"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"Field","name":{"kind":"Name","value":"equippedGlove"}},{"kind":"Field","name":{"kind":"Name","value":"sessionId"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
+export const GetSessionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"organizer"}},{"kind":"Field","name":{"kind":"Name","value":"prize"}},{"kind":"Field","name":{"kind":"Name","value":"maximumUser"}},{"kind":"Field","name":{"kind":"Name","value":"minimumUser"}},{"kind":"Field","name":{"kind":"Name","value":"remainingUser"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"players"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gloves"}}]}},{"kind":"Field","name":{"kind":"Name","value":"creationHeight"}},{"kind":"Field","name":{"kind":"Name","value":"startHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetSessionsQuery, GetSessionsQueryVariables>;
+export const GetUserScopedSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserScopedSession"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userScopedSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sessionId"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"sessionState"}},{"kind":"Field","name":{"kind":"Name","value":"organizerAddress"}},{"kind":"Field","name":{"kind":"Name","value":"opponentAddress"}},{"kind":"Field","name":{"kind":"Name","value":"currentInterval"}},{"kind":"Field","name":{"kind":"Name","value":"myGloves"}},{"kind":"Field","name":{"kind":"Name","value":"opponentGloves"}},{"kind":"Field","name":{"kind":"Name","value":"playersLeft"}},{"kind":"Field","name":{"kind":"Name","value":"currentPhaseIndex"}},{"kind":"Field","name":{"kind":"Name","value":"currentUserRoundIndex"}},{"kind":"Field","name":{"kind":"Name","value":"myCondition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"gloveUsed"}},{"kind":"Field","name":{"kind":"Name","value":"submission"}}]}},{"kind":"Field","name":{"kind":"Name","value":"opponentCondition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"gloveUsed"}},{"kind":"Field","name":{"kind":"Name","value":"submission"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lastRoundWinner"}},{"kind":"Field","name":{"kind":"Name","value":"currentUserMatchState"}},{"kind":"Field","name":{"kind":"Name","value":"playerState"}},{"kind":"Field","name":{"kind":"Name","value":"intervalEndHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserScopedSessionQuery, GetUserScopedSessionQueryVariables>;
+export const GetSessionHeaderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSessionHeader"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"session"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"organizer"}},{"kind":"Field","name":{"kind":"Name","value":"prize"}},{"kind":"Field","name":{"kind":"Name","value":"maximumUser"}},{"kind":"Field","name":{"kind":"Name","value":"minimumUser"}},{"kind":"Field","name":{"kind":"Name","value":"remainingUser"}},{"kind":"Field","name":{"kind":"Name","value":"startAfter"}},{"kind":"Field","name":{"kind":"Name","value":"maxRounds"}},{"kind":"Field","name":{"kind":"Name","value":"roundLength"}},{"kind":"Field","name":{"kind":"Name","value":"roundInterval"}},{"kind":"Field","name":{"kind":"Name","value":"initialHealthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"numberOfGloves"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"players"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gloves"}}]}},{"kind":"Field","name":{"kind":"Name","value":"creationHeight"}},{"kind":"Field","name":{"kind":"Name","value":"startHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetSessionHeaderQuery, GetSessionHeaderQueryVariables>;
 export const IsValidSessionIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"IsValidSessionId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"isValidSessionId"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}}]}]}}]} as unknown as DocumentNode<IsValidSessionIdQuery, IsValidSessionIdQueryVariables>;
-export const GetSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSession"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"session"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"organizer"}},{"kind":"Field","name":{"kind":"Name","value":"prize"}},{"kind":"Field","name":{"kind":"Name","value":"maximumUser"}},{"kind":"Field","name":{"kind":"Name","value":"minimumUser"}},{"kind":"Field","name":{"kind":"Name","value":"remainingUser"}},{"kind":"Field","name":{"kind":"Name","value":"startAfter"}},{"kind":"Field","name":{"kind":"Name","value":"roundLength"}},{"kind":"Field","name":{"kind":"Name","value":"roundInterval"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"players"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"glove"}},{"kind":"Field","name":{"kind":"Name","value":"state"}}]}},{"kind":"Field","name":{"kind":"Name","value":"rounds"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"matches"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"move1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"playerIndex"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}},{"kind":"Field","name":{"kind":"Name","value":"move2"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"playerIndex"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"creationHeight"}},{"kind":"Field","name":{"kind":"Name","value":"startHeight"}},{"kind":"Field","name":{"kind":"Name","value":"height"}}]}}]}}]}}]} as unknown as DocumentNode<GetSessionQuery, GetSessionQueryVariables>;
+export const GetSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSession"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"session"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"organizer"}},{"kind":"Field","name":{"kind":"Name","value":"prize"}},{"kind":"Field","name":{"kind":"Name","value":"maximumUser"}},{"kind":"Field","name":{"kind":"Name","value":"minimumUser"}},{"kind":"Field","name":{"kind":"Name","value":"remainingUser"}},{"kind":"Field","name":{"kind":"Name","value":"startAfter"}},{"kind":"Field","name":{"kind":"Name","value":"maxRounds"}},{"kind":"Field","name":{"kind":"Name","value":"roundLength"}},{"kind":"Field","name":{"kind":"Name","value":"roundInterval"}},{"kind":"Field","name":{"kind":"Name","value":"initialHealthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"numberOfGloves"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"players"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gloves"}},{"kind":"Field","name":{"kind":"Name","value":"state"}}]}},{"kind":"Field","name":{"kind":"Name","value":"phases"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"matches"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"startHeight"}},{"kind":"Field","name":{"kind":"Name","value":"players"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"rounds"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"condition1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"gloveUsed"}},{"kind":"Field","name":{"kind":"Name","value":"submission"}}]}},{"kind":"Field","name":{"kind":"Name","value":"condition2"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"gloveUsed"}},{"kind":"Field","name":{"kind":"Name","value":"submission"}}]}},{"kind":"Field","name":{"kind":"Name","value":"winner"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"creationHeight"}},{"kind":"Field","name":{"kind":"Name","value":"startHeight"}},{"kind":"Field","name":{"kind":"Name","value":"height"}}]}}]}}]}}]} as unknown as DocumentNode<GetSessionQuery, GetSessionQueryVariables>;
 export const IsGloveRegisteredDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"IsGloveRegistered"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"isGloveRegistered"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloveId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}}}]}]}}]} as unknown as DocumentNode<IsGloveRegisteredQuery, IsGloveRegisteredQueryVariables>;
-export const GetGloveDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetGlove"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"glove"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloveId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"author"}}]}}]}}]}}]} as unknown as DocumentNode<GetGloveQuery, GetGloveQueryVariables>;
-export const CreateSessionActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CreateSessionAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"prize"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"maximumUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"minimumUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"remainingUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"startAfter"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roundLength"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roundInterval"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"prize"},"value":{"kind":"Variable","name":{"kind":"Name","value":"prize"}}},{"kind":"Argument","name":{"kind":"Name","value":"maximumUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"maximumUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"minimumUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"minimumUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"remainingUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"remainingUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"startAfter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"startAfter"}}},{"kind":"Argument","name":{"kind":"Name","value":"roundLength"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roundLength"}}},{"kind":"Argument","name":{"kind":"Name","value":"roundInterval"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roundInterval"}}}]}]}}]}}]} as unknown as DocumentNode<CreateSessionActionQuery, CreateSessionActionQueryVariables>;
-export const JoinSessionActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"JoinSessionAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"joinSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"gloveId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}}}]}]}}]}}]} as unknown as DocumentNode<JoinSessionActionQuery, JoinSessionActionQueryVariables>;
+export const CreateSessionActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CreateSessionAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"prize"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"maximumUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"minimumUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"remainingUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"startAfter"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"maxRounds"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roundLength"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roundInterval"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"initialHealthPoint"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"prize"},"value":{"kind":"Variable","name":{"kind":"Name","value":"prize"}}},{"kind":"Argument","name":{"kind":"Name","value":"maximumUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"maximumUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"minimumUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"minimumUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"remainingUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"remainingUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"startAfter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"startAfter"}}},{"kind":"Argument","name":{"kind":"Name","value":"maxRounds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"maxRounds"}}},{"kind":"Argument","name":{"kind":"Name","value":"roundLength"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roundLength"}}},{"kind":"Argument","name":{"kind":"Name","value":"roundInterval"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roundInterval"}}},{"kind":"Argument","name":{"kind":"Name","value":"initialHealthPoint"},"value":{"kind":"Variable","name":{"kind":"Name","value":"initialHealthPoint"}}}]}]}}]}}]} as unknown as DocumentNode<CreateSessionActionQuery, CreateSessionActionQueryVariables>;
+export const JoinSessionActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"JoinSessionAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"joinSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"gloves"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}}}]}]}}]}}]} as unknown as DocumentNode<JoinSessionActionQuery, JoinSessionActionQueryVariables>;
 export const CreateUserActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CreateUserAction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createUser"}}]}}]}}]} as unknown as DocumentNode<CreateUserActionQuery, CreateUserActionQueryVariables>;
-export const SubmitMoveActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SubmitMoveAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"move"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MoveType"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"submitMove"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"move"},"value":{"kind":"Variable","name":{"kind":"Name","value":"move"}}}]}]}}]}}]} as unknown as DocumentNode<SubmitMoveActionQuery, SubmitMoveActionQueryVariables>;
+export const SubmitMoveActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SubmitMoveAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveIndex"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"submitMove"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"gloveIndex"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveIndex"}}}]}]}}]}}]} as unknown as DocumentNode<SubmitMoveActionQuery, SubmitMoveActionQueryVariables>;
 export const RegisterGloveActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RegisterGloveAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerGlove"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloveId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}}}]}]}}]}}]} as unknown as DocumentNode<RegisterGloveActionQuery, RegisterGloveActionQueryVariables>;
 export const UnsignedTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"UnsignedTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unsignedTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"address"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}},{"kind":"Argument","name":{"kind":"Name","value":"plainValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}}}]}]}}]}}]} as unknown as DocumentNode<UnsignedTransactionQuery, UnsignedTransactionQueryVariables>;
 export const StageTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"StageTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"signature"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stageTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"unsignedTransaction"},"value":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}}},{"kind":"Argument","name":{"kind":"Name","value":"signature"},"value":{"kind":"Variable","name":{"kind":"Name","value":"signature"}}}]}]}}]} as unknown as DocumentNode<StageTransactionMutation, StageTransactionMutationVariables>;

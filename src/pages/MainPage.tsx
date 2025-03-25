@@ -1,29 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Search, Swords } from 'lucide-react';
 import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument, joinSessionAction } from '../queries';
+import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument } from '../queries';
 import { SessionState } from '../gql/graphql';
-import { useEquippedGlove } from '../context/EquippedGloveContext';
 import logo from '../assets/logo.webp';
 import StyledButton from '../components/StyledButton';
 import SessionCard from '../components/SessionCard';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
-import { getGloveImage } from '../fetches';
-import { MoveType } from '../gql/graphql';
 
-export const JoinSession: React.FC = () => {
+export const MainPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState('');
   const [error, setError] = useState('');
   const account = useRequiredAccount();
   const { tip } = useTip();
-  const { equippedGlove } = useEquippedGlove();
   const [prizeImages, setPrizeImages] = useState<{ [key: string]: string | null }>({});
 
   const { data: sessionData, error: sessionError, isLoading: sessionIsLoading, refetch: sessionRefetch } = useQuery({
@@ -49,81 +44,16 @@ export const JoinSession: React.FC = () => {
     }
   }, [tip, sessionRefetch, userRefetch]);
 
-  useEffect(() => {
-    const fetchPrizeImages = async () => {
-      if (sessionData) {
-        const promises = sessionData.map(async (session) => {
-          if (session?.metadata?.prize) {
-            const response = await getGloveImage(session.metadata.prize, MoveType.Paper);
-            const blob = await response.blob();
-            return { [session.metadata.prize]: URL.createObjectURL(blob) };
-          }
-          return null;
-        });
-        const images = await Promise.all(promises);
-        const imagesMap = images.reduce((acc, curr) => {
-          if (curr !== null) {
-            return { ...acc, ...curr };
-          }
-          return acc;
-        }, {} as { [key: string]: string | null });
-        setPrizeImages(imagesMap);
-      }
-    };
-    fetchPrizeImages();
-  }, [sessionData]);
-
-  const joinSessionMutation = useMutation({
-    mutationFn: async (sessionId: string) => {
-      const joinSesisonResponse = await request(GRAPHQL_ENDPOINT, joinSessionAction, {
-        sessionId,
-        gloveId: equippedGlove,
-      });
-      if (!joinSesisonResponse.actionQuery?.joinSession) {
-        throw new Error('Failed to join session');
-      }
-      
-      const plainValue = joinSesisonResponse.actionQuery.joinSession;
-      const txId = await executeTransaction(account, plainValue);
-      await waitForTransaction(txId);
-    },
-    onSuccess: () => {
-    },
-    onError: (error) => {
-      console.error('Failed to join session:', error);
-    }
-  });
-
-  const handleJoin = async (id: string) => {
-    if (!validateSessionIdLength(id)) {
-      setError(t('invalidSessionIdLength'));
-      return;
-    }
-
-    try {
-      await joinSessionMutation.mutateAsync(id);
-      navigate(`/game/${id}`);
-    } catch (error) {
-      console.error('Failed to join session:', error);
-      setError(t('failedToJoinSession'));
-    }
+  const handleJoin = (id: string) => {
+    navigate(`/join/${id}`);
   };
 
   const handleSpectate = (id: string) => {
-    if (!validateSessionIdLength(id)) {
-      setError(t('invalidSessionIdLength'));
-      return;
-    }
-
     navigate(`/result/${id}`);
   };
 
   const handleCreate = () => {
     navigate('/create');
-  };
-
-  const validateSessionIdLength = (id: string): boolean => {
-    return id.length === 40;
   };
 
   // 필터링된 세션 데이터
@@ -137,14 +67,14 @@ export const JoinSession: React.FC = () => {
       {userData?.sessionId && userData.sessionId !== "0000000000000000000000000000000000000000" ? (
         <div className="flex justify-between items-center bg-gradient-to-r from-yellow-200 to-blue-200 p-6 rounded-lg border-2 border-black w-full mb-6">
           <div>
-            <h3 className="text-xl font-bold text-blue-800">{t('alreadyJoinedSession')}</h3>
+            <h3 className="text-xl font-bold text-blue-800">{t('ui:alreadyJoinedSession')}</h3>
             <p className="text-gray-700 font-mono">{userData.sessionId}</p>
           </div>
           <StyledButton 
             bgColor = '#FFE55C'
             shadowColor = '#FF9F0A'
             onClick={() => navigate(`/game/${userData.sessionId}`)}>
-            {t('rejoin')}
+            {t('ui:rejoin')}
           </StyledButton>
         </div>
       ) : null}
@@ -154,7 +84,7 @@ export const JoinSession: React.FC = () => {
             className="text-2xl text-center text-white font-extrabold"
             style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
           >
-            {t('sessionList')}
+            {t('ui:sessionList')}
           </p>
         </div>
         <div className="p-6">
@@ -162,7 +92,7 @@ export const JoinSession: React.FC = () => {
             <div className="relative">
               <input
                 className="w-full pl-12 py-2 border border-black border-2 bg-gray-100 rounded-xl focus:bg-white"
-                placeholder={t('enterSessionId')}
+                placeholder={t('ui:enterSessionId')}
                 type="text"
                 value={sessionId}
                 onChange={(e) => {
@@ -174,8 +104,8 @@ export const JoinSession: React.FC = () => {
             </div>
           </div>
           {error && <p className="text-red-500">{error}</p>}
-          {sessionIsLoading && <p>{t('loading')}</p>}
-          {sessionError && <p className="text-red-500">{t('error')}: {sessionError.message}</p>}
+          {sessionIsLoading && <p>{t('ui:loading')}</p>}
+          {sessionError && <p className="text-red-500">{t('ui:error')}: {sessionError.message}</p>}
           <div className="session-list overflow-hidden w-full max-w-4xl">
             <div className="text-center text-white mb-2">
               <div className="flex items-center justify-center">
@@ -199,18 +129,18 @@ export const JoinSession: React.FC = () => {
                       id={sessionMetadata.id}
                       maxPlayers={sessionMetadata.maximumUser}
                       prize={sessionMetadata.prize}
-                      state={session.state}
                       prizeImage={prizeImages[sessionMetadata.prize] || logo}
+                      state={session.state}
                     />
                   );
                 })) : (
                   <div className="flex justify-center items-center p-6 rounded-lg w-full border-2 bg-gray-500 border-gray-600">
-                    <p className="text-gray-400"><i>{t('noSessionFound')}</i></p>
+                    <p className="text-gray-400"><i>{t('ui:noSessionFound')}</i></p>
                   </div>)}
             </div>
           </div>
           <p className="mt-4 text-center text-gray-300 cursor-pointer mt-10" onClick={handleCreate}>
-            <i>{t('createNewSession')}</i>
+            <i>{t('ui:createNewSession')}</i>
           </p>
         </div>
       </div>

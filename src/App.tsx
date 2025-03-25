@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GlovePage from './pages/GlovePage';
-import { JoinSession } from './pages/JoinSession';
+import { MainPage } from './pages/MainPage';
 import { CreateSession } from './pages/CreateSession';
 import { GamePage } from './pages/GamePage';
 import { ResultPage } from './pages/ResultPage';
@@ -13,9 +13,9 @@ import UserPage from './pages/UserPage';
 import { TipProvider } from './context/TipContext';
 import RegisterGlove from './components/RegisterGlove';
 import { EquippedGloveProvider } from './context/EquippedGloveContext';
-import GloveEquipPage from './pages/GloveEquipPage';
 import { MetamaskAccountCreator } from './accounts/MetamaskAccount';
 import { PrivateKeyAccountCreator } from './accounts/PrivateKeyAccount';
+import JoinPage from './pages/JoinPage';
 
 registerCreator(new MetamaskAccountCreator());
 registerCreator(new PrivateKeyAccountCreator());
@@ -34,14 +34,14 @@ const AppContent: React.FC = () => {
           <main>
             <Routes>
               <Route element={<LoginPage />} path="/login" />
-              <Route element={<ProtectedRoute><JoinSession /></ProtectedRoute>} path="/" />
+              <Route element={<ProtectedRoute><MainPage /></ProtectedRoute>} path="/" />
               <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
               <Route element={<ProtectedRoute><GamePage /></ProtectedRoute>} path="/game/:sessionId" />
               <Route element={<ResultPage />} path="/result/:sessionId" />
               <Route element={<UserPage />} path="/user/:userAddress" />
               <Route element={<ProtectedRoute><RegisterGlove /></ProtectedRoute>} path="/registerGlove" />
               <Route element={<GlovePage />} path="/glove/:gloveId" />
-              <Route element={<GloveEquipPage />} path="/gloveEquip" />
+              <Route element={<ProtectedRoute><JoinPage /></ProtectedRoute>} path="/join/:sessionId" />
             </Routes>
           </main>
         </div>

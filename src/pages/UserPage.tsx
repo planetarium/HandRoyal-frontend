@@ -1,17 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
-import { Address } from '@planetarium/account';
-import { getUserDocument, USER_SUBSCRIPTION } from '../queries';
-import { getGloveImage } from '../fetches';
+import { getUserDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
 import { useRequiredAccount } from '../context/AccountContext';
-import { MoveType } from '../gql/graphql';
-import subscriptionClient from '../subscriptionClient';
 import AddressDisplay from '../components/AddressDisplay';
-import { useEquippedGlove } from '../context/EquippedGloveContext';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
@@ -19,8 +14,6 @@ const UserPage: React.FC = () => {
   const { t } = useTranslation();
   const account = useRequiredAccount();
   const navigate = useNavigate();
-  const [gloveImages, setGloveImages] = useState<{ [key: string]: string | null }>({});
-  const { equippedGlove, setEquippedGlove } = useEquippedGlove();
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['getUser', account],
@@ -31,23 +24,11 @@ const UserPage: React.FC = () => {
   });
 
   const [currentOwnedPage, setCurrentOwnedPage] = React.useState(0);
-  const [move, setMove] = React.useState<MoveType>(MoveType.Paper);
   const glovesPerPage = 10;
   const [currentRegisteredPage, setCurrentRegisteredPage] = React.useState(0);
 
-  useEffect(() => {
-    const fetchGloveImage = async () => {
-      if (equippedGlove) {
-        const response = await getGloveImage(equippedGlove, move);
-        const blob = await response.blob();
-        setGloveImages(prev => ({ ...prev, [equippedGlove]: URL.createObjectURL(blob) }));
-      }
-    };
-    fetchGloveImage();
-  }, [equippedGlove, move]);
-
-  if (isLoading) return <p>{t('loading')}</p>;
-  if (error) return <p>{t('error')}: {error.message}</p>;
+  if (isLoading) return <p>{t('ui:loading')}</p>;
+  if (error) return <p>{t('ui:error')}: {error.message}</p>;
 
   const handleBack = () => {
     navigate(-1);
@@ -77,58 +58,29 @@ const UserPage: React.FC = () => {
     }
   }
 
-  const handleGloveClick = (gloveId: string) => {
-    if (!data || !account) return;
-    const unsubscribe = subscriptionClient.subscribe(
-      {
-        query: USER_SUBSCRIPTION,
-        variables: { userId: account.address.toString() },
-      },
-      {
-        next: (result: any) => {
-          if (Address.fromHex(result.data.onUserChanged.id).equals(account.address)) {
-            setEquippedGlove(result.data.onUserChanged.equippedGlove);
-            unsubscribe();
-          }
-        },
-        error: (err: any) => {
-          console.error('Subscription error:', err);
-        },
-        complete: () => {
-          console.log('Subscription completed');
-        },
-      }
-    );
-  };
-
   return (
     <div className="flex flex-col items-center justify-center w-full mx-auto bg-gray-700 border-2 border-black rounded-lg text-white">
       <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
-        <h1 className="text-4xl font-bold" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('userInfo')}</h1>
+        <h1 className="text-2xl font-bold mb-4" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('ui:userInfo')}</h1>
       </div>
       <div className="flex flex-col items-center p-4 space-y-4">
         {data ? (
           <>
             <div className="flex flex-col items-center">
-              <img alt="Glove" className="w-64 h-64 rounded-full bg-gray-500 mb-4 cursor-pointer" src={equippedGlove ? gloveImages[equippedGlove] || move : move} onClick={() => navigate('/gloveEquip')} />
-              <div className="flex flex-row space-x-2">
-                <button className={`p-1 rounded shadow cursor-pointer ${move === MoveType.Rock ? 'bg-gray-500 border-2 border-gray-400' : 'bg-gray-600'}`} onClick={() => {setMove(MoveType.Rock)}}>✊</button>
-                <button className={`p-1 rounded shadow cursor-pointer ${move === MoveType.Paper ? 'bg-gray-500 border-2 border-gray-400' : ' bg-gray-600'}`} onClick={() => {setMove(MoveType.Paper)}}>✋</button>
-                <button className={`p-1 rounded shadow cursor-pointer ${move === MoveType.Scissors ? 'bg-gray-500 border-2 border-gray-400' : 'bg-gray-600'}`} onClick={() => {setMove(MoveType.Scissors)}}>✌️</button>
-              </div>
+              {/* 자랑할 만한 대표 글러브 선택할 수 있게? 바꾸기 */}
             </div>
-            <p className="text-lg">{t('User ID')}: {data.id}</p>
+            <p className="text-lg">{t('ui:userId')}: {data.id}</p>
             <div className="w-full">
               <div className="bg-gray-600 p-4 rounded shadow mb-4">
-                <p className="text-lg">{t('ownedGloves')}</p>
+                <p className="text-lg">{t('ui:ownedGloves')}</p>
                 {data.ownedGloves && data.ownedGloves.length > 0 ? (
                   <div className="flex flex-col gap-1 text-sm">
                     {data.ownedGloves.slice(currentOwnedPage * glovesPerPage, (currentOwnedPage + 1) * glovesPerPage).map((glove, index) => (
-                      <AddressDisplay key={index} address={glove} type="glove"/>
+                      <AddressDisplay key={index} address={glove?.id ?? ''} type="glove"/>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">{t('noGlovesFound')}</p>
+                  <p className="text-gray-500">{t('ui:noGlovesFound')}</p>
                 )}
               </div>
               <div className="flex justify-center space-x-6">
@@ -142,7 +94,7 @@ const UserPage: React.FC = () => {
             </div>
             <div className="w-full">
               <div className="flex flex-col bg-gray-600 p-4 rounded shadow mb-4">
-                <p className="text-lg">{t('registeredGloves')}</p>
+                <p className="text-lg">{t('ui:registeredGloves')}</p>
                 {data.registeredGloves && data.registeredGloves.length > 0 ? (
                   <div className="flex flex-col gap-1 text-sm">
                     {data.registeredGloves.slice(currentRegisteredPage * glovesPerPage, (currentRegisteredPage + 1) * glovesPerPage).map((glove, index) => (
@@ -150,7 +102,7 @@ const UserPage: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">{t('noGlovesFound')}</p>
+                  <p className="text-gray-500">{t('ui:noGlovesFound')}</p>
                 )}
               </div>
               <div className="flex justify-center space-x-6">
@@ -163,11 +115,11 @@ const UserPage: React.FC = () => {
               </div>
             </div>
             <StyledButton onClick={handleBack}>
-              {t('goBack')}
+              {t('ui:goBack')}
             </StyledButton>
           </>
         ) : (
-          <p className="text-red-500">{t('User not found')}</p>
+          <p className="text-red-500">{t('ui:userNotFound')}</p>
         )}
       </div>
     </div>

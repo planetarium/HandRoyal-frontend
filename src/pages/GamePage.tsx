@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
-import { request } from 'graphql-request';
-import { Address } from '@planetarium/account';
-import { useQuery } from '@tanstack/react-query';
 import { Clock } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Address } from '@planetarium/account';
+import { request } from 'graphql-request';
 import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { SessionState, PlayerState } from '../gql/graphql';
-import { GRAPHQL_ENDPOINT, getSessionDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, getUserScopedSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
 import win from '../assets/lose.webp';
 import lose from '../assets/lose.webp';
 import loading from '../assets/loading.webp';
-import type { Session } from '../gql/graphql';
+import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
   const { t } = useTranslation();
@@ -25,76 +25,42 @@ export const GamePage: React.FC = () => {
   const [showNoSessionMessage, setShowNoSessionMessage] = useState(false);
   const [playerStatus, setPlayerStatus] = useState<PlayerState | null>(null);
 
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ['getSession', sessionId],
+  const { data: sessionData, isLoading, refetch } = useQuery<GetUserScopedSessionQuery>({
+    queryKey: ['getUserScopedSession', sessionId, account?.address],
     queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getSessionDocument, { sessionId });
-      return response.stateQuery?.session;
+      if (!sessionId || !account?.address) {
+        throw new Error('Session ID and user address are required');
+      }
+      return request<GetUserScopedSessionQuery>(
+        GRAPHQL_ENDPOINT,
+        getUserScopedSessionDocument,
+        {
+          sessionId,
+          userId: account.address.toString()
+        }
+      );
     },
-    enabled: !!sessionId,
+    enabled: !!sessionId && !!account?.address && !!tip,
   });
 
   useEffect(() => {
-    if (tip) {
-      refetch();
-    }
+    refetch();
   }, [tip, refetch]);
 
-  useEffect(() => {
-    if (data?.players && account) {
-      const address = account.address;
-      const currentPlayer = data.players.find(player => Address.fromHex(player!.id).toHex() === address.toHex());
-      if (currentPlayer) {
-        setPlayerStatus(currentPlayer.state);
-      }
-    }
-  }, [data, account]);
-
-  useEffect(() => {
-    if (!sessionId) {
-      setShowNoSessionMessage(true);
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
-    }
-  }, [sessionId, navigate]);
-
-  const blocksLeft = () => {
-    switch (data?.state) {
-      case SessionState.Ready:
-        return data?.startHeight && tip
-          ? data.startHeight - tip.index
-          : 0;
-      case SessionState.Active:
-        return data?.rounds && data.metadata && tip
-          ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundLength) - tip.index
-          : 0;
-      case SessionState.Break:
-        return data?.rounds && data.metadata && tip
-          ? (data.rounds[data.rounds.length - 1]?.height + data.metadata.roundLength + data.metadata.roundInterval) - tip.index
-          : 0;
-      default:
-        return 0;
-    }
+  if (isLoading || !sessionData?.stateQuery?.userScopedSession) {
+    return <p>{t('ui:loading')}</p>;
   }
 
-  const round = data?.rounds ? data.rounds.length : 0;
+  const session = sessionData.stateQuery.userScopedSession;
 
-  if (isLoading) return <p>{t('loading')}</p>;
-  if (error) return <p>{t('error')}: {error.message}</p>;
-  
-  // Ensure data is of type Session
-  const sessionData = data as Session;
+  const blocksLeft = () => {
+    if (!session || !tip) return 0;
+    return session.intervalEndHeight - tip.index;
+  };
 
   const renderContent = () => {
     if (showNoSessionMessage) {
-      return(
-        <p className="text-red-500 text-center mb-4">{t('noSessionFound')}</p>
-      );
-    }
-
-    if (sessionData === null) {
-      return <p className="text-2xl">{t('waitingForSession')}</p>;
+      return <p className="text-red-500 text-center mb-4">{t('ui:noSessionFound')}</p>;
     }
 
     if (playerStatus === PlayerState.Won) {
@@ -103,17 +69,17 @@ export const GamePage: React.FC = () => {
           <p> </p>
           <div className="flex flex-col items-center justify-center">
             <img alt="Win" className="w-1/4 h-auto object-contain animate-cry mb-6" src={win} />
-            <p className="text-2xl text-center">{t('win')}</p>
+            <p className="text-2xl text-center">{t('ui:win')}</p>
           </div>
           <div className="flex justify-center space-x-4 mb-5">
             <StyledButton 
               bgColor = '#FFE55C'
               shadowColor = '#FF9F0A'
               onClick={() => navigate(`/result/${sessionId}`)}>
-              {t('viewResults')}
+              {t('ui:viewResults')}
             </StyledButton>
             <StyledButton onClick={() => navigate('/')} >
-              {t('backToMain')}
+              {t('ui:backToMain')}
             </StyledButton>
           </div>
         </div>
@@ -126,29 +92,47 @@ export const GamePage: React.FC = () => {
           <p> </p>
           <div className="flex flex-col items-center justify-center">
             <img alt="Lose" className="w-1/4 h-auto object-contain animate-cry mb-6" src={lose} />
-            <p className="text-2xl text-center">{t('lose')}</p>
+            <p className="text-2xl text-center">{t('ui:lose')}</p>
           </div>
           <div className="flex justify-center space-x-4 mb-5">
             <StyledButton 
               bgColor = '#FFE55C'
               shadowColor = '#FF9F0A'
               onClick={() => navigate(`/result/${sessionId}`)}>
-              {t('viewResults')}
+              {t('ui:viewResults')}
             </StyledButton>
             <StyledButton onClick={() => navigate('/')} >
-              {t('backToMain')}
+              {t('ui:backToMain')}
             </StyledButton>
           </div>
         </div>
       );
     }
 
-    if (sessionData.state === SessionState.Break) {
-      {/* 여기에 승리 모션 들어가야함 */}
+    if (session.sessionState === SessionState.Ended) {
+      return (
+        <div className="flex flex-col items-center justify-center">
+          <h2 className="text-2xl mb-4">{t('ui:sessionEnded')}</h2>
+          <div className="flex justify-center space-x-4 mb-5">
+            <StyledButton 
+              bgColor = '#FFE55C'
+              shadowColor = '#FF9F0A'
+              onClick={() => navigate(`/result/${sessionId}`)}>
+              {t('ui:viewResults')}
+            </StyledButton>
+            <StyledButton onClick={() => navigate('/')} >
+              {t('ui:backToMain')}
+            </StyledButton>
+          </div>
+        </div>
+      );
+    }
+
+    if (session.sessionState === SessionState.Ready) {
       return (
         <div className="flex flex-col items-center justify-center">
           <img alt="Loading" className="w-1/4 h-auto object-contain animate-swing mb-6" src={loading} />
-          <p className="text-2xl text-white text-center mt-4">{t('waitingForRoundToStart')}</p>
+          <p className="text-2xl text-white text-center mt-4">{t('ui:waitingForGameToStart')}</p>
           <div className="flex items-center justify-center text-xl mt-5">
             <Clock className="w-5 h-5 mr-1" />{blocksLeft()}
           </div>
@@ -156,70 +140,31 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (sessionData.state === SessionState.Ended) {
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <h2 className="text-2xl mb-4">{t('sessionEnded')}</h2>
-          <div className="flex justify-center space-x-4 mb-5">
-            <StyledButton 
-              bgColor = '#FFE55C'
-              shadowColor = '#FF9F0A'
-              onClick={() => navigate(`/result/${sessionId}`)}>
-              {t('viewResults')}
-            </StyledButton>
-            <StyledButton onClick={() => navigate('/')} >
-              {t('backToMain')}
-            </StyledButton>
-          </div>
-        </div>
-      );
-    }
-
-    if (sessionData.state === SessionState.Ready) {
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <img alt="Loading" className="w-1/4 h-auto object-contain animate-swing mb-6" src={loading} />
-          <p className="text-2xl text-white text-center mt-4">{t('waitingForGameToStart')}</p>
-          <div className="flex items-center justify-center text-xl mt-5">
-            <Clock className="w-5 h-5 mr-1" />{blocksLeft()}
-          </div>
-        </div>
-      );
-    }
-
-    if (sessionData.metadata?.organizer && Address.fromHex(sessionData.metadata.organizer).toHex() === account.address.toHex()) {
+    if (account.address.equals(Address.fromHex(session.organizerAddress))) {
       return (
         <div>
-          <p className="text-2xl">{t('youAreTheSessionOrganizer')}</p>
+          <p className="text-2xl">{t('ui:youAreTheSessionOrganizer')}</p>
           <StyledButton 
             bgColor = '#FFE55C'
             shadowColor = '#FF9F0A'
             onClick={() => navigate(`/result/${sessionId}`)}>
-          {t('spectate')}
+            {t('ui:spectate')}
           </StyledButton>
           <StyledButton onClick={() => navigate('/')} >
-            {t('backToMain')}
+            {t('ui:backToMain')}
           </StyledButton>
         </div>
       )
     }
 
     return (
-      <GameBoard blocksLeft={blocksLeft()} data={sessionData} round={round} />
+      <GameBoard blockIndex={tip?.index || 0} data={session} />
     );
-  }
+  };
 
   return (
     <div className="flex justify-center">
       <div className="flex flex-col justify-between bg-gray-700 rounded-lg text-white border-black border-2 min-h-[calc(100vh-180px)] w-full">
-        <div className="flex items-center justify-center rounded-t-lg p-6 bg-gray-900">
-          <p
-            className="text-4xl text-center text-white font-extrabold"
-            style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
-          >
-            {t('gameBoardTitle')}
-          </p>
-        </div>
         <div className="flex flex-col justify-center flex-grow">
           {renderContent()}
         </div>
