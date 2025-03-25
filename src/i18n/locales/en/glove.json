@@ -2,23 +2,80 @@
   "0000000000000000000000000000000000000000": {
     "name": "Basic Rock",
     "type": "rock",
+    "rarity": "Common",
     "description": "Win against scissors, lose against paper",
     "damage": 40,
     "abilities": {
     }
   },
-  "0000000000000000000000000000000000000001": {
+  "1000000000000000000000000000000000000000": {
     "name": "Basic Paper",
     "type": "paper",
+    "rarity": "Common",
     "description": "Win against rock, lose against scissors",
     "damage": 40,
     "abilities": {
     }
   },
-  "0000000000000000000000000000000000000002": {
+  "2000000000000000000000000000000000000000": {
     "name": "Basic Scissors",
     "type": "scissors",
+    "rarity": "Common",
     "description": "Win against paper, lose against rock",
+    "damage": 40,
+    "abilities": {
+    }
+  },
+  "0100000000000000000000000000000000000000": {
+    "name": "Red Rock",
+    "type": "rock",
+    "rarity": "Uncommon",
+    "description": "Sharppend version of basic rock, deals more damage",
+    "damage": 42,
+    "abilities": {
+    }
+  },
+  "1100000000000000000000000000000000000000": {
+    "name": "Red Paper",
+    "type": "paper",
+    "rarity": "Uncommon",
+    "description": "Sharppend version of basic paper, deals more damage",
+    "damage": 42,
+    "abilities": {
+    }
+  },
+  "2100000000000000000000000000000000000000": {
+    "name": "Red Scissors",
+    "type": "scissors",
+    "rarity": "Uncommon",
+    "description": "Sharppend version of basic scissors, deals more damage",
+    "damage": 42,
+    "abilities": {
+    }
+  },
+  "0100000000000000000000000000000000000001": {
+    "name": "Green Rock",
+    "type": "rock",
+    "rarity": "Uncommon",
+    "description": "Sturdy version of basic rock, takes 2 less damage when losing",
+    "damage": 40,
+    "abilities": {
+    }
+  },
+  "1100000000000000000000000000000000000001": {
+    "name": "Green Paper",
+    "type": "paper",
+    "rarity": "Uncommon",
+    "description": "Sturdy version of basic paper, takes 2 less damage when losing",
+    "damage": 40,
+    "abilities": {
+    }
+  },
+  "2100000000000000000000000000000000000001": {
+    "name": "Green Scissors",
+    "type": "scissors",
+    "rarity": "Uncommon",
+    "description": "Sturdy version of basic scissors, takes 2 less damage when losing",
     "damage": 40,
     "abilities": {
     }
