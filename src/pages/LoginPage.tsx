@@ -12,7 +12,7 @@ import {
   getUserDocument
 } from '../queries';
 import StyledButton from '../components/StyledButton';
-import logo from '../assets/logo.webp';
+import logo from '../assets/logo.png';
 import metamaskIcon from '../assets/MetaMask-icon-fox.svg';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
 

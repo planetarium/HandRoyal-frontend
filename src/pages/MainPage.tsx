@@ -8,7 +8,7 @@ import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument } from '../queries';
 import { SessionState } from '../gql/graphql';
-import logo from '../assets/logo.webp';
+import logo from '../assets/logo.png';
 import StyledButton from '../components/StyledButton';
 import SessionCard from '../components/SessionCard';
 
