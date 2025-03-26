@@ -21,7 +21,6 @@ export const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const { tip } = useTip();
   const [showNoSessionMessage, setShowNoSessionMessage] = useState(false);
-  const [playerStatus, setPlayerStatus] = useState<PlayerState | null>(null);
 
   const { data: sessionData, isLoading, refetch } = useQuery<GetUserScopedSessionQuery>({
     queryKey: ['getUserScopedSession', sessionId, account?.address],
@@ -61,7 +60,7 @@ export const GamePage: React.FC = () => {
       return <p className="text-red-500 text-center mb-4">{t('ui:noSessionFound')}</p>;
     }
 
-    if (playerStatus === PlayerState.Won) {
+    if (session.playerState === PlayerState.Won) {
       return (
         <div className="flex flex-col items-center justify-between h-full">
           <p> </p>
@@ -84,7 +83,7 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (playerStatus === PlayerState.Lose) {
+    if (session.playerState === PlayerState.Lose) {
       return (
         <div className="flex flex-col items-center justify-between h-full">
           <p> </p>
