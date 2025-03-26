@@ -29,13 +29,13 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, ma
         </div>
       </div>
       {/* HP 표시 공간 */}
-      <div className="w-full p-2 bg-gray-700">
-        <div className="relative w-full h-6 bg-gray-800 rounded-full overflow-hidden">
+      <div className="w-full p-1 bg-gray-700">
+        <div className="relative w-full h-4 bg-gray-800 rounded-full overflow-hidden">
           <div 
             className="absolute left-0 top-0 h-full bg-red-500 transition-all duration-500 ease-out"
             style={{ width: `${hpPercentage}%` }}
           />
-          <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-white text-xs">
             {currentHp}/{maxHp}
           </div>
         </div>

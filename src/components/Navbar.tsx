@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
 import AddressDisplay from './AddressDisplay';
+import logoText from '../assets/logo-text.png';
 
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -22,8 +23,8 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-gray-800 p-4 text-white flex justify-between items-center fixed top-0 left-0 w-full h-16 z-10">
       <div className="flex items-center space-x-20">
-        <Link className="text-lg font-bold text-white" to="/">
-          HandRoyal
+        <Link to="/">
+          <img alt="HandRoyal" className="h-12" src={logoText} />
         </Link>
         <div className="flex items-center space-x-6">
           <Link className="text-lg text-white" to={"/user/" + account?.address.toString()}>

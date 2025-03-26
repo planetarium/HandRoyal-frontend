@@ -23,7 +23,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   const { t } = useTranslation();
   const account = useRequiredAccount();
   const [submitting, setSubmitting] = useState(false);
-  const [selectedHand, setSelectedHand] = useState<number | null>(null);
+  const [selectedHand, setSelectedHand] = useState<number>(-1);
   const [gameBoardState, setGameBoardState] = useState<GameBoardState>({
     opponentAddress: null,
     myGloveAddress: null,
@@ -61,6 +61,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     },
     onSuccess: (data) => {
       console.error('Move submitted successfully: ' + data);
+      setSelectedHand(-1);
       setSubmitting(false);
     },
     onError: (error) => {
@@ -101,6 +102,27 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       submitMoveMutation.mutate(selectedHand);
     }
   };
+  
+  // 사용 가능한 글러브만 필터링하되, 원본 인덱스 정보 유지
+  const availableGloves = data?.myGloves?.map((gloveId, index) => ({
+    gloveId,
+    originalIndex: index,
+    isUsed: data?.myCondition?.gloveUsed?.[index] === true
+  })).filter(glove => !glove.isUsed) ?? [];
+
+  const calculateSpacing = () => {
+    const totalCards = availableGloves.length;
+    const cardWidth = 100; // w-25 = 100px
+    const containerWidth = 672; // max-w-3xl = 42rem = 672px
+    const totalPadding = 24;
+    const cardBorder = 4;
+    const effectiveCardWidth = cardWidth + cardBorder;
+    const availableWidth = containerWidth - totalPadding - (effectiveCardWidth * totalCards);
+    const spacing = totalCards > 1 
+      ? (availableWidth / (totalCards - 1))
+      : 0;
+    return spacing > 10 ? 10 : spacing;
+  }
 
   return (
     <div className="relative h-full w-full mx-auto bg-slate-800 text-white overflow-hidden rounded-lg">
@@ -147,8 +169,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
         />
         <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 text-xs">💣</div>
         <div
-          style={{ left: `${fusePercentage}%` }}
           className="absolute top-1/2 transform -translate-y-1/2 transition-all duration-1000 ease-linear text-xs"
+          style={{ left: `${fusePercentage}%` }}
         >
           🔥
         </div>
@@ -225,7 +247,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
           </div>
 
           {/* 현재 제출 및 체력 상태 표시 영역 */}
-          <div className="flex items-center justify-center space-x-4 py-2 w-full">
+          <div className="flex items-center justify-center space-x-4 px-6 py-2 w-full">
             <MoveDisplay 
               currentHp={gameBoardState.myHealthPoint < 0 ? 0 : gameBoardState.myHealthPoint}
               gloveAddress={gameBoardState.myGloveAddress ?? ''} 
@@ -246,39 +268,26 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
             <div className="flex justify-center relative h-[100px] w-full">
               <div className="flex justify-center w-full">
                 {(() => {
-                  // 사용 가능한 글러브만 필터링하되, 원본 인덱스 정보 유지
-                  const availableGloves = data?.myGloves?.map((gloveId, index) => ({
-                    gloveId,
-                    originalIndex: index,
-                    isUsed: data?.myCondition?.gloveUsed?.[index] === true
-                  })).filter(glove => !glove.isUsed) ?? [];
-
-                  const totalCards = availableGloves.length;
-                  const cardWidth = 120; // w-30 = 7.5rem = 120px
-                  const containerWidth = 896; // max-w-4xl = 56rem = 896px
-                  const totalPadding = 72; // p-6 * 3 = 1.5rem * 3 = 24px * 3
-                  const cardBorder = 4; // border-2 = 2px * 2
-                  const effectiveCardWidth = cardWidth + cardBorder;
-                  const availableWidth = containerWidth - totalPadding - effectiveCardWidth;
-                  const spacing = totalCards > 1 
-                    ? (100 - (effectiveCardWidth / availableWidth * 100)) / (totalCards - 1) 
-                    : 0;
-
                   return availableGloves.map((glove, displayIndex) => {
                     const isSelected = selectedHand === glove.originalIndex;
                     const gloveImage = getLocalGloveImage(glove.gloveId);
+                    const spacing = calculateSpacing();
                     
                     return (
                       <div
                         key={glove.originalIndex}
-                        className={`absolute w-25 h-25 rounded-lg overflow-hidden border-2 bg-gray-100 border-black cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 hover:-translate-y-4 ${
+                        className={`rounded-lg overflow-hidden border-2 bg-gray-100 border-black cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 hover:-translate-y-4 ${
                           isSelected 
                             ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-10 -translate-y-4' 
                             : 'hover:shadow-lg hover:shadow-white/20'
                         }`}
                         style={{
-                          left: `${displayIndex * spacing}%`,
                           zIndex: isSelected ? 10 : displayIndex,
+                          width: '100px',
+                          height: '100px',
+                          minWidth: '100px',
+                          minHeight: '100px',
+                          marginRight: displayIndex < availableGloves.length - 1 ? `${spacing}px` : '0'
                         }}
                         onClick={() => setSelectedHand(isSelected ? -1 : glove.originalIndex)}
                       >
@@ -311,14 +320,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
 
           {/* 제출 버튼 */}
           <div className="flex flex-col items-center p-4">
-            {submitting && (
-              <p className="text-yellow-400 mb-2">{t('ui:submitting')}</p>
-            )}
             <StyledButton 
               bgColor='#FFE55C' 
+              disabled={submitting}
               shadowColor='#FF9F0A'
               onClick={handleSubmit}
-              disabled={submitting}
             >
               {submitting ? t('ui:submitting') : t('ui:submit')}
             </StyledButton>
