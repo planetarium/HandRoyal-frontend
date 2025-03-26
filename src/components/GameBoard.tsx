@@ -23,7 +23,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   const { t } = useTranslation();
   const account = useRequiredAccount();
   const [submitting, setSubmitting] = useState(false);
-  const [selectedHand, setSelectedHand] = useState<number | null>(null);
+  const [selectedHand, setSelectedHand] = useState<number>(-1);
   const [gameBoardState, setGameBoardState] = useState<GameBoardState>({
     opponentAddress: null,
     myGloveAddress: null,
@@ -61,6 +61,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     },
     onSuccess: (data) => {
       console.error('Move submitted successfully: ' + data);
+      setSelectedHand(-1);
       setSubmitting(false);
     },
     onError: (error) => {
