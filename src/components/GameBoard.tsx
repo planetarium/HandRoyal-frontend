@@ -8,7 +8,7 @@ import { GRAPHQL_ENDPOINT, submitMoveAction } from '../queries';
 import { MatchState } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
-import { executeTransaction } from '../utils/transaction';
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import { getLocalGloveImage } from '../fetches';
 import win from '../assets/win.png';
 import lose from '../assets/lose.png';
@@ -56,7 +56,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       }
 
       const plainValue = submitMoveResponse.actionQuery.submitMove;
-      return executeTransaction(account, plainValue);
+      const txId = await executeTransaction(account, plainValue);
+      await waitForTransaction(txId);
     },
     onSuccess: (data) => {
       console.error('Move submitted successfully: ' + data);
@@ -145,7 +146,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
           }`}
         />
         <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 text-xs">💣</div>
-        {/* eslint-disable-next-line react/jsx-sort-props, react/jsx-max-props-per-line */}
         <div
           style={{ left: `${fusePercentage}%` }}
           className="absolute top-1/2 transform -translate-y-1/2 transition-all duration-1000 ease-linear text-xs"
@@ -310,13 +310,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
           </div>
 
           {/* 제출 버튼 */}
-          <div className="flex justify-center p-4">
+          <div className="flex flex-col items-center p-4">
+            {submitting && (
+              <p className="text-yellow-400 mb-2">{t('ui:submitting')}</p>
+            )}
             <StyledButton 
               bgColor='#FFE55C' 
               shadowColor='#FF9F0A'
               onClick={handleSubmit}
+              disabled={submitting}
             >
-              {t('ui:submit')}
+              {submitting ? t('ui:submitting') : t('ui:submit')}
             </StyledButton>
           </div>
         </>
