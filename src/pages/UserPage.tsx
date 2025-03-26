@@ -70,6 +70,7 @@ const UserPage: React.FC = () => {
               {/* 자랑할 만한 대표 글러브 선택할 수 있게? 바꾸기 */}
             </div>
             <p className="text-lg">{t('ui:userId')}: {data.id}</p>
+            <p className="text-lg">{t('ui:userName')}: {data.name}</p>
             <div className="w-full">
               <div className="bg-gray-600 p-4 rounded shadow mb-4">
                 <p className="text-lg">{t('ui:ownedGloves')}</p>

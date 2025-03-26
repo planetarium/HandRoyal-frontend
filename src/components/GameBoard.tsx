@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
 import { useRequiredAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, submitMoveAction } from '../queries';
+import { GRAPHQL_ENDPOINT, submitMoveAction, getUserDocument } from '../queries';
 import { MatchState } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
@@ -26,6 +26,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   const [selectedHand, setSelectedHand] = useState<number>(-1);
   const [gameBoardState, setGameBoardState] = useState<GameBoardState>({
     opponentAddress: null,
+    opponentName: null,
     myGloveAddress: null,
     opponentGloveAddress: null,
     myHealthPoint: 100,
@@ -35,6 +36,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
 
   interface GameBoardState {
     opponentAddress: string | null;
+    opponentName: string | null;
     myGloveAddress: string | null;
     opponentGloveAddress: string | null;
     myHealthPoint: number;
@@ -70,12 +72,26 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     }
   });
 
+  // 상대방 정보 조회
+  const { data: opponentData } = useQuery({
+    queryKey: ['getOpponent', data?.opponentAddress],
+    queryFn: async () => {
+      if (!data?.opponentAddress) return null;
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { 
+        address: data.opponentAddress 
+      });
+      return response?.stateQuery?.user;
+    },
+    enabled: !!data?.opponentAddress
+  });
+
   const remainingBlocks = data ? data.intervalEndHeight - blockIndex : 0;
   const fusePercentage = data ? Math.max(0, Math.min(100, (remainingBlocks / data.currentInterval) * 100)) : 0;
 
   useEffect(() => {
     const props: GameBoardState = {
       opponentAddress: data.opponentAddress || null,
+      opponentName: opponentData?.name || null,
       myGloveAddress:
         (data.myGloves !== null &&
           data.myGloves !== undefined &&
@@ -94,7 +110,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     };
 
     setGameBoardState(props);
-  }, [data]);
+  }, [data, opponentData]);
 
   const handleSubmit = () => {
     if (selectedHand !== null) {
@@ -253,6 +269,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
               gloveAddress={gameBoardState.myGloveAddress ?? ''} 
               maxHp={gameBoardState.maxHealthPoint}
               userAddress={'you'} 
+              userName={t('ui:you')}
             />
             <Swords className="w-16 h-16" color="white" />
             <MoveDisplay 
@@ -260,6 +277,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
               gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
               maxHp={gameBoardState.maxHealthPoint}
               userAddress={gameBoardState.opponentAddress ?? ''}
+              userName={gameBoardState.opponentName ?? t('ui:opponent')}
             />
           </div>
       
