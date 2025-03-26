@@ -166,6 +166,7 @@ export const getSessionDocument = graphql(/* GraphQL */ `
               }
               winner
             }
+            winner
           }
         }
         creationHeight
