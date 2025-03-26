@@ -12,6 +12,8 @@ import { GRAPHQL_ENDPOINT, getUserScopedSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
 import loading from '../assets/loading.webp';
+import win from '../assets/win.png';
+import lose from '../assets/lose.png';
 import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
