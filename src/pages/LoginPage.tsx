@@ -49,6 +49,7 @@ const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const { account, createAccount } = useAccountContext();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
+  const [nameInput, setNameInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
@@ -90,7 +91,9 @@ const LoginPage: React.FC = () => {
         throw new Error('Account not connected');
       }
 
-      const createUserResponse = await request(GRAPHQL_ENDPOINT, createUserAction);
+      const createUserResponse = await request(GRAPHQL_ENDPOINT, createUserAction, {
+        name: nameInput
+      });
       if (!createUserResponse.actionQuery?.createUser) {
         throw new Error('Failed to create user');
       }
@@ -152,9 +155,17 @@ const LoginPage: React.FC = () => {
     <div className="flex flex-col items-center justify-center">
       <img alt="logo" className="w-120 h-auto object-contain mb-4" src={logo} />
       <div className="flex flex-col w-full">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <input
-            className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg mr-5 ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+            className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+            disabled={isDisabled()}
+            placeholder={t('ui:enterName')}
+            type="text"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+          />
+          <input
+            className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
             disabled={isDisabled()}
             placeholder={t('ui:enterPrivateKey')}
             type="password"
@@ -162,7 +173,7 @@ const LoginPage: React.FC = () => {
             onChange={(e) => setPrivateKeyInput(e.target.value)}
           />
           <StyledButton
-            disabled={isDisabled()}
+            disabled={isDisabled() || !nameInput.trim()}
             onClick={() => handleLogin('raw', privateKeyInput)}
           >
             {isLoggingIn ? 'Logging in...' : t('ui:loginButton')}

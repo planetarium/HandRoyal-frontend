@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import AddressDisplay from './AddressDisplay';
-import { getLocalGloveImage, getGloveImage } from '../fetches';
+import { getLocalGloveImage } from '../fetches';
 
 interface MoveDisplayProps {
-  gloveAddress: string;
-  userAddress: string;
-  maxHp: number;
   currentHp: number;
+  gloveAddress: string;
+  maxHp: number;
+  userAddress: string;
+  userName: string;
 }
 
-const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, maxHp, currentHp }) => {
+const MoveDisplay: React.FC<MoveDisplayProps> = ({ currentHp, gloveAddress, maxHp, userAddress, userName }) => {
   const { t } = useTranslation();
   const hpPercentage = (currentHp / maxHp) * 100;
 
@@ -43,6 +44,7 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ gloveAddress, userAddress, ma
       {/* 플레이어 주소 공간 */}
       <div className="flex w-full items-center justify-center text-sm text-white p-1 bg-gray-800 rounded-b">
         {userAddress === 'you' ? t('ui:you') : <AddressDisplay address={userAddress} type='user' />}
+        {userAddress === 'you' ? '' : <div>({userName})</div>}
       </div>
     </div>
   );

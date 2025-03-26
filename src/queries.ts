@@ -7,6 +7,7 @@ export const getUserDocument = graphql(/* GraphQL */ `
     stateQuery {
       user(userId: $address) {
         id
+        name
         registeredGloves
         ownedGloves {
           id
@@ -246,9 +247,9 @@ export const joinSessionAction = graphql(/* GraphQL */ `
 `);
 
 export const createUserAction = graphql(/* GraphQL */ `
-  query CreateUserAction {
+  query CreateUserAction($name: String!) {
     actionQuery {
-      createUser
+      createUser(name: $name)
     }
   }
 `);
