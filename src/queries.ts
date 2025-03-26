@@ -188,29 +188,7 @@ export const USER_SUBSCRIPTION = `
 export const SESSION_SUBSCRIPTION = `
   subscription OnSessionChanged($sessionId: Address!, $userId: Address!) {
     onSessionChanged(sessionId: $sessionId, userId: $userId) {
-      sessionId
-      height
-      organizerAddress
       sessionState
-      userPlayerIndex
-      opponentAddress
-      myGloves
-      opponentGloves
-      currentUserMatchState
-      intervalEndHeight
-      currentUserRound {
-        winner
-        condition1 {
-            healthPoint
-            gloveUsed
-            submission
-        }
-        condition2 {
-            healthPoint
-            gloveUsed
-            submission
-        }
-      } 
     }
   }
 `;
