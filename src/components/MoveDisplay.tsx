@@ -28,8 +28,14 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ currentHp, gloveAddress, maxH
       ? 'border-red-500' 
       : 'border-black';
 
+  const sizeClass = gloveStatus === GloveStatus.Winning
+    ? 'scale-110'
+    : gloveStatus === GloveStatus.Losing
+      ? 'scale-90'
+      : '';
+
   return (
-    <div className={`flex flex-col items-center rounded-lg w-full border-2 ${borderColorClass} bg-gray-600 shadow-md`}>
+    <div className={`flex flex-col items-center rounded-lg w-full border-2 ${borderColorClass} bg-gray-600 shadow-md transition-transform duration-300 ${sizeClass}`}>
       {/* 이미지 공간 */}
       <div className="w-full h-30 bg-white rounded-t-lg flex items-center justify-center">
         {gloveAddress === '' ? (
