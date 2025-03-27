@@ -5,7 +5,7 @@ export const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 export const getUserDocument = graphql(/* GraphQL */ `
   query GetUser($address: Address!) {
     stateQuery {
-      user(userId: $address) {
+      getUserData(userId: $address) {
         id
         name
         registeredGloves
@@ -15,6 +15,7 @@ export const getUserDocument = graphql(/* GraphQL */ `
         }
         equippedGlove
         sessionId
+        balance
       }
     }
   }

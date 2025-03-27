@@ -16,10 +16,10 @@ const UserPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['getUser', account],
+    queryKey: ['getUserData', account],
     queryFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
-      return response?.stateQuery?.user;
+      return response?.stateQuery?.getUserData;
     }
   });
 
@@ -71,6 +71,7 @@ const UserPage: React.FC = () => {
             </div>
             <p className="text-lg">{t('ui:userId')}: {data.id}</p>
             <p className="text-lg">{t('ui:userName')}: {data.name}</p>
+            <p className="text-lg">{t('ui:balance')}: {data.balance}</p>
             <div className="w-full">
               <div className="bg-gray-600 p-4 rounded shadow mb-4">
                 <p className="text-lg">{t('ui:ownedGloves')}</p>
