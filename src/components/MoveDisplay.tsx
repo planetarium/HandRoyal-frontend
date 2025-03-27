@@ -3,29 +3,46 @@ import { useTranslation } from 'react-i18next';
 import AddressDisplay from './AddressDisplay';
 import { getLocalGloveImage } from '../fetches';
 
+enum GloveStatus {
+  Winning = 'winning',
+  Losing = 'losing',
+  Neutral = 'neutral'
+}
+
 interface MoveDisplayProps {
   currentHp: number;
   gloveAddress: string;
   maxHp: number;
   userAddress: string;
   userName: string;
+  gloveStatus: GloveStatus;
 }
 
-const MoveDisplay: React.FC<MoveDisplayProps> = ({ currentHp, gloveAddress, maxHp, userAddress, userName }) => {
+const MoveDisplay: React.FC<MoveDisplayProps> = ({ currentHp, gloveAddress, maxHp, userAddress, userName, gloveStatus }) => {
   const { t } = useTranslation();
   const hpPercentage = (currentHp / maxHp) * 100;
 
+  const borderColorClass = gloveStatus === GloveStatus.Winning 
+    ? 'border-green-500' 
+    : gloveStatus === GloveStatus.Losing
+      ? 'border-red-500' 
+      : 'border-black';
+
   return (
-    <div className="flex flex-col items-center rounded-lg w-full border-2 border-black bg-gray-600 shadow-md">
+    <div className={`flex flex-col items-center rounded-lg w-full border-2 ${borderColorClass} bg-gray-600 shadow-md`}>
       {/* 이미지 공간 */}
       <div className="w-full h-30 bg-white rounded-t-lg flex items-center justify-center">
-        {gloveAddress === '' ? null : <img alt={gloveAddress} className="w-30 h-30 object-cover" src={getLocalGloveImage(gloveAddress)} />}
+        {gloveAddress === '' ? (
+          <div className="text-4xl">❓</div>
+        ) : (
+          <img alt={gloveAddress} className="w-30 h-30 object-cover" src={getLocalGloveImage(gloveAddress)} />
+        )}
       </div>
       {/* 장갑 이름 공간 */}
       <div className="text-center text-black w-full bg-white">
         <div className="w-full max-w-[300px] mx-auto">
           <p className="whitespace-nowrap text-ellipsis">
-          {gloveAddress === '' ? t('ui:notSubmitted') : t(`glove:${gloveAddress}.name`)}
+            {gloveAddress === '' ? t('ui:notSubmitted') : t(`glove:${gloveAddress}.name`)}
           </p>
         </div>
       </div>
