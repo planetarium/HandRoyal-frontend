@@ -6,6 +6,7 @@
   "blocksLeft": "{{count}} blocks left",
   "cancel": "Cancel",
   "closed": "Closed",
+  "countOwned": "{{count}}",
   "createNewSession": "Or you can create a new session...",
   "createSession": {
     "allowedAddresses": "Allowed Addresses",

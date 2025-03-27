@@ -6,6 +6,7 @@
   "blocksLeft": "{{count}} 블록 뒤에 시작",
   "cancel": "취소",
   "closed": "닫힘",
+  "countOwned": "{{count}}개",
   "createNewSession": "혹은 새 세션 만들기...",
   "createSession": {
     "allowedAddresses": "허용된 주소 목록",
