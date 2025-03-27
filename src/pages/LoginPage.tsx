@@ -18,26 +18,32 @@ import { executeTransaction, waitForTransaction } from '../utils/transaction';
 
 const TEST_ACCOUNTS = [
   {
+    name: 'test1',
     privateKey: '27950e31daa29df8cb3639377a056a03836f79867ce65d1a715f52278b46a479',
     address: '0x3df656F6E8Ed3C9ba5fE5596FC69eDbe8614EB2C'
   },
   {
+    name: 'test2',
     privateKey: '92a0a4fac1a19af90eeded2bdd422d65a56612ad8fba9b3f96052e3c309be23d',
     address: '0x798f0D17a47b120069329313BaDdAd1eC97b5a83'
   },
   {
+    name: 'test3',
     privateKey: 'a487c5a2cf88e00a4dd57f60baadb0ba4ec24caa52d01ae21dd2f79bef52795c',
     address: '0xF17D2337858EcD8e4e9DFEa8953f7a38109799fe'
   },
   {
+    name: 'test4',
     privateKey: '330524c8f5d3040c3c54619f36e9c226c3368f0af390615599542e7cd230d853',
     address: '0xE8F6027e487Ef52d261663099061dF9c6E159188'
   },
   {
+    name: 'test5',
     privateKey: '4ce92198f27d05f80a318f34ad9d0cd43ef7d2a138e022bc66770acdd53f716a',
     address: '0xfdc4eE76d810635eC932E57de386DC0ef3C9e7e9'
   },
   {
+    name: 'test6',
     privateKey: '74f101e78bf0ac924298f4d9b2dfed69ae84114fd7ac7bdc012bb4a66329f43b',
     address: '0x17fB691ac6B3793871d3b1c06B806C75C60240d0'
   }
@@ -206,6 +212,7 @@ const LoginPage: React.FC = () => {
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
+                <th className="px-6 py-3 border-b text-left">{t('ui:name')}</th>
                 <th className="px-6 py-3 border-b text-left">{t('ui:privateKey')}</th>
                 <th className="px-6 py-3 border-b text-left">{t('ui:address')}</th>
               </tr>
@@ -213,11 +220,18 @@ const LoginPage: React.FC = () => {
             <tbody>
               {TEST_ACCOUNTS.map((account) => (
                 <tr key={account.privateKey} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 border-b font-mono text-sm">
+                    {account.name}
+                  </td>
                   <td className="px-6 py-4 border-b font-mono text-sm break-all">
                     <button
                       className="text-left hover:text-blue-600 hover:underline w-full"
-                      onClick={() => setPrivateKeyInput(account.privateKey)}
+                      onClick={() => {
+                        setNameInput(account.name);
+                        setPrivateKeyInput(account.privateKey);
+                      }}
                       onDoubleClick={() => {
+                        setNameInput(account.name);
                         setPrivateKeyInput(account.privateKey);
                         handleLogin('raw', account.privateKey);
                       }}

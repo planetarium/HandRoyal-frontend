@@ -11,6 +11,7 @@ import { SessionState } from '../gql/graphql';
 import logo from '../assets/logo.png';
 import StyledButton from '../components/StyledButton';
 import SessionCard from '../components/SessionCard';
+import type { Address } from '@planetarium/account';
 
 export const MainPage: React.FC = () => {
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export const MainPage: React.FC = () => {
   const [error, setError] = useState('');
   const account = useRequiredAccount();
   const { tip } = useTip();
-  const [prizeImages, setPrizeImages] = useState<{ [key: string]: string | null }>({});
+  const [prizeImages] = useState<{ [key: string]: string | null }>({});
 
   const { data: sessionData, error: sessionError, isLoading: sessionIsLoading, refetch: sessionRefetch } = useQuery({
     queryKey: ['getSessions'],
@@ -117,16 +118,23 @@ export const MainPage: React.FC = () => {
               {filteredSessions && filteredSessions.length > 0 ? (
                 filteredSessions.map((session) => {
                   if (!session || !session.metadata || !(session.state === SessionState.Ready || session.state === SessionState.Active)) return null;
-                  const sessionMetadata = session.metadata as { id: string, organizer: string, maximumUser: number, prize: string };
+                  const sessionMetadata = session.metadata as { id: string, organizer: string, maximumUser: number, prize: string, users: Address[] };
+                  const isSessionPrivate = sessionMetadata.users && sessionMetadata.users.length > 0;
+                  const userAddress = account.address;
+                  const isUserAllowed = !isSessionPrivate || 
+                    (sessionMetadata.users && sessionMetadata.users.includes(userAddress));
+                  
                   return (
                     <SessionCard
                       key={sessionMetadata.id}
                       blocksLeft={session.startHeight - (tip?.index ?? 0)}
+                      canJoin={isUserAllowed}
                       currentPlayers={session.players?.length ?? 0}
                       handleJoin={handleJoin}
                       handleSpectate={handleSpectate}
                       host={sessionMetadata.organizer}
                       id={sessionMetadata.id}
+                      isPrivate={isSessionPrivate}
                       maxPlayers={sessionMetadata.maximumUser}
                       prize={sessionMetadata.prize}
                       prizeImage={prizeImages[sessionMetadata.prize] || logo}

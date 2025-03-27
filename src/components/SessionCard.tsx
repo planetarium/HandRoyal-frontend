@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, Clock, Crown, Trophy } from 'lucide-react';
+import { Users, Clock, Crown, Trophy, Lock } from 'lucide-react';
 import { SessionState } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import AddressDisplay from './AddressDisplay';
@@ -16,6 +16,8 @@ interface SessionCardProps {
   handleJoin: (id: string) => void;
   handleSpectate: (id: string) => void;
   prizeImage: string;
+  isPrivate?: boolean;
+  canJoin?: boolean;
 }
 
 const SessionCard: React.FC<SessionCardProps> = ({
@@ -28,7 +30,9 @@ const SessionCard: React.FC<SessionCardProps> = ({
   state,
   handleJoin,
   handleSpectate,
-  prizeImage
+  prizeImage,
+  isPrivate = false,
+  canJoin = true
 }) => {
   const { t } = useTranslation();
 
@@ -46,7 +50,7 @@ const SessionCard: React.FC<SessionCardProps> = ({
 
   // 배경색의 밝기를 계산하여 텍스트 색상 결정
   const getTextColor = (hslColor: string) => {
-    const [h, s, l] = hslColor.match(/\d+/g)!.map(Number);
+    const [,, l] = hslColor.match(/\d+/g)!.map(Number);
     return l > 50 ? '#000000' : '#FFFFFF'; // 밝기가 50% 이상이면 검은색, 아니면 흰색
   };
 
@@ -80,14 +84,19 @@ const SessionCard: React.FC<SessionCardProps> = ({
           <AddressDisplay address={prize} shorten={false} type='glove' />
         </div>
       </div>
-      <div className="flex items-center space-x-4 flex-shrink-0">
+      <div className="flex items-center space-x-3 flex-shrink-0">
         <div className={`flex text-sm items-center ${currentPlayers === maxPlayers ? 'text-red-700' : 'text-blue-700'}`}>
           <Users className="mr-1 h-4 w-4" strokeWidth={3} />
           <span>{currentPlayers}/{maxPlayers}</span>
         </div>
+        {isPrivate && (
+          <div className="flex text-sm items-center text-yellow-500">
+            <Lock className="h-4 w-4" strokeWidth={3} />
+          </div>
+        )}
         {state === SessionState.Ready ? (
             <div
-              className={`flex text-sm items-center mr-3 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
+              className={`flex text-sm items-center mr-2 ${state === SessionState.Ready && blocksLeft <= 10 ? 'text-red-700' : 'text-gray-700'}`}
             >
             <Clock className="mr-1 h-4 w-4" strokeWidth={3} />
             <span>{`${blocksLeft}`}</span>
@@ -96,8 +105,11 @@ const SessionCard: React.FC<SessionCardProps> = ({
         {state === SessionState.Ready ? (
           <StyledButton
             bgColor = '#FFE55C'
-            disabled={(currentPlayers ?? maxPlayers) >= maxPlayers}
             shadowColor = '#FF9F0A'
+            disabled={
+              (currentPlayers ?? maxPlayers) >= maxPlayers || 
+              (isPrivate && !canJoin)
+            }
             onClick={() => handleJoin(id)}
           >
             {t('join')}

@@ -16,6 +16,7 @@ import { EquippedGloveProvider } from './context/EquippedGloveContext';
 import { MetamaskAccountCreator } from './accounts/MetamaskAccount';
 import { PrivateKeyAccountCreator } from './accounts/PrivateKeyAccount';
 import JoinPage from './pages/JoinPage';
+import { GameRuleProvider } from './context/GameRuleContext';
 
 registerCreator(new MetamaskAccountCreator());
 registerCreator(new PrivateKeyAccountCreator());
@@ -58,9 +59,11 @@ const App: React.FC = () => {
       <AccountProvider>
         <TipProvider>
           <EquippedGloveProvider>
-            <Router>
-              <AppContent />
-            </Router>
+            <GameRuleProvider>
+              <Router>
+                <AppContent />
+              </Router>
+            </GameRuleProvider>
           </EquippedGloveProvider>
         </TipProvider>
       </AccountProvider>

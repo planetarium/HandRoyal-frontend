@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { useRequiredAccount } from '../context/AccountContext';
 import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument, registerGloveAction } from '../queries';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import { registerGlove } from '../fetches';
-import type { RequestDocument } from 'graphql-request';
-import { useNavigate } from 'react-router-dom';
 import { useTip } from '../context/TipContext';
+import type { RequestDocument } from 'graphql-request';
 
 const RegisterGlove: React.FC = () => {
   const account = useRequiredAccount();

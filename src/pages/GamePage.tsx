@@ -22,7 +22,7 @@ export const GamePage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { tip } = useTip();
-  const [showNoSessionMessage, setShowNoSessionMessage] = useState(false);
+  const [showNoSessionMessage] = useState(false);
 
   const { data: sessionData, isLoading, refetch } = useQuery<GetUserScopedSessionQuery>({
     queryKey: ['getUserScopedSession', sessionId, account?.address],
@@ -139,7 +139,7 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (account.address.equals(Address.fromHex(session.organizerAddress))) {
+    if (account.address.equals(Address.fromHex(session.organizerAddress)) && !session.isPlayer) {
       return (
         <div>
           <p className="text-2xl">{t('ui:youAreTheSessionOrganizer')}</p>
