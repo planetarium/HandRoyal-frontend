@@ -13,6 +13,7 @@ import { getLocalGloveImage } from '../fetches';
 import win from '../assets/win.png';
 import lose from '../assets/lose.png';
 import type { GetUserScopedSessionQuery } from '../gql/graphql';
+import { GetGloveType } from '../utils/gloveUtils';
 
 interface GameBoardProps {
   blockIndex: number;
@@ -292,7 +293,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-bold text-sm mb-1">{t(`glove:${gloveId}.name`)}</h3>
-                          <p className="text-xs text-slate-300">{t(`glove:${gloveId}.type`)}</p>
+                          <p className="text-xs text-slate-300">{GetGloveType(gloveId)}</p>
                           <p className="text-xs text-yellow-400">{t(`glove:${gloveId}.damage`)}</p>
                         </div>
                       </div>
@@ -416,7 +417,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                                 </div>
                                 <div className="flex-1">
                                   <h3 className="font-bold text-sm mb-1">{t(`glove:${glove.gloveId}.name`)}</h3>
-                                  <p className="text-xs text-slate-300">{t(`glove:${glove.gloveId}.type`)}</p>
+                                  <p className="text-xs text-slate-300">{GetGloveType(glove.gloveId)}</p>
                                   <p className="text-xs text-yellow-400">{t(`glove:${glove.gloveId}.damage`)}</p>
                                 </div>
                               </div>
@@ -487,7 +488,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-bold text-sm mb-1">{t(`glove:${gloveId}.name`)}</h3>
-                        <p className="text-xs text-slate-300">{t(`glove:${gloveId}.type`)}</p>
+                        <p className="text-xs text-slate-300">{GetGloveType(gloveId)}</p>
                         <p className="text-xs text-yellow-400">{t(`glove:${gloveId}.damage`)}</p>
                       </div>
                     </div>
@@ -611,7 +612,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                               </div>
                               <div className="flex-1">
                                 <h3 className="font-bold text-sm mb-1">{t(`glove:${glove.gloveId}.name`)}</h3>
-                                <p className="text-xs text-slate-300">{t(`glove:${glove.gloveId}.type`)}</p>
+                                <p className="text-xs text-slate-300">{GetGloveType(glove.gloveId)}</p>
                                 <p className="text-xs text-yellow-400">{t(`glove:${glove.gloveId}.damage`)}</p>
                               </div>
                             </div>
