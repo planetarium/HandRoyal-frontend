@@ -63,9 +63,13 @@
   "joinSession": "세션 참가",
   "language": "언어",
   "loading": "로딩 중...",
-  "login": "로그인",
-  "loginButton": "로그인",
-  "logoutButton": "로그아웃",
+  "login": {
+    "failedToLogin": "로그인에 실패했습니다",
+    "loginButton": "로그인",
+    "logoutButton": "로그아웃",
+    "serverConnectionRefused": "서버 연결이 거부되었습니다. 서버가 실행 중인지 확인해주세요.",
+    "networkError": "네트워크 연결이 실패했습니다. 잠시 후 다시 시도해주세요."
+  },
   "lose": "게임에서 패배했습니다",
   "matchActive": "경기가 진행 중입니다",
   "matchBreak": "경기 휴식",

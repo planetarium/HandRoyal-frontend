@@ -63,8 +63,13 @@
   "joinSession": "Join Session",
   "language": "Language",
   "loading": "Loading...",
-  "login": "Login",
-  "loginButton": "Login",
+  "login": {
+    "failedToLogin": "Failed to login",
+    "loginButton": "Login",
+    "logoutButton": "Logout",
+    "serverConnectionRefused": "Server connection refused. Please check if the server is running.",
+    "networkError": "Cannot connect to the network. Please try again later."
+  },
   "logoutButton": "Logout",
   "lose": "You have lost the game.",
   "matchActive": "Match is active",

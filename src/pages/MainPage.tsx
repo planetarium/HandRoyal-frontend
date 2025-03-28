@@ -127,7 +127,7 @@ export const MainPage: React.FC = () => {
                   return (
                     <SessionCard
                       key={sessionMetadata.id}
-                      blocksLeft={session.startHeight - (tip?.index ?? 0)}
+                      blocksLeft={session.startHeight - (tip?.height ?? 0)}
                       canJoin={isUserAllowed}
                       currentPlayers={session.players?.length ?? 0}
                       handleJoin={handleJoin}

@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
       <div className="flex items-center">
         {tip && (
           <div className="ml-4 mr-4 text-sm">
-            Tip: #{tip.index} 0x{tip.hash.substring(0, 6)}
+            Tip: #{tip.height} 0x{tip.hash.substring(0, 6)}
           </div>
         )}
         {account && (

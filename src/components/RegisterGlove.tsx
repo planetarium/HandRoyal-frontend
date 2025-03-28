@@ -48,7 +48,7 @@ const RegisterGlove: React.FC = () => {
         await registerGlove(gloveAddress, file);
         setErrorMessage(null);
         setIsRegistered(true);
-        setInitialTip(tip?.index ?? 0);
+        setInitialTip(tip?.height ?? 0);
       } catch (error) {
         console.error('Failed to register glove:', error);
         setErrorMessage('Failed to register glove. Please try again.');
@@ -61,7 +61,7 @@ const RegisterGlove: React.FC = () => {
   });
 
   useEffect(() => {
-    if (isRegistered && initialTip !== null && tip?.index === initialTip + 1) {
+    if (isRegistered && initialTip !== null && tip?.height === initialTip + 1) {
       navigate(`/glove/${gloveAddress}`);
     }
   }, [isRegistered, initialTip, tip, navigate, gloveAddress]);

@@ -259,7 +259,7 @@ const JoinPage: React.FC = () => {
             <div className="flex items-center mb-2">
               <Clock className="mr-2 h-5 w-5" />
               <span className="font-semibold">
-                {t('ui:blocksLeft', { count: creationHeight + metadata?.startAfter - (tip.tip?.index ?? 0)})}
+                {t('ui:blocksLeft', { count: creationHeight + metadata?.startAfter - (tip.tip?.height ?? 0)})}
               </span>
             </div>
           </div>
