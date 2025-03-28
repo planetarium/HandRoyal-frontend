@@ -66,6 +66,7 @@
   "login": {
     "failedToLogin": "Failed to login",
     "loginButton": "Login",
+    "loggingIn": "...",
     "logoutButton": "Logout",
     "serverConnectionRefused": "Server connection refused. Please check if the server is running.",
     "networkError": "Cannot connect to the network. Please try again later."
@@ -127,7 +128,8 @@
   "testAccounts": "Test Accounts",
   "tip": "Tip",
   "userId": "User ID",
-  "userInfo": "User Info",
+  "userInfo": "User Information",
+  "userName": "User Name",
   "userNotFound": "User not found",
   "viewResults": "Results",
   "waitingForGameToStart": "Waiting for the game to start...",
