@@ -107,6 +107,7 @@ export type Mutation = {
   createSession: Scalars['TxId']['output'];
   createUser: Scalars['TxId']['output'];
   joinSession: Scalars['TxId']['output'];
+  mintSinkAddress: Scalars['TxId']['output'];
   pickUp: Scalars['TxId']['output'];
   registerGlove: Scalars['TxId']['output'];
   stageTransaction: Scalars['TxId']['output'];
@@ -140,6 +141,12 @@ export type MutationJoinSessionArgs = {
   gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
   sessionId: Scalars['Address']['input'];
+};
+
+
+export type MutationMintSinkAddressArgs = {
+  amount: Scalars['Long']['input'];
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
 
@@ -195,12 +202,18 @@ export enum PlayerState {
 export type Query = {
   __typename?: 'Query';
   actionQuery?: Maybe<Query_ActionQuery>;
+  getBalance: Scalars['Long']['output'];
   isGloveRegistered: Scalars['Boolean']['output'];
   isValidSessionId: Scalars['Boolean']['output'];
   nextTxNonce: Scalars['Long']['output'];
   nodeStatus?: Maybe<Query_NodeStatus>;
   stateQuery?: Maybe<Query_StateQuery>;
   transaction?: Maybe<Query_Transaction>;
+};
+
+
+export type QueryGetBalanceArgs = {
+  address: Scalars['Address']['input'];
 };
 
 
