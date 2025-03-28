@@ -31,6 +31,7 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
           maximumUser
           minimumUser
           remainingUser
+          users
         }
         state
         players {
@@ -54,6 +55,7 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         organizerAddress
         opponentAddress
         currentInterval
+        isPlayer
         myGloves
         opponentGloves
         playersLeft
@@ -141,6 +143,7 @@ export const getSessionDocument = graphql(/* GraphQL */ `
           roundInterval
           initialHealthPoint
           numberOfGloves
+          users
         }
         state
         players {
@@ -220,7 +223,8 @@ export const createSessionAction = graphql(/* GraphQL */ `
     $maxRounds: Int!,
     $roundLength: Long!,
     $roundInterval: Long!,
-    $initialHealthPoint: Int!
+    $initialHealthPoint: Int!,
+    $users: [Address!]!
   ) {
     actionQuery {
       createSession(
@@ -233,7 +237,8 @@ export const createSessionAction = graphql(/* GraphQL */ `
         maxRounds: $maxRounds,
         roundLength: $roundLength,
         roundInterval: $roundInterval,
-        initialHealthPoint: $initialHealthPoint
+        initialHealthPoint: $initialHealthPoint,
+        users: $users
       )
     }
   }
