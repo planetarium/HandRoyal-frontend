@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StyledButton from '../components/StyledButton';
 import { getLocalGloveImage } from '../fetches';
+import { GetGloveRarity, GetGloveType } from '../utils/gloveUtils';
 
 const GlovePage: React.FC = () => {
   const [images, setImages] = useState<{ [key: string]: string | null }>({
@@ -29,7 +30,8 @@ const GlovePage: React.FC = () => {
             <img key={gloveId} alt={`${gloveId} Glove`} className="max-w-96 h-auto" src={getLocalGloveImage(gloveId ?? '')} />
         </div>
         <p className="mb-2 text-2xl">{t(`glove:${gloveId}.name`)}</p>
-        <p className="mb-2 text-sm">{t('ui:glovetype')}: {t(`glove:${gloveId}.type`)}</p>
+        <p className="mb-2 text-sm">{t('ui:glovetype')}: {GetGloveType(gloveId ?? '')}</p>
+        <p className="mb-2 text-sm">{t('ui:rarity')}: {GetGloveRarity(gloveId ?? '')}</p>
         <p className="mb-2 text-sm">{t('ui:damage')}: {t(`glove:${gloveId}.damage`)}</p>
         <p className="mb-2 text-md">{t(`glove:${gloveId}.description`)}</p>
       </div>

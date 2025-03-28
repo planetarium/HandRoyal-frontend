@@ -56,6 +56,7 @@
   "gloveType": "타입",
   "gloves": "장갑",
   "goBack": "뒤로가기",
+  "guaranteedUncommon": "고급 등급 이상 확정!",
   "host": "호스트",
   "initialHP": "초기 체력",
   "invalidSession": "잘못된 세션: {{sessionId}}",
@@ -83,6 +84,7 @@
   "noGlovesFound": "장갑이 없습니다",
   "noGlovesOwned": "소유한 장갑이 없습니다",
   "noSessionFound": "세션을 찾을 수 없습니다",
+  "notEnoughBalance": "잔액이 부족합니다",
   "notSubmitted": "미제출",
   "open": "열림",
   "organizer": "주최자",
@@ -99,6 +101,7 @@
   "registeredGloves": "등록한 장갑",
   "remainingUser": "최종 승리자 수",
   "reset": "초기화",
+  "revealAllCards": "모두 뒤집기",
   "rock": "바위",
   "round": "라운드",
   "roundInterval": "라운드 사이 대기 시간",
@@ -143,5 +146,13 @@
   "you": "당신",
   "youAreTheSessionOrganizer": "당신은 세션 주최자입니다",
   "connectWithMetamask": "메타마스크로 연결",
-  "or": "또는"
+  "or": "또는",
+  "pickupCard": "카드 뽑기",
+  "pickupCardButton": "1개 뽑기",
+  "pickupCardDescription": "운을 시험해보고 새로운 카드를 뽑아보세요!",
+  "pickupCardError": "카드 뽑기에 실패했습니다. 다시 시도해주세요.",
+  "pickupCardSuccess": "축하합니다! 새로운 카드를 획득했습니다!",
+  "pickupCardTitle": "카드 뽑기",
+  "pickupManyCardsButton": "10개 뽑기",
+  "pickedUpGloves": "새로 획득한 장갑"
 }

@@ -213,6 +213,14 @@ export const GLOVE_SUBSCRIPTION = `
   }
 `;
 
+export const PICK_UP_RESULT_SUBSCRIPTION = `
+  subscription OnPickUpResult($txId: TxId!) {
+    onPickUpResult(txId: $txId) {
+      gloves
+    }
+  }
+`;
+
 export const createSessionAction = graphql(/* GraphQL */ `
   query CreateSessionAction(
     $sessionId: Address!,
@@ -273,6 +281,22 @@ export const registerGloveAction = graphql(/* GraphQL */ `
   query RegisterGloveAction($gloveId: Address!) {
     actionQuery {
       registerGlove(gloveId: $gloveId)
+    }
+  }
+`);
+
+export const pickUpAction = graphql(/* GraphQL */ `
+  query PickUpAction {
+    actionQuery {
+      pickUp
+    }
+  }
+`);
+
+export const pickUpManyAction = graphql(/* GraphQL */ `
+  query PickUpManyAction {
+    actionQuery {
+      pickUpMany
     }
   }
 `);

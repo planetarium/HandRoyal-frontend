@@ -56,6 +56,7 @@
   "gloveType": "Type",
   "gloves": "gloves",
   "goBack": "Go Back",
+  "guaranteedUncommon": "Uncommon or higher guaranteed!",
   "host": "Host",
   "initialHP": "Initial HP",
   "invalidSession": "Invalid session: {{sessionId}}",
@@ -84,6 +85,7 @@
   "noGlovesFound": "No gloves found",
   "noGlovesOwned": "You don't own any gloves",
   "noSessionFound": "No session found",
+  "notEnoughBalance": "Not enough balance",
   "notSubmitted": "Not submitted",
   "open": "Open",
   "organizer": "Organizer",
@@ -100,6 +102,7 @@
   "registeredGloves": "Registered Gloves",
   "remainingUser": "Users left to end game",
   "reset": "Reset",
+  "revealAllCards": "Reveal All",
   "rock": "Rock",
   "round": "Round",
   "roundInterval": "Waiting time between rounds",
@@ -143,5 +146,13 @@
   "you": "You",
   "youAreTheSessionOrganizer": "You are the session organizer",
   "connectWithMetamask": "Connect with MetaMask",
-  "or": "or"
+  "or": "or",
+  "pickupCard": "Pick Up Card",
+  "pickupCardButton": "Pick Up One",
+  "pickupCardDescription": "Try your luck and pick up a new card!",
+  "pickupCardError": "Failed to pick up a card. Please try again.",
+  "pickupCardSuccess": "Congratulations! You got a new card!",
+  "pickupCardTitle": "Card Pick Up",
+  "pickupManyCardsButton": "Pick Up 10 Cards",
+  "pickedUpGloves": "Newly Acquired Gloves"
 }

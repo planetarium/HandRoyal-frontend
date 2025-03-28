@@ -34,6 +34,9 @@ const Navbar: React.FC = () => {
               <Link className="text-lg text-white" to="/registerGlove">
                 {t('ui:registerGlove')}
               </Link>
+              <Link className="text-lg text-white" to="/pickup">
+                {t('ui:pickupCard')}
+              </Link>
             </>
           )}
         </div>
