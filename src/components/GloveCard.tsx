@@ -8,9 +8,10 @@ import type { HandType, GloveRarity } from '../types/types';
 interface GloveCardProps {
   gloveId: string;
   count?: number;
+  disableClick?: boolean;
 }
 
-const GloveCard: React.FC<GloveCardProps> = ({ gloveId, count = 1 }) => {
+const GloveCard: React.FC<GloveCardProps> = ({ gloveId, count = 1, disableClick = false }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -59,12 +60,14 @@ const GloveCard: React.FC<GloveCardProps> = ({ gloveId, count = 1 }) => {
   };
   
   const handleClick = () => {
-    navigate(`/glove/${processedGloveId}`);
+    if (!disableClick) {
+      navigate(`/glove/${processedGloveId}`);
+    }
   };
 
   return (
     <div 
-      className={`flex flex-col items-center justify-center bg-gray-800 p-2 rounded-lg border-2 ${getBorderColorClass()} hover:border-white cursor-pointer transition-all hover:shadow-lg`}
+      className={`flex flex-col items-center justify-center bg-gray-800 p-2 rounded-lg border-2 ${getBorderColorClass()} hover:border-white ${disableClick ? '' : 'cursor-pointer'} transition-all hover:shadow-lg`}
       onClick={handleClick}
     >
       <div className="w-20 h-20 bg-gray-700 rounded-lg overflow-hidden mb-2 relative">

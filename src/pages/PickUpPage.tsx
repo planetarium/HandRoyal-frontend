@@ -33,28 +33,37 @@ const animationStyles = `
   
   .card-container {
     transition: all 0.3s ease-in-out;
+    perspective: 1000px;
   }
   
   .card-container.revealed .card-back {
     opacity: 0;
     transform: rotateY(180deg);
+    z-index: 0;
+    pointer-events: none;
     transition: all 0.8s ease-out;
   }
   
   .card-container.revealed .card-front {
     opacity: 1;
-    transition: opacity 0.3s ease-in 0.5s;
+    transform: rotateY(0deg);
+    z-index: 10;
+    transition: all 0.8s ease-out;
   }
   
   .card-back {
+    backface-visibility: hidden;
     transition: all 0.8s ease-out;
     transform: rotateY(0deg);
     opacity: 1;
+    z-index: 20;
   }
   
   .card-front {
+    backface-visibility: hidden;
     opacity: 0;
-    transition: opacity 0.3s ease-out;
+    transform: rotateY(180deg);
+    transition: all 0.8s ease-out;
   }
 
   @keyframes pulse-glow {
@@ -192,8 +201,6 @@ const PickUpPage: React.FC = () => {
   });
 
   const resetCardState = () => {
-    if (isLoading) return;
-    setIsLoading(true);
     setError(null);
     setSuccess(false);
     setPickedGloves([]);
@@ -201,9 +208,11 @@ const PickUpPage: React.FC = () => {
     setRevealedCards([]);
     setAllRevealed(false);
     setAnimatingCards([]);
+    setIsLoading(true);
   };
 
   const handlePickUpCard = async () => {
+    if (isLoading) return;
     resetCardState();
     try {
       await pickUpMutation.mutateAsync();
@@ -214,8 +223,8 @@ const PickUpPage: React.FC = () => {
 
   // 한번에 10개 카드 뽑기 핸들러 추가
   const handlePickUpManyCards = async () => {
+    if (isLoading) return;
     resetCardState();
-
     try {
       await pickUpManyMutation.mutateAsync();
     } catch (err) {
@@ -246,9 +255,12 @@ const PickUpPage: React.FC = () => {
     
     // 새로 뒤집힌 카드 찾기
     const newAnimatingCards = [...animatingCards];
+    let hasChanges = false;
+    
     revealedCards.forEach((revealed, idx) => {
       if (revealed && !newAnimatingCards[idx]) {
         newAnimatingCards[idx] = true;
+        hasChanges = true;
         
         // 애니메이션 시간 후 효과 제거 (1초)
         setTimeout(() => {
@@ -261,8 +273,11 @@ const PickUpPage: React.FC = () => {
       }
     });
     
-    setAnimatingCards(newAnimatingCards);
-  }, [revealedCards, animatingCards]);
+    // 변경 사항이 있을 때만 상태 업데이트
+    if (hasChanges) {
+      setAnimatingCards(newAnimatingCards);
+    }
+  }, [revealedCards]);
 
   // 모든 카드 뒤집기
   const handleRevealAllCards = () => {
@@ -402,17 +417,19 @@ const PickUpPage: React.FC = () => {
                   className={`relative card-container ${revealedCards[index] ? 'revealed' : ''}`}
                 >
                   {/* 앞면 카드 */}
-                  <div className="card-front">
-                    <GloveCard gloveId={gloveId} />
+                  <div 
+                    className={`card-front transition-transform hover:scale-105 relative z-10 ${revealedCards[index] ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                  >
+                    <GloveCard disableClick={true} gloveId={gloveId} />
                   </div>
                   
                   {/* 뒷면 카드 */}
                   <div 
-                    className="card-back absolute inset-0"
+                    className={`card-back absolute inset-0 z-20 ${revealedCards[index] ? 'pointer-events-none' : 'pointer-events-auto'}`}
                     onClick={() => handleRevealCard(index)}
                   >
                     <div 
-                      className={`cursor-pointer h-full w-full ${isCardRare(gloveId) ? 'animate-pulse' : ''}`}
+                      className={`cursor-pointer h-full w-full ${isCardRare(gloveId) ? 'animate-pulse' : ''} hover:scale-105 transition-transform`}
                     >
                       <div className={`h-full w-full bg-gray-800 rounded-lg border-3 ${isCardRare(gloveId) ? getBorderColorByRarity(gloveId) : 'border-gray-600'} flex items-center justify-center relative overflow-hidden
                         ${isCardRare(gloveId) ? getPulseGlowClass(gloveId) : ''}`}

@@ -65,7 +65,7 @@
   "0200000000000000000000000000000000000000": {
     "name": "Burning Rock",
     "description": "Burns the opponent regardless of win or loss",
-    "baseDamage": 35,
+    "damage": 35,
     "abilities": [
       {
         "name": "Burn",
@@ -80,7 +80,7 @@
   "1200000000000000000000000000000000000000": {
     "name": "Burning Paper",
     "description": "Burns the opponent regardless of win or loss",
-    "baseDamage": 35,
+    "damage": 35,
     "abilities": [
       {
         "name": "Burn",
@@ -95,7 +95,7 @@
   "2200000000000000000000000000000000000000": {
     "name": "Burning Scissors",
     "description": "Burns the opponent regardless of win or loss",
-    "baseDamage": 35,
+    "damage": 35,
     "abilities": [
       {
         "name": "Burn",
@@ -110,25 +110,25 @@
   "0300000000000000000000000000000000000000": {
     "name": "Latecomer Rock",
     "description": "Increases damage by the round number when winning",
-    "baseDamage": 15,
+    "damage": 15,
     "abilities": []
   },
   "130000000  000000000000000000000000000000": {
     "name": "Latecomer Paper",
     "description": "Increases damage by the round number when winning",
-    "baseDamage": 15,
+    "damage": 15,
     "abilities": []
   },
   "2300000000000000000000000000000000000000": {
     "name": "Latecomer Scissors",
     "description": "Increases damage by the round number when winning",
-    "baseDamage": 15,
+    "damage": 15,
     "abilities": []
   },
   "3400000000000000000000000000000000000000": {
     "name": "Gun",
     "description": "Always wins. Only one can be included in the deck.",
-    "baseDamage": 30,
+    "damage": 30,
     "abilities": []
   }
 }

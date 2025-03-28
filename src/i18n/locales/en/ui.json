@@ -55,7 +55,7 @@
   "gloveNotFound": "Glove not found",
   "gloveType": "Type",
   "gloves": "gloves",
-  "goBack": "Go Back",
+  "goBack": "Back",
   "guaranteedUncommon": "Uncommon or higher guaranteed!",
   "host": "Host",
   "initialHP": "Initial HP",
@@ -154,5 +154,6 @@
   "pickupCardSuccess": "Congratulations! You got a new card!",
   "pickupCardTitle": "Card Pick Up",
   "pickupManyCardsButton": "Pick Up 10 Cards",
-  "pickedUpGloves": "Newly Acquired Gloves"
+  "pickedUpGloves": "Newly Acquired Gloves",
+  "hoverCardToView": "Click to view details"
 }
