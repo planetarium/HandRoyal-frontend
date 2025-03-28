@@ -6,7 +6,7 @@ import { request } from 'graphql-request';
 import { getUserDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
 import { useRequiredAccount } from '../context/AccountContext';
-import AddressDisplay from '../components/AddressDisplay';
+import GloveCard from '../components/GloveCard';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
@@ -16,15 +16,15 @@ const UserPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['getUser', account],
+    queryKey: ['getUserData', account],
     queryFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
-      return response?.stateQuery?.user;
+      return response?.stateQuery?.getUserData;
     }
   });
 
   const [currentOwnedPage, setCurrentOwnedPage] = React.useState(0);
-  const glovesPerPage = 10;
+  const glovesPerPage = 8; // 2x4 그리드에 맞게 조정
   const [currentRegisteredPage, setCurrentRegisteredPage] = React.useState(0);
 
   if (isLoading) return <p>{t('ui:loading')}</p>;
@@ -61,29 +61,36 @@ const UserPage: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center w-full mx-auto bg-gray-700 border-2 border-black rounded-lg text-white">
       <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
-        <h1 className="text-2xl font-bold mb-4" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('ui:userInfo')}</h1>
+        <h1 className="text-2xl font-bold" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>{t('ui:userInfo')}</h1>
       </div>
-      <div className="flex flex-col items-center p-4 space-y-4">
+      <div className="flex flex-col items-center p-4 space-y-2">
         {data ? (
           <>
             <div className="flex flex-col items-center">
               {/* 자랑할 만한 대표 글러브 선택할 수 있게? 바꾸기 */}
             </div>
-            <p className="text-lg">{t('ui:userId')}: {data.id}</p>
-            <p className="text-lg">{t('ui:userName')}: {data.name}</p>
+            <p className="text-md">{t('ui:userId')}: {data.id}</p>
+            <p className="text-md">{t('ui:userName')}: {data.name}</p>
+            <p className="text-md">{t('ui:balance')}: {data.balance}</p>
             <div className="w-full">
+              {/* 소유한 글러브 */}
               <div className="bg-gray-600 p-4 rounded shadow mb-4">
-                <p className="text-lg">{t('ui:ownedGloves')}</p>
+                <p className="text-md mb-3">{t('ui:ownedGloves')}</p>
                 {data.ownedGloves && data.ownedGloves.length > 0 ? (
-                  <div className="flex flex-col gap-1 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {data.ownedGloves.slice(currentOwnedPage * glovesPerPage, (currentOwnedPage + 1) * glovesPerPage).map((glove, index) => (
-                      <AddressDisplay key={index} address={glove?.id ?? ''} type="glove"/>
+                      <GloveCard 
+                        key={index}
+                        count={glove?.count} 
+                        gloveId={glove?.id} 
+                      />
                     ))}
                   </div>
                 ) : (
                   <p className="text-gray-500">{t('ui:noGlovesFound')}</p>
                 )}
               </div>
+              {/* 소유한 글러브 페이지네이션 */}
               <div className="flex justify-center space-x-6">
                 <StyledButton disabled={currentOwnedPage === 0} onClick={handlePreviousOwnedPage}>
                   &lt;
@@ -95,11 +102,14 @@ const UserPage: React.FC = () => {
             </div>
             <div className="w-full">
               <div className="flex flex-col bg-gray-600 p-4 rounded shadow mb-4">
-                <p className="text-lg">{t('ui:registeredGloves')}</p>
+                <p className="text-md mb-3">{t('ui:registeredGloves')}</p>
                 {data.registeredGloves && data.registeredGloves.length > 0 ? (
-                  <div className="flex flex-col gap-1 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {data.registeredGloves.slice(currentRegisteredPage * glovesPerPage, (currentRegisteredPage + 1) * glovesPerPage).map((glove, index) => (
-                      <AddressDisplay key={index} address={glove} type="glove"/>
+                      <GloveCard 
+                        key={index}
+                        gloveId={glove} 
+                      />
                     ))}
                   </div>
                 ) : (

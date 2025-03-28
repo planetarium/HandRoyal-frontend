@@ -107,6 +107,7 @@ export type Mutation = {
   createSession: Scalars['TxId']['output'];
   createUser: Scalars['TxId']['output'];
   joinSession: Scalars['TxId']['output'];
+  pickUp: Scalars['TxId']['output'];
   registerGlove: Scalars['TxId']['output'];
   stageTransaction: Scalars['TxId']['output'];
   submitMove: Scalars['TxId']['output'];
@@ -142,6 +143,11 @@ export type MutationJoinSessionArgs = {
 };
 
 
+export type MutationPickUpArgs = {
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
 export type MutationRegisterGloveArgs = {
   gloveId: Scalars['Address']['input'];
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
@@ -164,6 +170,12 @@ export type Phase = {
   __typename?: 'Phase';
   height: Scalars['Long']['output'];
   matches?: Maybe<Array<Maybe<Match>>>;
+};
+
+export type PickUpResultEventData = {
+  __typename?: 'PickUpResultEventData';
+  gloves?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  txId: Scalars['TxId']['output'];
 };
 
 export type Player = {
@@ -211,6 +223,8 @@ export type Query_ActionQuery = {
   createSession?: Maybe<Scalars['Hex']['output']>;
   createUser?: Maybe<Scalars['Hex']['output']>;
   joinSession?: Maybe<Scalars['Hex']['output']>;
+  pickUp?: Maybe<Scalars['Hex']['output']>;
+  pickUpMany?: Maybe<Scalars['Hex']['output']>;
   registerGlove?: Maybe<Scalars['Hex']['output']>;
   submitMove?: Maybe<Scalars['Hex']['output']>;
 };
@@ -259,20 +273,20 @@ export type Query_NodeStatus = {
 
 export type Query_StateQuery = {
   __typename?: 'Query_StateQuery';
+  getUserData?: Maybe<UserData>;
   session?: Maybe<Session>;
   sessions?: Maybe<Array<Maybe<Session>>>;
-  user?: Maybe<User>;
   userScopedSession?: Maybe<SessionEventData>;
+};
+
+
+export type Query_StateQueryGetUserDataArgs = {
+  userId: Scalars['Address']['input'];
 };
 
 
 export type Query_StateQuerySessionArgs = {
   sessionId: Scalars['Address']['input'];
-};
-
-
-export type Query_StateQueryUserArgs = {
-  userId: Scalars['Address']['input'];
 };
 
 
@@ -381,6 +395,7 @@ export type Subscription = {
   __typename?: 'Subscription';
   onGloveRegistered?: Maybe<GloveRegisteredEventData>;
   onMoveChanged?: Maybe<SubmitMoveEventData>;
+  onPickUpResult?: Maybe<PickUpResultEventData>;
   onSessionChanged?: Maybe<SessionEventData>;
   onTipChanged?: Maybe<TipEventData>;
   onTransactionChanged?: Maybe<TransactionEventData>;
@@ -396,6 +411,11 @@ export type SubscriptionOnGloveRegisteredArgs = {
 export type SubscriptionOnMoveChangedArgs = {
   sessionId: Scalars['Address']['input'];
   userId: Scalars['Address']['input'];
+};
+
+
+export type SubscriptionOnPickUpResultArgs = {
+  txId: Scalars['TxId']['input'];
 };
 
 
@@ -443,8 +463,9 @@ export enum TxStatus {
   Success = 'SUCCESS'
 }
 
-export type User = {
-  __typename?: 'User';
+export type UserData = {
+  __typename?: 'UserData';
+  balance: Scalars['Long']['output'];
   equippedGlove: Scalars['Address']['output'];
   id: Scalars['Address']['output'];
   name?: Maybe<Scalars['String']['output']>;
@@ -466,7 +487,7 @@ export type GetUserQueryVariables = Exact<{
 }>;
 
 
-export type GetUserQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', user?: { __typename?: 'User', id: any, name?: string | null, registeredGloves?: Array<any> | null, equippedGlove: any, sessionId: any, ownedGloves?: Array<{ __typename?: 'GloveInfo', id: any, count: number } | null> | null } | null } | null };
+export type GetUserQuery = { __typename?: 'Query', stateQuery?: { __typename?: 'Query_StateQuery', getUserData?: { __typename?: 'UserData', id: any, name?: string | null, registeredGloves?: Array<any> | null, equippedGlove: any, sessionId: any, balance: any, ownedGloves?: Array<{ __typename?: 'GloveInfo', id: any, count: number } | null> | null } | null } | null };
 
 export type GetSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -556,6 +577,16 @@ export type RegisterGloveActionQueryVariables = Exact<{
 
 export type RegisterGloveActionQuery = { __typename?: 'Query', actionQuery?: { __typename?: 'Query_ActionQuery', registerGlove?: any | null } | null };
 
+export type PickUpActionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PickUpActionQuery = { __typename?: 'Query', actionQuery?: { __typename?: 'Query_ActionQuery', pickUp?: any | null } | null };
+
+export type PickUpManyActionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PickUpManyActionQuery = { __typename?: 'Query', actionQuery?: { __typename?: 'Query_ActionQuery', pickUpMany?: any | null } | null };
+
 export type UnsignedTransactionQueryVariables = Exact<{
   address: Scalars['Address']['input'];
   plainValue: Scalars['Hex']['input'];
@@ -580,7 +611,7 @@ export type TransactionResultQueryVariables = Exact<{
 export type TransactionResultQuery = { __typename?: 'Query', transaction?: { __typename?: 'Query_Transaction', transactionResult?: { __typename?: 'TxResultValue', txStatus: TxStatus, blockIndex?: any | null, exceptionNames?: Array<string | null> | null } | null } | null };
 
 
-export const GetUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"registeredGloves"}},{"kind":"Field","name":{"kind":"Name","value":"ownedGloves"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"Field","name":{"kind":"Name","value":"equippedGlove"}},{"kind":"Field","name":{"kind":"Name","value":"sessionId"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
+export const GetUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"registeredGloves"}},{"kind":"Field","name":{"kind":"Name","value":"ownedGloves"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"Field","name":{"kind":"Name","value":"equippedGlove"}},{"kind":"Field","name":{"kind":"Name","value":"sessionId"}},{"kind":"Field","name":{"kind":"Name","value":"balance"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
 export const GetSessionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"organizer"}},{"kind":"Field","name":{"kind":"Name","value":"prize"}},{"kind":"Field","name":{"kind":"Name","value":"maximumUser"}},{"kind":"Field","name":{"kind":"Name","value":"minimumUser"}},{"kind":"Field","name":{"kind":"Name","value":"remainingUser"}},{"kind":"Field","name":{"kind":"Name","value":"users"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"players"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gloves"}}]}},{"kind":"Field","name":{"kind":"Name","value":"creationHeight"}},{"kind":"Field","name":{"kind":"Name","value":"startHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetSessionsQuery, GetSessionsQueryVariables>;
 export const GetUserScopedSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserScopedSession"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userScopedSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sessionId"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"sessionState"}},{"kind":"Field","name":{"kind":"Name","value":"organizerAddress"}},{"kind":"Field","name":{"kind":"Name","value":"opponentAddress"}},{"kind":"Field","name":{"kind":"Name","value":"currentInterval"}},{"kind":"Field","name":{"kind":"Name","value":"isPlayer"}},{"kind":"Field","name":{"kind":"Name","value":"myGloves"}},{"kind":"Field","name":{"kind":"Name","value":"opponentGloves"}},{"kind":"Field","name":{"kind":"Name","value":"playersLeft"}},{"kind":"Field","name":{"kind":"Name","value":"currentPhaseIndex"}},{"kind":"Field","name":{"kind":"Name","value":"currentUserRoundIndex"}},{"kind":"Field","name":{"kind":"Name","value":"myCondition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"gloveUsed"}},{"kind":"Field","name":{"kind":"Name","value":"submission"}},{"kind":"Field","name":{"kind":"Name","value":"activeEffectData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"parameters"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"opponentCondition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"gloveUsed"}},{"kind":"Field","name":{"kind":"Name","value":"submission"}},{"kind":"Field","name":{"kind":"Name","value":"activeEffectData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"parameters"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"lastRoundWinner"}},{"kind":"Field","name":{"kind":"Name","value":"currentUserMatchState"}},{"kind":"Field","name":{"kind":"Name","value":"playerState"}},{"kind":"Field","name":{"kind":"Name","value":"intervalEndHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserScopedSessionQuery, GetUserScopedSessionQueryVariables>;
 export const GetSessionHeaderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSessionHeader"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"session"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"organizer"}},{"kind":"Field","name":{"kind":"Name","value":"prize"}},{"kind":"Field","name":{"kind":"Name","value":"maximumUser"}},{"kind":"Field","name":{"kind":"Name","value":"minimumUser"}},{"kind":"Field","name":{"kind":"Name","value":"remainingUser"}},{"kind":"Field","name":{"kind":"Name","value":"startAfter"}},{"kind":"Field","name":{"kind":"Name","value":"maxRounds"}},{"kind":"Field","name":{"kind":"Name","value":"roundLength"}},{"kind":"Field","name":{"kind":"Name","value":"roundInterval"}},{"kind":"Field","name":{"kind":"Name","value":"initialHealthPoint"}},{"kind":"Field","name":{"kind":"Name","value":"numberOfGloves"}}]}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"players"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"gloves"}}]}},{"kind":"Field","name":{"kind":"Name","value":"creationHeight"}},{"kind":"Field","name":{"kind":"Name","value":"startHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetSessionHeaderQuery, GetSessionHeaderQueryVariables>;
@@ -592,6 +623,8 @@ export const JoinSessionActionDocument = {"kind":"Document","definitions":[{"kin
 export const CreateUserActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CreateUserAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}}]}]}}]}}]} as unknown as DocumentNode<CreateUserActionQuery, CreateUserActionQueryVariables>;
 export const SubmitMoveActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SubmitMoveAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveIndex"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"submitMove"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"gloveIndex"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveIndex"}}}]}]}}]}}]} as unknown as DocumentNode<SubmitMoveActionQuery, SubmitMoveActionQueryVariables>;
 export const RegisterGloveActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RegisterGloveAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerGlove"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloveId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}}}]}]}}]}}]} as unknown as DocumentNode<RegisterGloveActionQuery, RegisterGloveActionQueryVariables>;
+export const PickUpActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PickUpAction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pickUp"}}]}}]}}]} as unknown as DocumentNode<PickUpActionQuery, PickUpActionQueryVariables>;
+export const PickUpManyActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PickUpManyAction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pickUpMany"}}]}}]}}]} as unknown as DocumentNode<PickUpManyActionQuery, PickUpManyActionQueryVariables>;
 export const UnsignedTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"UnsignedTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unsignedTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"address"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}},{"kind":"Argument","name":{"kind":"Name","value":"plainValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}}}]}]}}]}}]} as unknown as DocumentNode<UnsignedTransactionQuery, UnsignedTransactionQueryVariables>;
 export const StageTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"StageTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"signature"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stageTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"unsignedTransaction"},"value":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}}},{"kind":"Argument","name":{"kind":"Name","value":"signature"},"value":{"kind":"Variable","name":{"kind":"Name","value":"signature"}}}]}]}}]} as unknown as DocumentNode<StageTransactionMutation, StageTransactionMutationVariables>;
 export const TransactionResultDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TransactionResult"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"txId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TxId"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transactionResult"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"txId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"txId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"txStatus"}},{"kind":"Field","name":{"kind":"Name","value":"blockIndex"}},{"kind":"Field","name":{"kind":"Name","value":"exceptionNames"}}]}}]}}]}}]} as unknown as DocumentNode<TransactionResultQuery, TransactionResultQueryVariables>;

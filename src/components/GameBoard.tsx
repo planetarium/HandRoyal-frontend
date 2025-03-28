@@ -102,7 +102,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { 
         address: data.opponentAddress 
       });
-      return response?.stateQuery?.user;
+      return response?.stateQuery?.getUserData;
     },
     enabled: !!data?.opponentAddress
   });

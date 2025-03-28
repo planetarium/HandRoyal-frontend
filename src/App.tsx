@@ -18,6 +18,7 @@ import { PrivateKeyAccountCreator } from './accounts/PrivateKeyAccount';
 import JoinPage from './pages/JoinPage';
 import { GameRuleProvider } from './context/GameRuleContext';
 import { LanguageProvider } from './context/LanguageContext';
+import PickUpPage from './pages/PickUpPage';
 
 registerCreator(new MetamaskAccountCreator());
 registerCreator(new PrivateKeyAccountCreator());
@@ -44,6 +45,7 @@ const AppContent: React.FC = () => {
               <Route element={<ProtectedRoute><RegisterGlove /></ProtectedRoute>} path="/registerGlove" />
               <Route element={<GlovePage />} path="/glove/:gloveId" />
               <Route element={<ProtectedRoute><JoinPage /></ProtectedRoute>} path="/join/:sessionId" />
+              <Route element={<ProtectedRoute><PickUpPage /></ProtectedRoute>} path="/pickup" />
             </Routes>
           </main>
         </div>

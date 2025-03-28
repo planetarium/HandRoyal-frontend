@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      user(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n      }\n    }\n  }\n": typeof types.GetUserDocument,
+    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n": typeof types.GetUserDocument,
     "\n  query GetSessions {\n    stateQuery {\n      sessions {\n        metadata {\n          id\n          organizer\n          prize\n          maximumUser\n          minimumUser\n          remainingUser\n          users\n        }\n        state\n        players {\n          id\n          gloves\n        }\n        creationHeight\n        startHeight\n      }\n    }\n  }\n": typeof types.GetSessionsDocument,
     "\n  query GetUserScopedSession($sessionId: Address!, $userId: Address!) {\n    stateQuery {\n      userScopedSession(sessionId: $sessionId, userId: $userId) {\n        sessionId\n        height\n        sessionState\n        organizerAddress\n        opponentAddress\n        currentInterval\n        isPlayer\n        myGloves\n        opponentGloves\n        playersLeft\n        currentPhaseIndex\n        currentUserRoundIndex\n        myCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        opponentCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        lastRoundWinner\n        currentUserMatchState\n        playerState\n        intervalEndHeight\n      }\n    }\n  }\n": typeof types.GetUserScopedSessionDocument,
     "\n  query GetSessionHeader($sessionId: Address!) {\n    stateQuery {\n      session(sessionId: $sessionId) {\n        metadata {\n          id\n          organizer\n          prize\n          maximumUser\n          minimumUser\n          remainingUser\n          startAfter\n          maxRounds\n          roundLength\n          roundInterval\n          initialHealthPoint\n          numberOfGloves\n        }\n        state\n        players {\n          id\n          gloves\n        }\n        creationHeight\n        startHeight\n      }\n    }\n  }\n": typeof types.GetSessionHeaderDocument,
@@ -26,12 +26,14 @@ type Documents = {
     "\n  query CreateUserAction($name: String!) {\n    actionQuery {\n      createUser(name: $name)\n    }\n  }\n": typeof types.CreateUserActionDocument,
     "\n  query SubmitMoveAction($sessionId: Address!, $gloveIndex: Int!) {\n    actionQuery {\n      submitMove(sessionId: $sessionId, gloveIndex: $gloveIndex)\n    }\n  }\n": typeof types.SubmitMoveActionDocument,
     "\n  query RegisterGloveAction($gloveId: Address!) {\n    actionQuery {\n      registerGlove(gloveId: $gloveId)\n    }\n  }\n": typeof types.RegisterGloveActionDocument,
+    "\n  query PickUpAction {\n    actionQuery {\n      pickUp\n    }\n  }\n": typeof types.PickUpActionDocument,
+    "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n": typeof types.PickUpManyActionDocument,
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": typeof types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": typeof types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": typeof types.TransactionResultDocument,
 };
 const documents: Documents = {
-    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      user(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n      }\n    }\n  }\n": types.GetUserDocument,
+    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n": types.GetUserDocument,
     "\n  query GetSessions {\n    stateQuery {\n      sessions {\n        metadata {\n          id\n          organizer\n          prize\n          maximumUser\n          minimumUser\n          remainingUser\n          users\n        }\n        state\n        players {\n          id\n          gloves\n        }\n        creationHeight\n        startHeight\n      }\n    }\n  }\n": types.GetSessionsDocument,
     "\n  query GetUserScopedSession($sessionId: Address!, $userId: Address!) {\n    stateQuery {\n      userScopedSession(sessionId: $sessionId, userId: $userId) {\n        sessionId\n        height\n        sessionState\n        organizerAddress\n        opponentAddress\n        currentInterval\n        isPlayer\n        myGloves\n        opponentGloves\n        playersLeft\n        currentPhaseIndex\n        currentUserRoundIndex\n        myCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        opponentCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        lastRoundWinner\n        currentUserMatchState\n        playerState\n        intervalEndHeight\n      }\n    }\n  }\n": types.GetUserScopedSessionDocument,
     "\n  query GetSessionHeader($sessionId: Address!) {\n    stateQuery {\n      session(sessionId: $sessionId) {\n        metadata {\n          id\n          organizer\n          prize\n          maximumUser\n          minimumUser\n          remainingUser\n          startAfter\n          maxRounds\n          roundLength\n          roundInterval\n          initialHealthPoint\n          numberOfGloves\n        }\n        state\n        players {\n          id\n          gloves\n        }\n        creationHeight\n        startHeight\n      }\n    }\n  }\n": types.GetSessionHeaderDocument,
@@ -43,6 +45,8 @@ const documents: Documents = {
     "\n  query CreateUserAction($name: String!) {\n    actionQuery {\n      createUser(name: $name)\n    }\n  }\n": types.CreateUserActionDocument,
     "\n  query SubmitMoveAction($sessionId: Address!, $gloveIndex: Int!) {\n    actionQuery {\n      submitMove(sessionId: $sessionId, gloveIndex: $gloveIndex)\n    }\n  }\n": types.SubmitMoveActionDocument,
     "\n  query RegisterGloveAction($gloveId: Address!) {\n    actionQuery {\n      registerGlove(gloveId: $gloveId)\n    }\n  }\n": types.RegisterGloveActionDocument,
+    "\n  query PickUpAction {\n    actionQuery {\n      pickUp\n    }\n  }\n": types.PickUpActionDocument,
+    "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n": types.PickUpManyActionDocument,
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": types.TransactionResultDocument,
@@ -65,7 +69,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetUser($address: Address!) {\n    stateQuery {\n      user(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetUser($address: Address!) {\n    stateQuery {\n      user(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -110,6 +114,14 @@ export function graphql(source: "\n  query SubmitMoveAction($sessionId: Address!
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query RegisterGloveAction($gloveId: Address!) {\n    actionQuery {\n      registerGlove(gloveId: $gloveId)\n    }\n  }\n"): (typeof documents)["\n  query RegisterGloveAction($gloveId: Address!) {\n    actionQuery {\n      registerGlove(gloveId: $gloveId)\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query PickUpAction {\n    actionQuery {\n      pickUp\n    }\n  }\n"): (typeof documents)["\n  query PickUpAction {\n    actionQuery {\n      pickUp\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n"): (typeof documents)["\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

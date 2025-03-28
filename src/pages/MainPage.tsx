@@ -34,7 +34,7 @@ export const MainPage: React.FC = () => {
     queryKey: ['getUser', account?.address],
     queryFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
-      return response.stateQuery?.user;
+      return response.stateQuery?.getUserData;
     }
   });
 
