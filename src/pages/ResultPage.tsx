@@ -17,7 +17,7 @@ export const ResultPage: React.FC = () => {
   const { tip } = useTip();
   const { sessionId } = useParams<{ sessionId: string }>();
   const [showParticipants, setShowParticipants] = useState(false);
-  const [showPhases, setShowPhases] = useState<boolean[]>([]);
+  const [hidePhases, setHidePhases] = useState<boolean[]>([]);
 
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['getSession', sessionId],
@@ -97,8 +97,15 @@ export const ResultPage: React.FC = () => {
   }
 
   const renderRound = (round: Round, index: number, match: Match) => {
-    const player1Glove = getGloveByIndex(match.players?.[0] || -1, round.condition1?.submission || -1);
-    const player2Glove = getGloveByIndex(match.players?.[1] || -1, round.condition2?.submission || -1);
+    const submission1 = round.condition1?.submission !== undefined && round.condition1?.submission !== null ? round.condition1.submission : -1;
+    const submission2 = round.condition2?.submission !== undefined && round.condition2?.submission !== null ? round.condition2.submission : -1;
+    
+    const player1Index = match.players?.[0] !== undefined && match.players?.[0] !== null ? match.players[0] : -1;
+    const player2Index = match.players?.[1] !== undefined && match.players?.[1] !== null ? match.players[1] : -1;
+    
+    const player1Glove: string = getGloveByIndex(player1Index, submission1) ?? '';
+    const player2Glove: string = getGloveByIndex(player2Index, submission2) ?? '';
+    
     const maxHealth = data?.metadata?.initialHealthPoint ?? 100;
     let player1Health: number = round.condition1?.healthPoint || 0;
     let player2Health: number = round.condition2?.healthPoint || 0;
@@ -132,7 +139,7 @@ export const ResultPage: React.FC = () => {
                   <img 
                     alt="Player 1's glove" 
                     className='w-8 h-8' 
-                    src={player1Glove ? getLocalGloveImage(player1Glove) : ''}
+                    src={getLocalGloveImage(player1Glove)}
                   />
                 </div>
               ) : <div className='w-8 text-center'>-</div>}
@@ -147,7 +154,7 @@ export const ResultPage: React.FC = () => {
                   <img 
                     alt="Player 2's glove" 
                     className='w-8 h-8' 
-                    src={player2Glove ? getLocalGloveImage(player2Glove) : ''}
+                    src={getLocalGloveImage(player2Glove)}
                   />
                 </div>
               ) : <div className='w-8 text-center'>-</div>}
@@ -177,10 +184,10 @@ export const ResultPage: React.FC = () => {
   };
 
   const togglePhaseVisibility = (index: number) => {
-    setShowPhases(prev => {
-      const newShowPhases = [...prev];
-      newShowPhases[index] = !newShowPhases[index];
-      return newShowPhases;
+    setHidePhases(prev => {
+      const newHidePhases = [...prev];
+      newHidePhases[index] = !newHidePhases[index];
+      return newHidePhases;
     });
   };
 
@@ -240,9 +247,9 @@ export const ResultPage: React.FC = () => {
               <div key={index} className="mb-4">
                 <span className="mb-2 cursor-pointer" onClick={() => togglePhaseVisibility(index)}>
                   {t('ui:phase')}&nbsp;{index + 1}
-                  {showPhases[index] ? ' ▼' : ' ▶'}
+                  {hidePhases[index] ? ' ▶' : ' ▼'}
                 </span>
-                {showPhases[index] && (
+                {!hidePhases[index] && (
                   <div className="bg-gray-500 shadow-md rounded-lg overflow-hidden mt-1">
                     {renderPhase(phase, index)}
                   </div>
