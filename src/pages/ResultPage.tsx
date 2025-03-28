@@ -204,7 +204,7 @@ export const ResultPage: React.FC = () => {
       return (
         <div className="text-center">
           <p>{t('ui:waitingForGameToStart')}</p>
-          <p>{t('ui:blocksLeft', { count: data.startHeight ? data.startHeight - (tip?.index ?? 0) : 0 })}</p>
+          <p>{t('ui:blocksLeft', { count: data.startHeight ? data.startHeight - (tip?.height ?? 0) : 0 })}</p>
           <StyledButton onClick={() => navigate('/')}>
             {t('ui:backToMain')}
           </StyledButton>

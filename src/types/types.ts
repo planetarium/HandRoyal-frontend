@@ -1,5 +1,5 @@
 export interface Block {
-  index: number;
+  height: number;
   hash: string;
 }
 

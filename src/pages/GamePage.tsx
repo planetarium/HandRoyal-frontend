@@ -54,7 +54,7 @@ export const GamePage: React.FC = () => {
 
   const blocksLeft = () => {
     if (!session || !tip) return 0;
-    return session.intervalEndHeight - tip.index;
+    return session.intervalEndHeight - tip.height;
   };
 
   const renderContent = () => {
@@ -157,7 +157,7 @@ export const GamePage: React.FC = () => {
     }
 
     return (
-      <GameBoard blockIndex={tip?.index || 0} data={session} />
+      <GameBoard blockIndex={tip?.height || 0} data={session} />
     );
   };
 

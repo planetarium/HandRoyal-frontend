@@ -1,20 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { request } from 'graphql-request';
 import { useAccountContext } from '../context/AccountContext';
 import subscriptionClient from '../subscriptionClient';
-import {
-  GRAPHQL_ENDPOINT, 
-  createUserAction, 
-  USER_SUBSCRIPTION, 
-  getUserDocument
-} from '../queries';
+import { USER_SUBSCRIPTION } from '../queries';
 import StyledButton from '../components/StyledButton';
 import logo from '../assets/logo.png';
 import metamaskIcon from '../assets/MetaMask-icon-fox.svg';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
 
 const TEST_ACCOUNTS = [
   {
@@ -59,7 +51,6 @@ const LoginPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!account) return;
@@ -91,67 +82,24 @@ const LoginPage: React.FC = () => {
     };
   }, [navigate, account]);
 
-  const createUserMutation = useMutation({
-    mutationFn: async () => {
-      if (!account) {
-        throw new Error('Account not connected');
-      }
-
-      const createUserResponse = await request(GRAPHQL_ENDPOINT, createUserAction, {
-        name: nameInput
-      });
-      if (!createUserResponse.actionQuery?.createUser) {
-        throw new Error('Failed to create user');
-      }
-
-      const plainValue = createUserResponse.actionQuery.createUser;
-      const txId = await executeTransaction(account, plainValue);
-      await waitForTransaction(txId);
-      
-      return txId;
-    }
-  });
-
   const handleLogin = useCallback(async (type: LoginType, param?: any) => {
     setIsLoggingIn(true);
     try {
-      const account = await createAccount(type, param);
-      const data = await queryClient.fetchQuery({
-        queryKey: ['checkUser', account.address.toString()],
-        queryFn: async () => {
-          const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { 
-            address: account.address.toString() 
-          });
-          return response;
-        }
-      });
-
-      if (data?.stateQuery?.user) {
-        setErrorMessage(null);
-        navigate('/');
-      } else {
-        await createUserMutation.mutateAsync();
-        
-        setErrorMessage(null);
-        setIsLoggingIn(true);
-        const timeoutId = setTimeout(() => {
-          setIsLoggingIn(false);
-          setErrorMessage('Login timed out. Please try again.');
-        }, 30000);
-
-        return () => clearTimeout(timeoutId);
-      }
+      await createAccount(type, param);
+      setErrorMessage(null);
+      navigate('/');
+      setIsLoggingIn(true);
     } catch (error) {
-      console.error(
-        type === 'raw' ? 'Invalid private key format:' : 'Failed to connect with Metamask:', 
-        error
-      );
-      setErrorMessage(
-        type === 'raw' ? 'Invalid private key format.' : 'Failed to connect with Metamask'
-      );
+      if (error instanceof Error && error.message === 'Failed to fetch') {
+        setErrorMessage(t('ui:login.networkError'));
+      } else {
+        setErrorMessage(t('ui:login.failedToLogin'));
+      }
+
+      console.error('Failed to login', error);
       setIsLoggingIn(false);
     }
-  }, [queryClient, createUserMutation, navigate, createAccount]);
+  }, [navigate, createAccount, t]);
 
   const isDisabled = () => {
     return isLoggingIn;
