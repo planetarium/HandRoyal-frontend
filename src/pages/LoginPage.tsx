@@ -130,7 +130,7 @@ const LoginPage: React.FC = () => {
             disabled={isDisabled() || !nameInput.trim()}
             onClick={() => handleLogin('raw', privateKeyInput)}
           >
-            {isLoggingIn ? 'Logging in...' : t('ui:loginButton')}
+            {isLoggingIn ? 'Logging in...' : t('ui:login.loginButton')}
           </StyledButton>
         </div>
         <div className="text-center my-4 text-gray-500 flex items-center justify-center">
@@ -160,35 +160,43 @@ const LoginPage: React.FC = () => {
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th className="px-6 py-3 border-b text-left">{t('ui:name')}</th>
-                <th className="px-6 py-3 border-b text-left">{t('ui:privateKey')}</th>
-                <th className="px-6 py-3 border-b text-left">{t('ui:address')}</th>
+                <th className="px-4 py-3 border-b text-left">{t('ui:name')}</th>
+                <th className="px-4 py-3 border-b text-left">{t('ui:privateKey')}</th>
+                <th className="px-4 py-3 border-b text-left">{t('ui:address')}</th>
+                <th className="px-4 py-3 border-b text-left w-32">{t('ui:login.loginButton')}</th>
               </tr>
             </thead>
             <tbody>
               {TEST_ACCOUNTS.map((account) => (
                 <tr key={account.privateKey} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 border-b font-mono text-sm">
+                  <td className="px-4 py-4 border-b font-mono text-sm">
                     {account.name}
                   </td>
-                  <td className="px-6 py-4 border-b font-mono text-sm break-all">
+                  <td className="px-4 py-4 border-b font-mono text-sm break-all">
                     <button
                       className="text-left hover:text-blue-600 hover:underline w-full"
                       onClick={() => {
                         setNameInput(account.name);
                         setPrivateKeyInput(account.privateKey);
                       }}
-                      onDoubleClick={() => {
+                    >
+                      {account.privateKey}
+                    </button>
+                  </td>
+                  <td className="px-4 py-4 border-b font-mono text-sm break-all">
+                    {account.address}
+                  </td>
+                  <td className="px-4 py-4 border-b w-32">
+                    <StyledButton
+                      disabled={isDisabled()}
+                      onClick={() => {
                         setNameInput(account.name);
                         setPrivateKeyInput(account.privateKey);
                         handleLogin('raw', account.privateKey);
                       }}
                     >
-                      {account.privateKey}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 border-b font-mono text-sm break-all">
-                    {account.address}
+                      {isLoggingIn ? t('ui:login.loggingIn') : t('ui:login.loginButton')}
+                    </StyledButton>
                   </td>
                 </tr>
               ))}

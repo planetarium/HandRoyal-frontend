@@ -17,6 +17,7 @@ import { MetamaskAccountCreator } from './accounts/MetamaskAccount';
 import { PrivateKeyAccountCreator } from './accounts/PrivateKeyAccount';
 import JoinPage from './pages/JoinPage';
 import { GameRuleProvider } from './context/GameRuleContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 registerCreator(new MetamaskAccountCreator());
 registerCreator(new PrivateKeyAccountCreator());
@@ -55,19 +56,21 @@ const queryClient = new QueryClient();
 
 const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AccountProvider>
-        <TipProvider>
-          <EquippedGloveProvider>
-            <GameRuleProvider>
-              <Router>
-                <AppContent />
-              </Router>
-            </GameRuleProvider>
-          </EquippedGloveProvider>
-        </TipProvider>
-      </AccountProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <QueryClientProvider client={queryClient}>
+        <AccountProvider>
+          <TipProvider>
+            <EquippedGloveProvider>
+              <GameRuleProvider>
+                <Router>
+                  <AppContent />
+                </Router>
+              </GameRuleProvider>
+            </EquippedGloveProvider>
+          </TipProvider>
+        </AccountProvider>
+      </QueryClientProvider>
+    </LanguageProvider>
   );
 };
 
