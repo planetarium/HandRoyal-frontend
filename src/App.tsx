@@ -19,6 +19,7 @@ import JoinPage from './pages/JoinPage';
 import { GameRuleProvider } from './context/GameRuleContext';
 import { LanguageProvider } from './context/LanguageContext';
 import PickUpPage from './pages/PickUpPage';
+import MatchingPage from './pages/MatchingPage';
 
 registerCreator(new MetamaskAccountCreator());
 registerCreator(new PrivateKeyAccountCreator());
@@ -46,6 +47,7 @@ const AppContent: React.FC = () => {
               <Route element={<GlovePage />} path="/glove/:gloveId" />
               <Route element={<ProtectedRoute><JoinPage /></ProtectedRoute>} path="/join/:sessionId" />
               <Route element={<ProtectedRoute><PickUpPage /></ProtectedRoute>} path="/pickup" />
+              <Route element={<ProtectedRoute><MatchingPage /></ProtectedRoute>} path="/matching" />
             </Routes>
           </main>
         </div>

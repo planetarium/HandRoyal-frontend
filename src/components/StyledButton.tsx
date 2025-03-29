@@ -7,6 +7,7 @@ interface StyledButtonProps {
   textColor?: string;
   bgColor?: string;
   shadowColor?: string;
+  className?: string;
 }
 
 const StyledButton: React.FC<StyledButtonProps> = ({
@@ -15,12 +16,14 @@ const StyledButton: React.FC<StyledButtonProps> = ({
   disabled = false,
   textColor = '#000000',
   bgColor = '#40C4FF',
-  shadowColor = '#0288D1'
+  shadowColor = '#0288D1',
+  className = ''
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <button
+      className={className}
       disabled={disabled}
       style={{
         display: 'flex',
