@@ -180,5 +180,10 @@
   "pleaseWait": "Please wait",
   "processing": "Processing...",
   "provideEmail": "Please provide your email address",
-  "cannotJoinSession": "Cannot join session"
+  "cannotJoinSession": "Cannot join session",
+  "effectAttack": "Attack",
+  "effectDefense": "Defense",
+  "effectHeal": "Heal",
+  "effectSpecial": "Special",
+  "effectBurn": "Burn"
 }

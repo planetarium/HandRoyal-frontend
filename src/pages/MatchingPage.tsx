@@ -249,7 +249,7 @@ export const MatchingPage: React.FC = () => {
         
         <StyledButton
           bgColor="#4FD1C5"
-          disabled={totalSelected === 0}
+          disabled={totalSelected !== 5}
           shadowColor="#319795"
           onClick={handleRegisterMatching}
         >
@@ -288,7 +288,7 @@ export const MatchingPage: React.FC = () => {
                       <img 
                         alt={t(`glove:${gloveId}.name`)}
                         className="w-14 h-14 object-contain bg-gray-800 rounded-lg border border-gray-600"
-                        src={getLocalGloveImage(gloveId)} 
+                        src={getLocalGloveImage(gloveId)}
                       />
                     </div>
                   ))

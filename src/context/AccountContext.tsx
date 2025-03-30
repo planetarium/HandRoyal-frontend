@@ -36,7 +36,7 @@ const checkUser = async (
     address: address 
   });
 
-  if (response?.stateQuery?.user) {
+  if (response?.stateQuery?.getUserData) {
     return true;
   }
 
