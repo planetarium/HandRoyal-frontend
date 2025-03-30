@@ -7,15 +7,12 @@ import { Users, Clock, Crown, Trophy } from 'lucide-react';
 import { GRAPHQL_ENDPOINT, getUserDocument, joinSessionAction, getSessionHeaderDocument } from '../queries';
 import { useRequiredAccount } from '../context/AccountContext';
 import StyledButton from '../components/StyledButton';
-import { getLocalGloveImage } from '../fetches';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import { useEquippedGlove } from '../context/EquippedGloveContext';
 import AddressDisplay from '../components/AddressDisplay';
 import { SessionState } from '../gql/graphql';
 import { useTip } from '../context/TipContext';
-interface GloveSelection {
-  [gloveId: string]: number; // 글러브 ID를 키로, 선택된 개수를 값으로 가지는 객체
-}
+import GloveSelectionComponent, { type GloveSelection } from '../components/GloveSelectionComponent';
 
 const JoinPage: React.FC = () => {
   const { t } = useTranslation();
@@ -23,7 +20,6 @@ const JoinPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const account = useRequiredAccount();
   const { equippedGlove } = useEquippedGlove();
-  const [gloveImages, setGloveImages] = useState<{ [key: string]: string }>({});
   const [selectedGloves, setSelectedGloves] = useState<GloveSelection>({});
   const [totalSelected, setTotalSelected] = useState(0);
   const [error, setError] = useState('');
@@ -33,7 +29,7 @@ const JoinPage: React.FC = () => {
     queryKey: ['getUser', account?.address],
     queryFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
-      return response.stateQuery?.user;
+      return response.stateQuery?.getUserData;
     }
   });
 
@@ -74,57 +70,7 @@ const JoinPage: React.FC = () => {
     }
   });
 
-  useEffect(() => {
-    const fetchGloveImages = async () => {
-      if (userData?.ownedGloves && userData.ownedGloves.length > 0) {
-        const images: { [key: string]: string } = {};
-        
-        for (const info of userData.ownedGloves) {
-          try {
-            images[info?.id] = getLocalGloveImage(info?.id);
-          } catch (error) {
-            console.error(`Failed to load image for glove ${info?.id}:`, error);
-          }
-        }
-        
-        setGloveImages(images);
-      }
-    };
-    
-    fetchGloveImages();
-  }, [userData]);
-
   const MAX_SELECTIONS = sessionData?.metadata?.numberOfGloves ?? -1;
-
-  const handleGloveClick = (gloveId: string) => {
-    if (totalSelected >= MAX_SELECTIONS) {
-      // 이미 최대 선택 개수에 도달했을 경우우
-      return;
-    }
-
-    setSelectedGloves(prev => {
-      const currentCount = prev[gloveId] || 0;
-      const availableCount = userData?.ownedGloves?.find(g => g?.id === gloveId)?.count || 0;
-      
-      // 해당 글러브의 최대 개수에 도달한 경우
-      if (currentCount >= availableCount) {
-        return prev;
-      }
-      
-      const newCount = currentCount + 1;
-      const newSelected = { ...prev, [gloveId]: newCount };
-      
-      // 총 선택 개수 업데이트
-      setTotalSelected(Object.values(newSelected).reduce((sum, count) => sum + count, 0));
-      
-      return newSelected;
-    });
-  };
-
-  const resetSelections = () => {
-    setSelectedGloves({});
-    setTotalSelected(0);
-  };
 
   const handleJoin = async () => {
     if (!sessionId) {
@@ -139,55 +85,6 @@ const JoinPage: React.FC = () => {
       console.error('Failed to join session:', error);
       setError(t('ui:failedToJoinSession'));
     }
-  };
-
-  const renderGlove = () => {
-    if (!userData?.ownedGloves || userData.ownedGloves.length === 0) {
-      return <p className="text-center">{t('ui:noGlovesOwned')}</p>;
-    }
-
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {userData.ownedGloves.map((gloveInfo) => {
-          const gloveId = gloveInfo?.id;
-          const count = gloveInfo?.count || 0;
-          const selectedCount = selectedGloves[gloveId] || 0;
-
-          return (
-            <div
-              key={gloveId} 
-              className={`bg-white rounded-lg p-4 shadow-md cursor-pointer hover:shadow-lg transition-shadow relative ${
-                selectedCount > 0 
-                  ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50' 
-                  : 'hover:shadow-lg'
-              }`}
-              onClick={() => handleGloveClick(gloveId)}
-            >
-              <div className="relative">
-                <img 
-                  alt={`Glove ${gloveId}`} 
-                  className="w-full h-40 object-contain mb-2" 
-                  src={gloveImages[gloveId] || 'placeholder.png'}
-                />
-              </div>
-              <p className="text-center text-xs mt-2 truncate">{t(`glove:${gloveId}.name`)}</p>
-              <div className="flex justify-center mt-2">
-                {[...Array(count)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`w-4 h-4 mx-1 rounded-full border-2 transition-all duration-300 ${
-                      i < selectedCount 
-                        ? 'border-yellow-400 bg-yellow-400 shadow-md shadow-yellow-400/50 scale-110' 
-                        : 'border-gray-300 bg-transparent'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
   };
 
   const renderSessionInfo = () => {
@@ -311,16 +208,16 @@ const JoinPage: React.FC = () => {
       {sessionData?.state === SessionState.Ready && (
         <>
           <div className="w-full mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl">{t('ui:selectGloves')}</h2>
-              <div className="flex items-center">
-                <span className="mr-2">{totalSelected}/{MAX_SELECTIONS}</span>
-                <StyledButton onClick={resetSelections}>
-                  {t('ui:reset')}
-                </StyledButton>
-              </div>
-            </div>
-            {renderGlove()}
+            {userData?.ownedGloves && (
+              <GloveSelectionComponent
+                maxSelections={MAX_SELECTIONS}
+                ownedGloves={userData.ownedGloves.filter((g: any) => g !== null).map((g: any) => ({ id: g.id, count: g.count }))}
+                selectedGloves={selectedGloves}
+                setSelectedGloves={setSelectedGloves}
+                setTotalSelected={setTotalSelected}
+                totalSelected={totalSelected}
+              />
+            )}
           </div>
           
           <div className="flex space-x-4 mt-4">

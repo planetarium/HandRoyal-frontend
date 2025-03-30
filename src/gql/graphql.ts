@@ -95,6 +95,12 @@ export type Match = {
   winner: Scalars['Int']['output'];
 };
 
+export type MatchMadeEventData = {
+  __typename?: 'MatchMadeEventData';
+  players?: Maybe<Array<Scalars['Address']['output']>>;
+  sessionId: Scalars['Address']['output'];
+};
+
 export enum MatchState {
   Active = 'ACTIVE',
   Break = 'BREAK',
@@ -104,14 +110,22 @@ export enum MatchState {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  cancelMatching: Scalars['TxId']['output'];
   createSession: Scalars['TxId']['output'];
   createUser: Scalars['TxId']['output'];
   joinSession: Scalars['TxId']['output'];
   mintSinkAddress: Scalars['TxId']['output'];
   pickUp: Scalars['TxId']['output'];
+  pickUpMany: Scalars['TxId']['output'];
   registerGlove: Scalars['TxId']['output'];
+  registerMatching: Scalars['TxId']['output'];
   stageTransaction: Scalars['TxId']['output'];
   submitMove: Scalars['TxId']['output'];
+};
+
+
+export type MutationCancelMatchingArgs = {
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
 
@@ -155,8 +169,19 @@ export type MutationPickUpArgs = {
 };
 
 
+export type MutationPickUpManyArgs = {
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
 export type MutationRegisterGloveArgs = {
   gloveId: Scalars['Address']['input'];
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
+export type MutationRegisterMatchingArgs = {
+  gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
@@ -233,12 +258,14 @@ export type QueryNextTxNonceArgs = {
 
 export type Query_ActionQuery = {
   __typename?: 'Query_ActionQuery';
+  cancelMatching?: Maybe<Scalars['Hex']['output']>;
   createSession?: Maybe<Scalars['Hex']['output']>;
   createUser?: Maybe<Scalars['Hex']['output']>;
   joinSession?: Maybe<Scalars['Hex']['output']>;
   pickUp?: Maybe<Scalars['Hex']['output']>;
   pickUpMany?: Maybe<Scalars['Hex']['output']>;
   registerGlove?: Maybe<Scalars['Hex']['output']>;
+  registerMatching?: Maybe<Scalars['Hex']['output']>;
   submitMove?: Maybe<Scalars['Hex']['output']>;
 };
 
@@ -271,6 +298,11 @@ export type Query_ActionQueryJoinSessionArgs = {
 
 export type Query_ActionQueryRegisterGloveArgs = {
   gloveId: Scalars['Address']['input'];
+};
+
+
+export type Query_ActionQueryRegisterMatchingArgs = {
+  gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
 };
 
 
@@ -407,6 +439,7 @@ export type SubmitMoveEventData = {
 export type Subscription = {
   __typename?: 'Subscription';
   onGloveRegistered?: Maybe<GloveRegisteredEventData>;
+  onMatchMade?: Maybe<MatchMadeEventData>;
   onMoveChanged?: Maybe<SubmitMoveEventData>;
   onPickUpResult?: Maybe<PickUpResultEventData>;
   onSessionChanged?: Maybe<SessionEventData>;
@@ -418,6 +451,11 @@ export type Subscription = {
 
 export type SubscriptionOnGloveRegisteredArgs = {
   gloveId: Scalars['Address']['input'];
+};
+
+
+export type SubscriptionOnMatchMadeArgs = {
+  userId: Scalars['Address']['input'];
 };
 
 
@@ -600,6 +638,18 @@ export type PickUpManyActionQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type PickUpManyActionQuery = { __typename?: 'Query', actionQuery?: { __typename?: 'Query_ActionQuery', pickUpMany?: any | null } | null };
 
+export type RegisterMatchingActionQueryVariables = Exact<{
+  gloves: Array<Scalars['Address']['input']> | Scalars['Address']['input'];
+}>;
+
+
+export type RegisterMatchingActionQuery = { __typename?: 'Query', actionQuery?: { __typename?: 'Query_ActionQuery', registerMatching?: any | null } | null };
+
+export type CancelMatchingActionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CancelMatchingActionQuery = { __typename?: 'Query', actionQuery?: { __typename?: 'Query_ActionQuery', cancelMatching?: any | null } | null };
+
 export type UnsignedTransactionQueryVariables = Exact<{
   address: Scalars['Address']['input'];
   plainValue: Scalars['Hex']['input'];
@@ -638,6 +688,8 @@ export const SubmitMoveActionDocument = {"kind":"Document","definitions":[{"kind
 export const RegisterGloveActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RegisterGloveAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerGlove"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloveId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}}}]}]}}]}}]} as unknown as DocumentNode<RegisterGloveActionQuery, RegisterGloveActionQueryVariables>;
 export const PickUpActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PickUpAction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pickUp"}}]}}]}}]} as unknown as DocumentNode<PickUpActionQuery, PickUpActionQueryVariables>;
 export const PickUpManyActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PickUpManyAction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pickUpMany"}}]}}]}}]} as unknown as DocumentNode<PickUpManyActionQuery, PickUpManyActionQueryVariables>;
+export const RegisterMatchingActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RegisterMatchingAction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerMatching"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloves"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}}}]}]}}]}}]} as unknown as DocumentNode<RegisterMatchingActionQuery, RegisterMatchingActionQueryVariables>;
+export const CancelMatchingActionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CancelMatchingAction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelMatching"}}]}}]}}]} as unknown as DocumentNode<CancelMatchingActionQuery, CancelMatchingActionQueryVariables>;
 export const UnsignedTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"UnsignedTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unsignedTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"address"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}},{"kind":"Argument","name":{"kind":"Name","value":"plainValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}}}]}]}}]}}]} as unknown as DocumentNode<UnsignedTransactionQuery, UnsignedTransactionQueryVariables>;
 export const StageTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"StageTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"signature"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stageTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"unsignedTransaction"},"value":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}}},{"kind":"Argument","name":{"kind":"Name","value":"signature"},"value":{"kind":"Variable","name":{"kind":"Name","value":"signature"}}}]}]}}]} as unknown as DocumentNode<StageTransactionMutation, StageTransactionMutationVariables>;
 export const TransactionResultDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TransactionResult"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"txId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TxId"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transactionResult"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"txId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"txId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"txStatus"}},{"kind":"Field","name":{"kind":"Name","value":"blockIndex"}},{"kind":"Field","name":{"kind":"Name","value":"exceptionNames"}}]}}]}}]}}]} as unknown as DocumentNode<TransactionResultQuery, TransactionResultQueryVariables>;

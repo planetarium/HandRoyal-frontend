@@ -221,6 +221,15 @@ export const PICK_UP_RESULT_SUBSCRIPTION = `
   }
 `;
 
+export const MATCH_MADE_SUBSCRIPTION = `
+  subscription OnMatchMade($userId: Address!) {
+    onMatchMade(userId: $userId) {
+      sessionId
+      players
+    }
+  }
+`;
+
 export const createSessionAction = graphql(/* GraphQL */ `
   query CreateSessionAction(
     $sessionId: Address!,
@@ -297,6 +306,22 @@ export const pickUpManyAction = graphql(/* GraphQL */ `
   query PickUpManyAction {
     actionQuery {
       pickUpMany
+    }
+  }
+`);
+
+export const registerMatchingAction = graphql(/* GraphQL */ `
+  query RegisterMatchingAction($gloves: [Address!]!) {
+    actionQuery {
+      registerMatching(gloves: $gloves)
+    }
+  }
+`);
+
+export const cancelMatchingAction = graphql(/* GraphQL */ `
+  query CancelMatchingAction {
+    actionQuery {
+      cancelMatching
     }
   }
 `);

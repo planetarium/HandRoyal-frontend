@@ -57,6 +57,10 @@ export const MainPage: React.FC = () => {
     navigate('/create');
   };
 
+  const handleQuickMatch = () => {
+    navigate('/matching');
+  };
+
   // 필터링된 세션 데이터
   const filteredSessions = sessionData?.filter(session => 
     session?.metadata?.id.includes(sessionId)
@@ -65,6 +69,18 @@ export const MainPage: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <img alt="Hand Royal Logo" className="w-60 h-60 mb-6" src={logo} />
+      
+      {/* 퀵 매치 버튼 추가 */}
+      <div className="mb-6 w-full max-w-xs">
+        <StyledButton 
+          bgColor="#FF3366"
+          className="w-full py-3 text-lg font-bold"
+          shadowColor="#CC0033"
+          onClick={handleQuickMatch}>
+          {t('ui:quickMatch')}
+        </StyledButton>
+      </div>
+      
       {userData?.sessionId && userData.sessionId !== "0000000000000000000000000000000000000000" ? (
         <div className="flex justify-between items-center bg-gradient-to-r from-yellow-200 to-blue-200 p-6 rounded-lg border-2 border-black w-full mb-6">
           <div>

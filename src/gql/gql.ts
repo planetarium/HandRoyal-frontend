@@ -28,6 +28,8 @@ type Documents = {
     "\n  query RegisterGloveAction($gloveId: Address!) {\n    actionQuery {\n      registerGlove(gloveId: $gloveId)\n    }\n  }\n": typeof types.RegisterGloveActionDocument,
     "\n  query PickUpAction {\n    actionQuery {\n      pickUp\n    }\n  }\n": typeof types.PickUpActionDocument,
     "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n": typeof types.PickUpManyActionDocument,
+    "\n  query RegisterMatchingAction($gloves: [Address!]!) {\n    actionQuery {\n      registerMatching(gloves: $gloves)\n    }\n  }\n": typeof types.RegisterMatchingActionDocument,
+    "\n  query CancelMatchingAction {\n    actionQuery {\n      cancelMatching\n    }\n  }\n": typeof types.CancelMatchingActionDocument,
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": typeof types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": typeof types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": typeof types.TransactionResultDocument,
@@ -47,6 +49,8 @@ const documents: Documents = {
     "\n  query RegisterGloveAction($gloveId: Address!) {\n    actionQuery {\n      registerGlove(gloveId: $gloveId)\n    }\n  }\n": types.RegisterGloveActionDocument,
     "\n  query PickUpAction {\n    actionQuery {\n      pickUp\n    }\n  }\n": types.PickUpActionDocument,
     "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n": types.PickUpManyActionDocument,
+    "\n  query RegisterMatchingAction($gloves: [Address!]!) {\n    actionQuery {\n      registerMatching(gloves: $gloves)\n    }\n  }\n": types.RegisterMatchingActionDocument,
+    "\n  query CancelMatchingAction {\n    actionQuery {\n      cancelMatching\n    }\n  }\n": types.CancelMatchingActionDocument,
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": types.TransactionResultDocument,
@@ -122,6 +126,14 @@ export function graphql(source: "\n  query PickUpAction {\n    actionQuery {\n  
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n"): (typeof documents)["\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query RegisterMatchingAction($gloves: [Address!]!) {\n    actionQuery {\n      registerMatching(gloves: $gloves)\n    }\n  }\n"): (typeof documents)["\n  query RegisterMatchingAction($gloves: [Address!]!) {\n    actionQuery {\n      registerMatching(gloves: $gloves)\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query CancelMatchingAction {\n    actionQuery {\n      cancelMatching\n    }\n  }\n"): (typeof documents)["\n  query CancelMatchingAction {\n    actionQuery {\n      cancelMatching\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
