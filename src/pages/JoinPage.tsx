@@ -102,9 +102,9 @@ const JoinPage: React.FC = () => {
     if (state !== SessionState.Ready) {
       return (
         <div className="flex flex-col items-center">
-          <div className="bg-white rounded-lg p-6 shadow-md mb-6 w-full max-w-md text-center">
-            <h2 className="text-xl font-bold mb-4">{t('ui:sessionNotReady')}</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="rounded-lg p-6 border-black mb-6 w-full max-w-md text-center">
+            <h2 className="text-xl font-bold mb-4 text-white">{t('ui:cannotJoinSession')}</h2>
+            <p className="text-gray-300 mb-6">
               {state === SessionState.Active 
                 ? t('ui:sessionAlreadyStarted')
                 : state === SessionState.Ended
@@ -197,44 +197,53 @@ const JoinPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-4">{t('ui:joinSession')}</h1>
-      <p className="mb-4">{t('ui:sessionId')}: {sessionId}</p>
-      
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      
-      {renderSessionInfo()}
-      
-      {sessionData?.state === SessionState.Ready && (
-        <>
-          <div className="w-full mb-4">
-            {userData?.ownedGloves && (
-              <GloveSelectionComponent
-                maxSelections={MAX_SELECTIONS}
-                ownedGloves={userData.ownedGloves.filter((g: any) => g !== null).map((g: any) => ({ id: g.id, count: g.count }))}
-                selectedGloves={selectedGloves}
-                setSelectedGloves={setSelectedGloves}
-                setTotalSelected={setTotalSelected}
-                totalSelected={totalSelected}
-              />
-            )}
-          </div>
-          
-          <div className="flex space-x-4 mt-4">
-            <StyledButton 
-              bgColor = '#FFE55C'
-              disabled={totalSelected !== MAX_SELECTIONS}
-              shadowColor = '#FF9F0A' 
-              onClick={handleJoin}
-            >
-              {t('ui:join')}
-            </StyledButton>
-            <StyledButton onClick={() => navigate('/')}>
-              {t('ui:cancel')}
-            </StyledButton>
-          </div>
-        </>
-      )}
+    <div className="flex flex-col items-center bg-gray-700">
+      <div className="flex items-center justify-center rounded-t-lg bg-gray-900 w-full">
+        <h1
+          className="text-4xl font-bold text-white p-4"
+          style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+        >
+          {t('ui:joinSession')}
+        </h1>
+      </div>
+      <div className="flex flex-col items-center justify-center flex-grow p-6">
+        <p className="mb-4 text-white">{t('ui:sessionId')}: {sessionId}</p>
+        
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        
+        {renderSessionInfo()}
+        
+        {sessionData?.state === SessionState.Ready && (
+          <>
+            <div className="w-full mb-4">
+              {userData?.ownedGloves && (
+                <GloveSelectionComponent
+                  maxSelections={MAX_SELECTIONS}
+                  ownedGloves={userData.ownedGloves.filter((g: any) => g !== null).map((g: any) => ({ id: g.id, count: g.count }))}
+                  selectedGloves={selectedGloves}
+                  setSelectedGloves={setSelectedGloves}
+                  setTotalSelected={setTotalSelected}
+                  totalSelected={totalSelected}
+                />
+              )}
+            </div>
+            
+            <div className="flex space-x-4 mt-4">
+              <StyledButton 
+                bgColor = '#FFE55C'
+                disabled={totalSelected !== MAX_SELECTIONS}
+                shadowColor = '#FF9F0A' 
+                onClick={handleJoin}
+              >
+                {t('ui:join')}
+              </StyledButton>
+              <StyledButton onClick={() => navigate('/')}>
+                {t('ui:cancel')}
+              </StyledButton>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

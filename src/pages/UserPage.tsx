@@ -7,6 +7,7 @@ import { getUserDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
 import { useRequiredAccount } from '../context/AccountContext';
 import GloveCard from '../components/GloveCard';
+import royal from '../assets/royal.png';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
@@ -71,7 +72,7 @@ const UserPage: React.FC = () => {
             </div>
             <p className="text-md">{t('ui:userId')}: {data.id}</p>
             <p className="text-md">{t('ui:userName')}: {data.name}</p>
-            <p className="text-md">{t('ui:balance')}: {data.balance}</p>
+            <p className="text-md"><img alt="royal" className="w-6 h-6 inline-block mr-2" src={royal} />{data.balance}</p>
             <div className="w-full">
               {/* 소유한 글러브 */}
               <div className="bg-gray-600 p-4 rounded shadow mb-4">

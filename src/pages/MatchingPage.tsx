@@ -333,21 +333,13 @@ export const MatchingPage: React.FC = () => {
         <Loader className="w-12 h-12 text-blue-400 animate-spin mr-4" />
         <div className="text-white">
           <p className="text-xl font-bold">{t('ui:searchingForOpponents')}</p>
-          <p className="text-sm opacity-80">{t('ui:estimatedWaitTime')}: ~00:30</p>
         </div>
       </div>
       
       <div className="bg-gray-800 rounded-lg p-4 w-full mb-6">
-        <div className="flex justify-between text-white mb-2">
-          <span>{t('ui:elapsed')}:</span>
-          <span className="font-mono">{formatTime(elapsed)}</span>
-        </div>
-        
-        <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-blue-500 h-full transition-all duration-300"
-            style={{ width: `${Math.min(elapsed * 3.33, 100)}%` }}
-          />
+        <div className="flex justify-center text-white mb-2">
+          <span>{t('ui:elapsed')}:&nbsp;</span>
+          <span>{formatTime(elapsed)}</span>
         </div>
       </div>
       
@@ -442,7 +434,7 @@ export const MatchingPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-180px)]">
-      <div className="w-full max-w-lg bg-gray-700 border-2 border-black rounded-lg shadow-lg overflow-hidden">
+      <div className="w-full bg-gray-700 border-2 border-black rounded-lg shadow-lg overflow-hidden">
         {renderHeader()}
         {renderContent()}
       </div>

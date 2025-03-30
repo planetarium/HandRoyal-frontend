@@ -7,6 +7,8 @@ import { useLanguage } from '../context/LanguageContext';
 import AddressDisplay from './AddressDisplay';
 import logoText from '../assets/logo-text.png';
 
+const ENABLE_REGISTER_GLOVE = false;
+
 const Navbar: React.FC = () => {
   const { t } = useTranslation();
   const account = useAccount();
@@ -31,11 +33,13 @@ const Navbar: React.FC = () => {
               <Link className="text-lg text-white" to={"/user/" + account?.address.toString()}>
                 {t('ui:userInfo')}
               </Link>
-              <Link className="text-lg text-white" to="/registerGlove">
-                {t('ui:registerGlove')}
-              </Link>
+              {ENABLE_REGISTER_GLOVE && (
+                <Link className="text-lg text-white" to="/registerGlove">
+                  {t('ui:registerGlove')}
+                </Link>
+              )}
               <Link className="text-lg text-white" to="/pickup">
-                {t('ui:pickupCard')}
+                {t('ui:pickupGlove')}
               </Link>
             </>
           )}

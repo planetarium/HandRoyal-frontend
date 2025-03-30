@@ -2,8 +2,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { getLocalGloveImage } from '../fetches';
-import { GetGloveRarity, GetGloveType } from '../utils/gloveUtils';
-import type { HandType, GloveRarity } from '../types/types';
+import { GetGloveType, GetGloveRarity } from '../utils/gloveUtils';
+import type_rock from '../assets/type_rock.png';
+import type_paper from '../assets/type_paper.png';
+import type_scissors from '../assets/type_scissors.png';
 
 interface GloveCardProps {
   gloveId: string;
@@ -43,19 +45,19 @@ const GloveCard: React.FC<GloveCardProps> = ({ gloveId, count = 1, disableClick 
     }
   };
   
-  // 타입에 따른 이모지 가져오기
-  const getTypeEmoji = () => {
+  // 타입에 따른 이미지 가져오기
+  const getTypeImage = () => {
     switch (gloveType) {
       case 'rock':
-        return '✊';
+        return type_rock;
       case 'paper':
-        return '✋';
+        return type_paper;
       case 'scissors':
-        return '✌️';
+        return type_scissors;
       case 'special':
-        return '🔮';
+        return type_rock; // special 타입은 임시로 rock 이미지 사용
       default:
-        return '❓';
+        return type_rock;
     }
   };
   
@@ -71,8 +73,12 @@ const GloveCard: React.FC<GloveCardProps> = ({ gloveId, count = 1, disableClick 
       onClick={handleClick}
     >
       <div className="w-20 h-20 bg-gray-700 rounded-lg overflow-hidden mb-2 relative">
-        <div className="absolute top-0 left-0 z-10 bg-black/60 rounded-tr-none rounded-bl-none rounded-tl-lg rounded-br-lg p-0.5 text-sm shadow-md">
-          {getTypeEmoji()}
+        <div className="absolute top-[-2px] left-[-2px] z-1">
+          <img 
+            alt={gloveType} 
+            className="w-8 h-8" 
+            src={getTypeImage()}
+          />
         </div>
         <img 
           alt={t(`glove:${processedGloveId}.name`)} 

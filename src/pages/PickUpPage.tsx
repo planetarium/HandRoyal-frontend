@@ -10,6 +10,7 @@ import { executeTransaction } from '../utils/transaction';
 import GloveCard from '../components/GloveCard';
 import subscriptionClient from '../subscriptionClient';
 import { GetGloveRarity } from '../utils/gloveUtils';
+import royal from '../assets/royal.png';
 import type { GloveRarity } from '../types/types';
 
 // 애니메이션 스타일 정의
@@ -173,7 +174,7 @@ const PickUpPage: React.FC = () => {
       return newTxId;
     },
     onError: (error) => {
-      console.error('Failed to pick up card:', error);
+      console.error('Failed to pick up glove:', error);
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       setIsLoading(false);
     }
@@ -194,7 +195,7 @@ const PickUpPage: React.FC = () => {
       return newTxId;
     },
     onError: (error) => {
-      console.error('Failed to pick up many cards:', error);
+      console.error('Failed to pick up many gloves:', error);
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       setIsLoading(false);
     }
@@ -375,21 +376,21 @@ const PickUpPage: React.FC = () => {
       <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
       <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
         <h1 className="text-2xl font-bold mb-4" style={{ textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}>
-          {t('ui:pickupCardTitle')}
+          {t('ui:pickupGloveTitle')}
         </h1>
         <div className="px-4 py-2 bg-gray-800 rounded-lg flex items-center shadow-inner">
-          <span className="text-yellow-400 text-2xl mr-2">💰</span>
+          <img alt="royal" className="w-8 h-8 inline-block mr-2" src={royal} />
           <span className="text-xl text-yellow-400 font-semibold">
             {userData?.balance !== undefined ? `${userData.balance}` : t('ui:loading')}
           </span>
         </div>
       </div>
       <div className="flex flex-col items-center p-4 space-y-4">
-        <p className="text-lg text-center mb-4">{t('ui:pickupCardDescription')}</p>
+        <p className="text-lg text-center mb-4">{t('ui:pickupGloveDescription')}</p>
         
         {error && (
           <div className="text-red-500 text-center mb-4">
-            {t('ui:pickupCardError')}
+            {t('ui:pickupGloveError')}
             <p className="text-sm">{error}</p>
           </div>
         )}
@@ -473,8 +474,8 @@ const PickUpPage: React.FC = () => {
               >
                 {isLoading ? t('ui:loading') : (
                   <div className="flex flex-col items-center">
-                    <span>{t('ui:pickupCardButton')}</span>
-                    <span className="text-sm text-white mt-1">💰 {SINGLE_PICKUP_COST}</span>
+                    <span>{t('ui:pickupGloveButton')}</span>
+                    <span className="text-sm text-white mt-1"><img alt="royal" className="w-5 h-5 inline-block mr-2" src={royal} />{SINGLE_PICKUP_COST}</span>
                   </div>
                 )}
               </StyledButton>
@@ -500,8 +501,8 @@ const PickUpPage: React.FC = () => {
               >
                 {isLoading ? t('ui:loading') : (
                   <div className="flex flex-col items-center">
-                    <span>{t('ui:pickupManyCardsButton')}</span>
-                    <span className="text-sm text-white mt-1">💰 {MULTI_PICKUP_COST}</span>
+                    <span>{t('ui:pickupManyGlovesButton')}</span>
+                    <span className="text-sm text-white mt-1"><img alt="royal" className="w-5 h-5 inline-block mr-2" src={royal} />{MULTI_PICKUP_COST}</span>
                   </div>
                 )}
               </StyledButton>
