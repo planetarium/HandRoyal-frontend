@@ -4,6 +4,8 @@ import uiEN from './locales/en/ui.json';
 import uiKO from './locales/ko/ui.json';
 import gloveEN from './locales/en/glove.json';
 import gloveKO from './locales/ko/glove.json';
+import effectsEN from './locales/en/effects.json';
+import effectsKO from './locales/ko/effects.json';
 
 i18n
   .use(initReactI18next)
@@ -11,11 +13,13 @@ i18n
     resources: {
       en: {
         ui: uiEN,
-        glove: gloveEN
+        glove: gloveEN,
+        effects: effectsEN
       },
       ko: {
         ui: uiKO,
-        glove: gloveKO
+        glove: gloveKO,
+        effects: effectsKO
       }
     },
     lng: navigator.language || "en",

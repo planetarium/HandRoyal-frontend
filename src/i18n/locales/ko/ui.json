@@ -180,5 +180,10 @@
   "pleaseWait": "잠시만 기다려주세요",
   "processing": "처리 중...",
   "provideEmail": "이메일 주소를 입력해주세요",
-  "cannotJoinSession": "세션에 참여할 수 없습니다"
+  "cannotJoinSession": "세션에 참여할 수 없습니다",
+  "effectAttack": "공격",
+  "effectDefense": "방어",
+  "effectHeal": "회복",
+  "effectSpecial": "특수",
+  "effectBurn": "화상"
 }

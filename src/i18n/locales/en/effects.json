@@ -1,0 +1,6 @@
+{
+  "burn": {
+    "name": "Burn",
+    "description": "Health decreases by 5 each turn"
+  }
+} 

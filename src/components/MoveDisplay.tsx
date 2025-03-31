@@ -2,6 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import AddressDisplay from './AddressDisplay';
 import { getLocalGloveImage } from '../fetches';
+import EffectDisplay from './EffectDisplay';
+import type { EffectType } from '../gql/graphql';
 
 enum GloveStatus {
   Winning = 'winning',
@@ -13,13 +15,15 @@ interface MoveDisplayProps {
   currentHp: number;
   gloveAddress: string;
   maxHp: number;
+  effects: string[];
   userAddress: string;
   userName: string;
   gloveStatus: GloveStatus;
+  effect?: EffectType;
 }
 
-const MoveDisplay: React.FC<MoveDisplayProps> = ({ currentHp, gloveAddress, maxHp, userAddress, userName, gloveStatus }) => {
-  const { t } = useTranslation();
+const MoveDisplay: React.FC<MoveDisplayProps> = ({ currentHp, gloveAddress, maxHp, effects, userAddress, userName, gloveStatus }) => {
+  const { t } = useTranslation(['ui']);
   const hpPercentage = (currentHp / maxHp) * 100;
 
   const borderColorClass = gloveStatus === GloveStatus.Winning 
@@ -36,6 +40,16 @@ const MoveDisplay: React.FC<MoveDisplayProps> = ({ currentHp, gloveAddress, maxH
 
   return (
     <div className={`flex flex-col items-center rounded-lg w-full border-2 ${borderColorClass} bg-gray-600 shadow-md transition-transform duration-300 ${sizeClass}`}>
+      {/* 이펙트 표시 공간 */}
+      {effects.length > 0 ? effects.map((effect) => (
+        <div key={effect} className="flex justify-start w-full px-2 py-1">
+          <EffectDisplay type={effect} />
+        </div>
+      )) : (
+        <div className="flex justify-start w-full px-2 py-1">
+          &nbsp;
+        </div>
+      )}
       {/* 이미지 공간 */}
       <div className="w-full h-30 bg-white rounded-t-lg flex items-center justify-center">
         {gloveAddress === '' ? (
