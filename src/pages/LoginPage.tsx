@@ -47,7 +47,6 @@ const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const { account, createAccount } = useAccountContext();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
-  const [nameInput, setNameInput] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
@@ -113,21 +112,13 @@ const LoginPage: React.FC = () => {
           <input
             className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
             disabled={isDisabled()}
-            placeholder={t('ui:enterName')}
-            type="text"
-            value={nameInput}
-            onChange={(e) => setNameInput(e.target.value)}
-          />
-          <input
-            className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
-            disabled={isDisabled()}
             placeholder={t('ui:enterPrivateKey')}
             type="password"
             value={privateKeyInput}
             onChange={(e) => setPrivateKeyInput(e.target.value)}
           />
           <StyledButton
-            disabled={isDisabled() || !nameInput.trim()}
+            disabled={isDisabled()}
             onClick={() => handleLogin('raw', privateKeyInput)}
           >
             {isLoggingIn ? 'Logging in...' : t('ui:login.loginButton')}
