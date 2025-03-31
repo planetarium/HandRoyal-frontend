@@ -8,6 +8,7 @@ import StyledButton from '../components/StyledButton';
 import logo from '../assets/logo.png';
 import metamaskIcon from '../assets/MetaMask-icon-fox.svg';
 
+const ENABLE_TEST_ACCOUNTS = false;
 const TEST_ACCOUNTS = [
   {
     name: 'test1',
@@ -145,9 +146,10 @@ const LoginPage: React.FC = () => {
         )}
       </div>
 
-      <div className="flex flex-col w-full">
-        <h2 className="text-xl font-semibold mt-50 mb-4">{t('ui:testAccounts')}</h2>
-        <div className="md:overflow-visible overflow-x-auto">
+      {ENABLE_TEST_ACCOUNTS && (
+        <div className="flex flex-col w-full">
+          <h2 className="text-xl font-semibold mt-50 mb-4">{t('ui:testAccounts')}</h2>
+          <div className="md:overflow-visible overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
@@ -167,7 +169,6 @@ const LoginPage: React.FC = () => {
                     <button
                       className="text-left hover:text-blue-600 hover:underline w-full"
                       onClick={() => {
-                        setNameInput(account.name);
                         setPrivateKeyInput(account.privateKey);
                       }}
                     >
@@ -181,7 +182,6 @@ const LoginPage: React.FC = () => {
                     <StyledButton
                       disabled={isDisabled()}
                       onClick={() => {
-                        setNameInput(account.name);
                         setPrivateKeyInput(account.privateKey);
                         handleLogin('raw', account.privateKey);
                       }}
@@ -193,8 +193,9 @@ const LoginPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
