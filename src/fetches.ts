@@ -1,4 +1,5 @@
 const GLOVE_API_URL = import.meta.env.VITE_GLOVE_API_URL;
+const RANKING_API_URL = import.meta.env.VITE_RANKING_API_URL;
 
 export const registerGlove = (gloveAddress: string, file: File | null) =>
 {
@@ -33,4 +34,8 @@ export const getGloveImage = (gloveId: string | null, hand: string) => {
   return fetch(url, {
     method: 'GET',
   });
+};
+
+export const getRanking = async () => {
+  return await fetch(`${RANKING_API_URL}/api/rank`);
 };

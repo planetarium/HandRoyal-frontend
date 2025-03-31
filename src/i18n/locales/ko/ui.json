@@ -187,5 +187,10 @@
   "effectHeal": "회복",
   "effectSpecial": "특수",
   "effectBurn": "화상",
+  "ranking": "랭킹",
+  "rank": "순위",
+  "wins": "승리",
+  "losses": "패배",
+  "winRate": "승률",
   "navigateToMatching": "매칭으로 돌아가기"
 }
