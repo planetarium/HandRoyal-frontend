@@ -14,7 +14,7 @@ import GloveSelectionComponent, { type GloveSelection } from '../components/Glov
 import type { GloveInfo } from '../gql/graphql';
 
 // 매칭 상태를 표현하는 타입
-type MatchingStatus = 'selecting' | 'confirming' | 'searching' | 'matched' | 'failed';
+type MatchingStatus = 'selecting' | 'confirming' | 'preSearching'| 'searching' | 'matched' | 'failed';
 
 // 매치 메이드 서브스크립션 결과 타입
 type MatchMadeSubscriptionResult = {
@@ -67,7 +67,7 @@ export const MatchingPage: React.FC = () => {
 
   // 매치 서브스크립션 설정
   useEffect(() => {
-    if (!account || matchingStatus !== 'searching') return;
+    if (!account || !(matchingStatus === 'preSearching' || matchingStatus === 'searching')) return;
 
     const unsubscribe = subscriptionClient.subscribe(
       {
@@ -117,6 +117,7 @@ export const MatchingPage: React.FC = () => {
       const plainValue = matchingResponse.actionQuery.registerMatching;
       const newTxId = await executeTransaction(account, plainValue);
       setTxId(newTxId);
+      setMatchingStatus('preSearching');
       await waitForTransaction(newTxId);
       return newTxId;
     },
@@ -406,6 +407,7 @@ export const MatchingPage: React.FC = () => {
       case 'selecting':
         return renderSelectingState();
       case 'confirming':
+      case 'preSearching':
         return renderConfirmingState();
       case 'searching':
         return renderSearchingState();
