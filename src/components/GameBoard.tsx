@@ -246,11 +246,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                       <img alt="Win" className="w-1/3 h-auto object-contain animate-cry mb-6" src={win} />
                       <p className="text-2xl text-center text-white">{t('ui:win')}</p>
                     </>
-                  ) : (
+                  ) : data.lastRoundWinner === 'opponent' ? (
                     <>
                       <img alt="Lose" className="w-1/3 h-auto object-contain animate-cry mb-6" src={lose} />
                       <p className="text-2xl text-center text-white">{t('ui:lose')}</p>
                     </>
+                  ) : data.lastRoundWinner === 'draw' ? (
+                    <p className="text-2xl text-center text-white">{t('ui:draw')}</p>
+                  ) : (
+                    <p className="text-2xl text-center text-white">{t('ui:unkown')}</p>
                   )}
                 </div>
               </div>
@@ -309,9 +313,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                   </div>
                 </div>
               ))}
-      </div>
+            </div>
 
-      {/* 현재 제출 및 체력 상태 표시 영역 */}
+            {/* 현재 제출 및 체력 상태 표시 영역 */}
             <div className="flex items-center justify-center space-x-4 px-6 py-2 w-full">
               {(() => {
                 const myGloveType = gameBoardState.myGloveAddress ? AddressToGloveType(gameBoardState.myGloveAddress) : null;
@@ -333,31 +337,31 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
 
                 return (
                   <>
-        <MoveDisplay 
+                    <MoveDisplay 
                       currentHp={gameBoardState.myHealthPoint < 0 ? 0 : gameBoardState.myHealthPoint}
                       effects={gameBoardState.myEffects} 
-          gloveAddress={gameBoardState.myGloveAddress ?? ''} 
+                      gloveAddress={gameBoardState.myGloveAddress ?? ''} 
                       gloveStatus={myGloveStatus}
-          maxHp={gameBoardState.maxHealthPoint}
-          userAddress={'you'}
+                      maxHp={gameBoardState.maxHealthPoint}
+                      userAddress={'you'}
                       userName={t('ui:you')}
-        />
+                    />
                     <Swords className="w-16 h-16" color="white" />
-        <MoveDisplay 
+                    <MoveDisplay 
                       currentHp={gameBoardState.opponentHealthPoint < 0 ? 0 : gameBoardState.opponentHealthPoint}
                       effects={gameBoardState.opponentEffects}
-          gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
+                      gloveAddress={gameBoardState.opponentGloveAddress ?? ''}
                       gloveStatus={opponentGloveStatus}
-          maxHp={gameBoardState.maxHealthPoint}
-          userAddress={gameBoardState.opponentAddress ?? ''}
+                      maxHp={gameBoardState.maxHealthPoint}
+                      userAddress={gameBoardState.opponentAddress ?? ''}
                       userName={gameBoardState.opponentName ?? t('ui:opponent')}
-        />
+                    />
                   </>
                 );
               })()}
-      </div>
+            </div>
       
-      {/* 글러브 선택 UI */}
+            {/* 글러브 선택 UI */}
             <div className="flex flex-col items-center space-y-4 p-4 w-full">
               <div className="flex justify-center relative h-[100px] w-full overflow-visible">
                 <div className="flex justify-center w-full overflow-visible">
@@ -382,15 +386,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                           ? 'border-red-500' 
                           : 'border-black';
               
-              return (
-                <div
+                      return (
+                        <div
                           key={glove.originalIndex}
                           className={`group/glove rounded-lg overflow-visible border-2 bg-gray-100 ${borderColorClass} cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-50 hover:-translate-y-4 ${
-                    isSelected 
-                              ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-50 -translate-y-4' 
-                      : 'hover:shadow-lg hover:shadow-white/20'
-                  }`}
-                  style={{
+                              isSelected 
+                                ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/50 z-50 -translate-y-4' 
+                                : 'hover:shadow-lg hover:shadow-white/20'
+                          }`}
+                          style={{
                             zIndex: isSelected ? 50 : displayIndex,
                             width: '100px',
                             height: '100px',
@@ -634,21 +638,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                     );
                   });
                 })()}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* 제출 버튼 */}
+          {/* 제출 버튼 */}
           <div className="flex flex-col items-center p-4">
-        <StyledButton 
-          bgColor='#FFE55C' 
+            <StyledButton 
+              bgColor='#FFE55C' 
               disabled={submitting}
-          shadowColor='#FF9F0A'
-          onClick={handleSubmit}
-        >
+              shadowColor='#FF9F0A'
+              onClick={handleSubmit}
+            >
               {submitting ? t('ui:submitting') : t('ui:submit')}
-        </StyledButton>
-      </div>
+            </StyledButton>
+          </div>
         </>
       )}
     </div>
