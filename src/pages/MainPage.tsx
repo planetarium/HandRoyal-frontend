@@ -6,7 +6,7 @@ import { request } from 'graphql-request';
 import { Search, Swords } from 'lucide-react';
 import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { GRAPHQL_ENDPOINT, getSessionsDocument, getUserDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, getMatchPoolDocument, getSessionsDocument, getUserDocument } from '../queries';
 import { SessionState } from '../gql/graphql';
 import logo from '../assets/logo.png';
 import StyledButton from '../components/StyledButton';
@@ -38,12 +38,25 @@ export const MainPage: React.FC = () => {
     }
   });
 
+  const { data: matchPoolData, refetch: matchPoolRefetch } = useQuery({
+    queryKey: ['getMatchPool'],
+    queryFn: async () => {
+      const response = await request(GRAPHQL_ENDPOINT, getMatchPoolDocument);
+      return response.stateQuery?.getMatchPool;
+    }
+  });
+
   useEffect(() => {
     if (tip) {
       sessionRefetch();
-      userRefetch();
     }
-  }, [tip, sessionRefetch, userRefetch]);
+  }, [tip, sessionRefetch]);
+
+  // 페이지 로드 시 한 번만 실행
+  useEffect(() => {
+    userRefetch();
+    matchPoolRefetch();
+  }, [userRefetch, matchPoolRefetch]);
 
   const handleJoin = (id: string) => {
     navigate(`/join/${id}`);
@@ -70,18 +83,21 @@ export const MainPage: React.FC = () => {
     <div className="flex flex-col items-center">
       <img alt="Hand Royal Logo" className="w-60 h-60 mb-6" src={logo} />
       
-      {/* 퀵 매치 버튼 추가 */}
-      <div className="mb-6 w-full max-w-xs">
-        <StyledButton 
-          bgColor="#FF3366"
-          className="w-full py-3 text-lg font-bold"
-          shadowColor="#CC0033"
-          onClick={handleQuickMatch}>
-          {t('ui:quickMatch')}
-        </StyledButton>
-      </div>
-      
-      {userData?.sessionId && userData.sessionId !== "0000000000000000000000000000000000000000" ? (
+      {matchPoolData?.some(matchPool => matchPool?.userId === account.address.toString().substring(2)) ? (
+        // 매칭 중인 경우
+        <div className="flex justify-between items-center bg-gradient-to-r from-yellow-200 to-blue-200 p-6 rounded-lg border-2 border-black w-full mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-blue-800">{t('ui:alreadyMatching')}</h3>
+          </div>
+          <StyledButton 
+            bgColor = '#FFE55C'
+            shadowColor = '#FF9F0A'
+            onClick={() => navigate(`/matching`)}>
+            {t('ui:navigateToMatching')}
+          </StyledButton>
+        </div>
+      ) : userData?.sessionId && userData.sessionId !== "0000000000000000000000000000000000000000" ? (
+        // 이미 참여중인 세션이 있는 경우
         <div className="flex justify-between items-center bg-gradient-to-r from-yellow-200 to-blue-200 p-6 rounded-lg border-2 border-black w-full mb-6">
           <div>
             <h3 className="text-xl font-bold text-blue-800">{t('ui:alreadyJoinedSession')}</h3>
@@ -94,7 +110,19 @@ export const MainPage: React.FC = () => {
             {t('ui:rejoin')}
           </StyledButton>
         </div>
-      ) : null}
+      ) : (
+        // 매칭 중이거나 이미 참여중인 세션이 없을 경우 퀵 매치 버튼 추가
+        <div className="mb-6 w-full max-w-xs">
+          <StyledButton 
+            bgColor="#FF3366"
+            className="w-full py-3 text-2xl font-bold"
+            shadowColor="#CC0033"
+            onClick={handleQuickMatch}>
+            {t('ui:quickMatch')}
+          </StyledButton>
+        </div>
+      )}
+
       <div className="w-full max-w-4xl bg-gray-700 border-2 border-black rounded-lg">
         <div className="bg-gray-900 p-4 rounded-t-lg">
           <p

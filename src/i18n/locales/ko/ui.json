@@ -1,5 +1,6 @@
 {
   "alreadyJoinedSession": "이미 다음 세션에 참가중입니다",
+  "alreadyMatching": "이미 매칭 대기열에 있습니다",
   "address": "주소",
   "backToMain": "메인으로",
   "blocks": "블록",
@@ -185,5 +186,6 @@
   "effectDefense": "방어",
   "effectHeal": "회복",
   "effectSpecial": "특수",
-  "effectBurn": "화상"
+  "effectBurn": "화상",
+  "navigateToMatching": "매칭으로 돌아가기"
 }

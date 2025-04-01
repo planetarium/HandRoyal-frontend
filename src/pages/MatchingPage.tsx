@@ -7,10 +7,11 @@ import { Loader, X } from 'lucide-react';
 import StyledButton from '../components/StyledButton';
 import { useRequiredAccount } from '../context/AccountContext';
 import { getLocalGloveImage } from '../fetches';
-import { GRAPHQL_ENDPOINT, getUserDocument, registerMatchingAction, cancelMatchingAction, MATCH_MADE_SUBSCRIPTION } from '../queries';
+import { GRAPHQL_ENDPOINT, getUserDocument, registerMatchingAction, cancelMatchingAction, MATCH_MADE_SUBSCRIPTION, getMatchPoolDocument } from '../queries';
 import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import subscriptionClient from '../subscriptionClient';
 import GloveSelectionComponent, { type GloveSelection } from '../components/GloveSelectionComponent';
+import { useTip } from '../context/TipContext';
 import type { GloveInfo } from '../gql/graphql';
 
 // 매칭 상태를 표현하는 타입
@@ -30,14 +31,15 @@ export const MatchingPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const account = useRequiredAccount();
-  
+  const { tip } = useTip();
+
   // 상태 관리
   const [matchingStatus, setMatchingStatus] = useState<MatchingStatus>('selecting');
   const [selectedGloves, setSelectedGloves] = useState<GloveSelection>({});
   const [totalSelected, setTotalSelected] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
-  const [elapsed, setElapsed] = useState(0);
+  const [registeredHeight, setRegisteredHeight] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -51,19 +53,23 @@ export const MatchingPage: React.FC = () => {
       return response.stateQuery?.getUserData;
     }
   });
-
-  // 경과 시간 타이머 설정
-  useEffect(() => {
-    if (matchingStatus !== 'searching') {
-      return;
+  
+  // 매치 풀풀 데이터 가져오기
+  const { data: matchPoolData, isLoading: matchPoolLoading } = useQuery({
+    queryKey: ['getMatchPool'],
+    queryFn: async () => {
+      const response = await request(GRAPHQL_ENDPOINT, getMatchPoolDocument);
+      return response.stateQuery?.getMatchPool;
     }
+  });
 
-    const timer = setInterval(() => {
-      setElapsed(prev => prev + 1);
-    }, 1000);
-    
-    return () => clearInterval(timer);
-  }, [matchingStatus]);
+  useEffect(() => {
+    const myAddress = account.address.toString().substring(2);
+    if (matchPoolData?.some(matchPool => matchPool?.userId === myAddress)) {
+      setMatchingStatus('searching');
+      setRegisteredHeight(matchPoolData?.find(matchPool => matchPool?.userId === myAddress)?.registeredHeight);
+    }
+  }, [matchPoolData, account.address]);
 
   // 매치 서브스크립션 설정
   useEffect(() => {
@@ -121,6 +127,7 @@ export const MatchingPage: React.FC = () => {
       return newTxId;
     },
     onSuccess: () => {
+      setRegisteredHeight(tip?.height ?? 0);
       setMatchingStatus('searching');
     },
     onError: (error) => {
@@ -210,13 +217,6 @@ export const MatchingPage: React.FC = () => {
       </h1>
     </div>
   );
-
-  // 경과 시간 포맷팅
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   // 장갑 선택 화면
   const renderSelectingState = () => (
@@ -339,7 +339,7 @@ export const MatchingPage: React.FC = () => {
       <div className="bg-gray-800 rounded-lg p-4 w-full mb-6">
         <div className="flex justify-center text-white mb-2">
           <span>{t('ui:elapsed')}:&nbsp;</span>
-          <span>{formatTime(elapsed)}</span>
+          <span>{(tip?.height ?? 0) - registeredHeight}</span>
         </div>
       </div>
       
