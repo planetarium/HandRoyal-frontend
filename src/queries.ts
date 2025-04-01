@@ -21,6 +21,18 @@ export const getUserDocument = graphql(/* GraphQL */ `
   }
 `);
 
+export const getMatchPoolDocument = graphql(/* GraphQL */ `
+  query GetMatchPool {
+    stateQuery {
+      getMatchPool {
+        userId
+        gloves
+        registeredHeight
+      }
+    }
+  }
+`);
+
 export const getSessionsDocument = graphql(/* GraphQL */ `
   query GetSessions {
     stateQuery {
