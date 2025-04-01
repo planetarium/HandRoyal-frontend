@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GlovePage from './pages/GlovePage';
 import { MainPage } from './pages/MainPage';
@@ -20,6 +20,7 @@ import { GameRuleProvider } from './context/GameRuleContext';
 import { LanguageProvider } from './context/LanguageContext';
 import PickUpPage from './pages/PickUpPage';
 import MatchingPage from './pages/MatchingPage';
+import RankingPage from './pages/RankingPage';
 
 registerCreator(new MetamaskAccountCreator());
 registerCreator(new PrivateKeyAccountCreator());
@@ -48,6 +49,7 @@ const AppContent: React.FC = () => {
               <Route element={<ProtectedRoute><JoinPage /></ProtectedRoute>} path="/join/:sessionId" />
               <Route element={<ProtectedRoute><PickUpPage /></ProtectedRoute>} path="/pickup" />
               <Route element={<ProtectedRoute><MatchingPage /></ProtectedRoute>} path="/matching" />
+              <Route element={<RankingPage />} path="/ranking" />
             </Routes>
           </main>
         </div>

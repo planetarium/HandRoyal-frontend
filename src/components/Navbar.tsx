@@ -43,6 +43,9 @@ const Navbar: React.FC = () => {
               </Link>
             </>
           )}
+          <Link className="text-lg text-white" to="/ranking">
+            {t('ui:ranking')}
+          </Link>
         </div>
       </div>
       <div className="flex items-center">

@@ -187,5 +187,10 @@
   "effectHeal": "Heal",
   "effectSpecial": "Special",
   "effectBurn": "Burn",
-  "navigateToMatching": "Back to Matching"
+  "navigateToMatching": "Back to Matching",
+  "ranking": "Ranking",
+  "rank": "Rank",
+  "wins": "Wins",
+  "losses": "Losses",
+  "winRate": "Win Rate"
 }

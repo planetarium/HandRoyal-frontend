@@ -430,6 +430,13 @@ export type SessionMetadata = {
   users?: Maybe<Array<Scalars['Address']['output']>>;
 };
 
+export type SessionResultEventData = {
+  __typename?: 'SessionResultEventData';
+  loserIds?: Maybe<Array<Scalars['Address']['output']>>;
+  sessionId?: Maybe<Scalars['Address']['output']>;
+  winnerIds?: Maybe<Array<Scalars['Address']['output']>>;
+};
+
 export enum SessionState {
   Active = 'ACTIVE',
   Ended = 'ENDED',
@@ -451,6 +458,7 @@ export type Subscription = {
   onMoveChanged?: Maybe<SubmitMoveEventData>;
   onPickUpResult?: Maybe<PickUpResultEventData>;
   onSessionChanged?: Maybe<SessionEventData>;
+  onSessionResultChanged?: Maybe<SessionResultEventData>;
   onTipChanged?: Maybe<TipEventData>;
   onTransactionChanged?: Maybe<TransactionEventData>;
   onUserChanged?: Maybe<UserEventData>;
