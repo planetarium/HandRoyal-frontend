@@ -192,5 +192,7 @@
   "wins": "승리",
   "losses": "패배",
   "winRate": "승률",
+  "myRanking": "내 랭킹",
+  "topRanking": "상위 10명",
   "navigateToMatching": "매칭으로 돌아가기"
 }
