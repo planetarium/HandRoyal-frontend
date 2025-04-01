@@ -30,8 +30,6 @@ const StyledButton: React.FC<StyledButtonProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         padding: '0.75rem 1.2rem',
-        fontSize: '1rem',
-        fontWeight: 'bold',
         color: disabled ? '#333333' : textColor,
         backgroundColor: disabled ? '#6A6A6A' : bgColor,
         border: `2px solid ${disabled ? '#555555' : '#1a1b23'}`,
