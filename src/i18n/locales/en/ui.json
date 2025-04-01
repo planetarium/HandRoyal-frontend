@@ -192,5 +192,7 @@
   "rank": "Rank",
   "wins": "Wins",
   "losses": "Losses",
-  "winRate": "Win Rate"
+  "winRate": "Win Rate",
+  "myRanking": "My Ranking",
+  "topRanking": "Top 10 Players"
 }

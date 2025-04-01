@@ -36,6 +36,10 @@ export const getGloveImage = (gloveId: string | null, hand: string) => {
   });
 };
 
-export const getRanking = async () => {
-  return await fetch(`${RANKING_API_URL}/api/rank`);
+export const getRanking = () => {
+  return fetch(`${RANKING_API_URL}/api/rank`);
+};
+
+export const getMyRanking = (address: string) => {
+  return fetch(`${RANKING_API_URL}/api/rank/${address}`);
 };
