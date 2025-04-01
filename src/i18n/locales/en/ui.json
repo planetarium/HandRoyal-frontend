@@ -1,5 +1,6 @@
 {
   "alreadyJoinedSession": "Already joined session",
+  "alreadyMatching": "Already in matchmaking queue",
   "address": "Address",
   "backToMain": "Back to Main",
   "blocks": "blocks",
@@ -185,5 +186,6 @@
   "effectDefense": "Defense",
   "effectHeal": "Heal",
   "effectSpecial": "Special",
-  "effectBurn": "Burn"
+  "effectBurn": "Burn",
+  "navigateToMatching": "Back to Matching"
 }
