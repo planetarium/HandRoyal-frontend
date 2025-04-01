@@ -1,24 +1,22 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status
+# Docker image build script for testing on localhost
+
 set -e
 
-# Get the current Git HEAD SHA
 GIT_SHA=$(git rev-parse HEAD)
-
-# Define the Docker image name
 IMAGE_NAME="planetariumhq/hand-royal-frontend"
+cp .env.production .env.production.backup
+restore_env() {
+    mv .env.production.backup .env.production
+}
 
-# Build the project
+trap restore_env EXIT
+cp .env.docker .env.production
 npm run build
-
-# Build the Docker image with the Git SHA as the tag
 docker build -t "$IMAGE_NAME:$GIT_SHA" .
-
-# Optionally, tag the image as "latest"
 docker tag "$IMAGE_NAME:$GIT_SHA" "$IMAGE_NAME:latest"
 
-# Print success message
 echo "Docker image built and tagged as:"
 echo "  $IMAGE_NAME:$GIT_SHA"
 echo "  $IMAGE_NAME:latest"
