@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { getRanking, getMyRanking } from '../fetches';
 import { useAccount } from '../context/AccountContext';
+import AddressDisplay from '../components/AddressDisplay';
 
 interface Player {
   address: string;
@@ -53,15 +54,11 @@ const RankingPage: React.FC = () => {
       ? ((player.wins / totalGames) * 100).toFixed(1) 
       : '0.0';
 
-    const displayAddress = player.address.startsWith('0x') 
-      ? player.address 
-      : `0x${player.address}`;
-
     return (
       <tr key={player.address} className="hover:bg-gray-50">
         <td className="px-6 py-4 border-b font-medium">{rank}</td>
         <td className="px-6 py-4 border-b font-mono text-sm">
-          {displayAddress.slice(0, 6)}...{displayAddress.slice(-4)}
+          <AddressDisplay address={player.address} type='user' />
         </td>
         <td className="px-6 py-4 border-b text-center text-green-600">
           {player.wins}
