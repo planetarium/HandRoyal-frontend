@@ -30,14 +30,18 @@ const AddressToGloveType = (address: string) => {
   if (address.startsWith('0')) return GloveType.Rock;
   if (address.startsWith('1')) return GloveType.Paper;
   if (address.startsWith('2')) return GloveType.Scissors;
-  throw new Error('Invalid address');
+  if (address.startsWith('3')) return GloveType.Special;
+  console.error('Invalid glove address: ' + address);
+  return GloveType.Special;
 }
 
 const JudgeGloveWinLose = (opponentGlove: GloveType) => {
   if (opponentGlove === GloveType.Rock) return { winningType: GloveType.Paper, losingType: GloveType.Scissors };
   if (opponentGlove === GloveType.Paper) return { winningType: GloveType.Scissors, losingType: GloveType.Rock };
   if (opponentGlove === GloveType.Scissors) return { winningType: GloveType.Rock, losingType: GloveType.Paper };
-  throw new Error('Invalid opponent glove');
+  if (opponentGlove === GloveType.Special) return { winningType: GloveType.Special, losingType: GloveType.Special };
+  console.error('Invalid opponent glove: ' + opponentGlove);
+  return { winningType: GloveType.Special, losingType: GloveType.Special };
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
