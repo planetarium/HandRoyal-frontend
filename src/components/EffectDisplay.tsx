@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { getLocalEffectImage } from '../fetches';
 interface EffectDisplayProps {
   type: string;
   className?: string;
@@ -35,9 +35,8 @@ const EffectDisplay: React.FC<EffectDisplayProps> = ({ type, className = '' }) =
 
   // 이펙트 타입에 따른 이미지 매핑
   const getEffectImage = (effectType: string) => {
-    const basePath = '/src/assets/effects';
     const effectName = effectType.toLowerCase();
-    return `${basePath}/${effectName}.png`;
+    return getLocalEffectImage(effectName);
   };
 
   // 이펙트 타입에 따른 설명 매핑

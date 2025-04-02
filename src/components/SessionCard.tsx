@@ -112,11 +112,11 @@ const SessionCard: React.FC<SessionCardProps> = ({
             }
             onClick={() => handleJoin(id)}
           >
-            {t('join')}
+            {t('ui:join')}
           </StyledButton>
         ) : (
           <StyledButton textColor={textColor} onClick={() => handleSpectate(id)}>
-            {t('spectate')}
+            {t('ui:spectate')}
           </StyledButton>
         )}
       </div>

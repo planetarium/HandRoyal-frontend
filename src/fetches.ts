@@ -26,6 +26,15 @@ export const getLocalGloveImage = (gloveId: string) => {
   }
 }
 
+export const getLocalEffectImage = (effect: string) => {
+  try {
+    return new URL(`/src/assets/effects/${effect}.png`, import.meta.url).href;
+  } catch (error) {
+    console.error(`Failed to load effect image for ${effect}:`, error);
+    return '';
+  }
+}
+
 export const getGloveImage = (gloveId: string | null, hand: string) => {
   const url = gloveId
     ? `${GLOVE_API_URL}/get-glove-image?gloveAddress=${gloveId}&hand=${hand}`
