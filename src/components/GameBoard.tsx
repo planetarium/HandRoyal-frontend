@@ -257,7 +257,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                   ) : data.lastRoundWinner === 'draw' ? (
                     <p className="text-2xl text-center text-white">{t('ui:draw')}</p>
                   ) : (
-                    <p className="text-2xl text-center text-white">{t('ui:unkown')}</p>
+                    <p className="text-2xl text-center text-white">{t('ui:unknown')}</p>
                   )}
                 </div>
               </div>

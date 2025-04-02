@@ -1,11 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { getUserDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
-import { useRequiredAccount } from '../context/AccountContext';
 import GloveCard from '../components/GloveCard';
 import royal from '../assets/royal.png';
 
@@ -13,13 +12,14 @@ const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
 const UserPage: React.FC = () => {
   const { t } = useTranslation();
-  const account = useRequiredAccount();
+  const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['getUserData', account],
+    queryKey: ['getUserData', userId],
     queryFn: async () => {
-      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: account.address.toString() });
+      console.error(userId);
+      const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { address: userId });
       return response?.stateQuery?.getUserData;
     }
   });

@@ -43,7 +43,7 @@ const AppContent: React.FC = () => {
               <Route element={<ProtectedRoute><CreateSession /></ProtectedRoute>} path="/create" />
               <Route element={<ProtectedRoute><GamePage /></ProtectedRoute>} path="/game/:sessionId" />
               <Route element={<ResultPage />} path="/result/:sessionId" />
-              <Route element={<UserPage />} path="/user/:userAddress" />
+              <Route element={<UserPage />} path="/user/:userId" />
               <Route element={<ProtectedRoute><RegisterGlove /></ProtectedRoute>} path="/registerGlove" />
               <Route element={<GlovePage />} path="/glove/:gloveId" />
               <Route element={<ProtectedRoute><JoinPage /></ProtectedRoute>} path="/join/:sessionId" />
