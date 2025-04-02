@@ -27,7 +27,6 @@ enum GloveStatus {
 }
 
 const AddressToGloveType = (address: string) => {
-  console.error('address: ' + address);
   if (address.startsWith('0')) return GloveType.Rock;
   if (address.startsWith('1')) return GloveType.Paper;
   if (address.startsWith('2')) return GloveType.Scissors;

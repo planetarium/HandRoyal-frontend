@@ -171,6 +171,7 @@
   "matchingConfirmDescription": "선택한 장갑으로 매치메이킹 대기열에 참여합니다. 매치가 성사되면 자동으로 게임 세션에 참가됩니다.",
   "next": "다음",
   "register": "매칭 등록",
+  "rejoin": "다시 참여",
   "selectedGloves": "선택한 장갑",
   "selectedGlovesDetail": "선택한 장갑 목록",
   "showSelectedGloves": "선택한 장갑 보기",
