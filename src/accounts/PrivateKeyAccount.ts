@@ -2,6 +2,9 @@ import { secp256k1 } from 'ethereum-cryptography/secp256k1';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import { utf8ToBytes, hexToBytes } from 'ethereum-cryptography/utils';
 import { Address, RawPrivateKey } from '@planetarium/account';
+import { request } from 'graphql-request';
+import { GRAPHQL_ENDPOINT } from '../queries';
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import type { Account, AccountCreator } from './Account';
 
 export class PrivateKeyAccount implements Account {
@@ -50,6 +53,26 @@ export class PrivateKeyAccount implements Account {
       console.error('Failed to sign message:', error);
       throw new Error('Failed to sign message');
     }
+  }
+  
+
+  async executeMutation<T = any>(mutation: string, actionName: string, variables?: Record<string, any>): Promise<T> {
+    // mutation 실행
+    const response = await request<T>(
+      GRAPHQL_ENDPOINT,
+      mutation,
+      variables
+    );
+
+    // 트랜잭션 실행이 필요한 경우
+    if ((response as any)[actionName]) {
+      const plainValue = (response as any)[actionName];
+      const txId = await executeTransaction(this, plainValue);
+      await waitForTransaction(txId);
+      return { ...response, txId };
+    }
+
+    return response;
   }
 }
 

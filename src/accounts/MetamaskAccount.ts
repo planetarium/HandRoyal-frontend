@@ -1,4 +1,7 @@
 import { Address } from '@planetarium/account';
+import { request } from 'graphql-request';
+import { GRAPHQL_ENDPOINT } from '../queries';
+import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import type { Account, AccountCreator } from './Account';
 
 type Ethereum = NonNullable<typeof window.ethereum>;
@@ -128,6 +131,36 @@ export class MetamaskAccount implements Account {
 
     await ensureCorrectChain(ethereum);
     return signMessage(ethereum, message, this.address);
+  }
+
+  async executeAction<T = any>(mutation: string, actionName: string, variables?: Record<string, any>): Promise<T> {
+    if (!this.connected) {
+      throw new Error('Account not connected');
+    }
+
+    const ethereum = window.ethereum;
+    if (!ethereum) {
+      throw new Error('Metamask is not installed');
+    }
+
+    await ensureCorrectChain(ethereum);
+
+    // mutation 실행
+    const response = await request<T>(
+      GRAPHQL_ENDPOINT,
+      mutation,
+      variables
+    );
+
+    // 트랜잭션 실행이 필요한 경우
+    if ((response as any)[actionName]) {
+      const plainValue = (response as any)[actionName];
+      const txId = await executeTransaction(this, plainValue);
+      await waitForTransaction(txId);
+      return { ...response, txId };
+    }
+
+    return response;
   }
 }
 

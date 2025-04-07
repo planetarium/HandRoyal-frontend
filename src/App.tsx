@@ -15,6 +15,7 @@ import RegisterGlove from './components/RegisterGlove';
 import { EquippedGloveProvider } from './context/EquippedGloveContext';
 import { MetamaskAccountCreator } from './accounts/MetamaskAccount';
 import { PrivateKeyAccountCreator } from './accounts/PrivateKeyAccount';
+import { SupabaseAccountCreator } from './accounts/SupabaseAccount';
 import JoinPage from './pages/JoinPage';
 import { GameRuleProvider } from './context/GameRuleContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -24,6 +25,7 @@ import RankingPage from './pages/RankingPage';
 
 registerCreator(new MetamaskAccountCreator());
 registerCreator(new PrivateKeyAccountCreator());
+registerCreator(new SupabaseAccountCreator());
 
 const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { account } = useAccountContext();
