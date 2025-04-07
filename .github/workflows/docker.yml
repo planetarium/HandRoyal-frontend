@@ -1,15 +1,20 @@
 name: Docker Build and Push
 
 on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
   workflow_dispatch:
     inputs:
       imageTag:
-        description: 'Custom docker image tag if needed'
-        default: ''
+        description: 'Docker image tag to use (required)'
+        required: true
+        type: string
 
 env:
   DOCKER_IMAGE: planetariumhq/hand-royal-frontend
-  DOCKER_TAG: latest
 
 jobs:
   docker:
@@ -41,12 +46,26 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
+      - name: Set Docker Tag
+        id: set_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.imageTag }}"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            TAG="latest"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           platforms: linux/arm64
-          tags: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }},${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ steps.set_tag.outputs.tag }}
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
