@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Clock, Swords } from 'lucide-react';
 import { useRequiredAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, submitMoveAction, getUserDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, getUserDocument } from '../queries';
 import { MatchState, GloveType } from '../gql/graphql';
 import StyledButton from './StyledButton';
 import MoveDisplay from './MoveDisplay';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
 import { getLocalGloveImage } from '../fetches';
 import win from '../assets/win.png';
 import lose from '../assets/lose.png';
 import { GetGloveType } from '../utils/gloveUtils';
+import { ActionName } from '../types/types';
 import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 interface GameBoardProps {
@@ -74,34 +74,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     maxHealthPoint: number;
   }
 
-  const submitMoveMutation = useMutation({
-    mutationFn: async (gloveIndex: number) => {
-      console.error('sessionId: ' + data?.sessionId);
-      console.error('gloveIndex: ' + gloveIndex);
-      const submitMoveResponse = await request(GRAPHQL_ENDPOINT, submitMoveAction, {
-        sessionId: data?.sessionId,
-        gloveIndex: gloveIndex
-      });
-
-      if (!submitMoveResponse.actionQuery?.submitMove) {
-        throw new Error('Failed to get submit move response');
-      }
-
-      const plainValue = submitMoveResponse.actionQuery.submitMove;
-      const txId = await executeTransaction(account, plainValue);
-      await waitForTransaction(txId);
-    },
-    onSuccess: (data) => {
-      console.error('Move submitted successfully: ' + data);
-      setSelectedHand(-1);
-      setSubmitting(false);
-    },
-    onError: (error) => {
-      console.error('Failed to submit move:', error);
-      setSubmitting(false);
-    }
-  });
-
   // 상대방 정보 조회
   const { data: opponentData } = useQuery({
     queryKey: ['getOpponent', data?.opponentAddress],
@@ -151,10 +123,24 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     }
   }, [data?.currentUserMatchState]);
 
-  const handleSubmit = () => {
-    if (selectedHand !== null) {
-      setSubmitting(true);
-      submitMoveMutation.mutate(selectedHand);
+  const handleSubmit = async () => {
+    if (selectedHand === null) return;
+
+    setSubmitting(true);
+    try {
+      await account.executeAction(
+        ActionName.SUBMIT_MOVE,
+        {
+          sessionId: data.sessionId,
+          gloveIndex: selectedHand
+        }
+      );
+
+      setSelectedHand(-1);
+      setSubmitting(false);
+    } catch (error) {
+      console.error('Failed to submit move:', error);
+      setSubmitting(false);
     }
   };
   

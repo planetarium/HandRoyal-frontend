@@ -215,6 +215,7 @@ export type PickUpResultEventData = {
   __typename?: 'PickUpResultEventData';
   gloves?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   txId: Scalars['TxId']['output'];
+  userId: Scalars['Address']['output'];
 };
 
 export type Player = {
@@ -482,7 +483,7 @@ export type SubscriptionOnMoveChangedArgs = {
 
 
 export type SubscriptionOnPickUpResultArgs = {
-  txId: Scalars['TxId']['input'];
+  userId: Scalars['Address']['input'];
 };
 
 

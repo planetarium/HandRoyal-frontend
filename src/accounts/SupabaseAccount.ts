@@ -2,8 +2,19 @@ import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
 import { supabase, getSupabaseJWT } from '../lib/supabase';
 import { GRAPHQL_ENDPOINT } from '../queries';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
-import type { Account, AccountCreator } from './Account';
+import { AccountType, type Account, type AccountCreator } from './Account';
+import { ActionName } from '../types/types';
+import {
+  pickUpAction,
+  pickUpManyAction,
+  registerMatchingAction,
+  cancelMatchingAction,
+  joinSessionAction,
+  submitMoveAction,
+  registerGloveAction,
+  createSessionAction,
+  createUserAction
+} from '../queries';
 
 // GraphQL 쿼리 정의
 const GET_USER_ADDRESS = `
@@ -12,12 +23,20 @@ const GET_USER_ADDRESS = `
   }
 `;
 
+// GraphQL 응답 타입 정의
+interface GetUserAddressResponse {
+  getUserAddress: string;
+}
+
 class SupabaseAccount implements Account {
   constructor(
     public readonly address: Address,
-    public readonly type: string,
     private readonly userId: string
   ) {}
+
+  public get type(): AccountType {
+    return AccountType.SUPABASE;
+  }
 
   disconnect(): void {
     supabase.auth.signOut();
@@ -30,36 +49,60 @@ class SupabaseAccount implements Account {
     return this.userId;
   }
 
-  async executeAction<T = any>(mutation: string, actionName: string, variables?: Record<string, any>): Promise<T> {
+  async executeAction<T = any>(actionName: ActionName, variables?: Record<string, any>): Promise<T> {
     const jwt = await getSupabaseJWT();
     if (!jwt) {
       throw new Error('No JWT token available');
     }
 
+    let document;
+    switch (actionName) {
+      case ActionName.PICK_UP:
+        document = pickUpAction;
+        break;
+      case ActionName.PICK_UP_MANY:
+        document = pickUpManyAction;
+        break;
+      case ActionName.REGISTER_MATCHING:
+        document = registerMatchingAction;
+        break;
+      case ActionName.CANCEL_MATCHING:
+        document = cancelMatchingAction;
+        break;
+      case ActionName.JOIN_SESSION:
+        document = joinSessionAction;
+        break;
+      case ActionName.SUBMIT_MOVE:
+        document = submitMoveAction;
+        break;
+      case ActionName.REGISTER_GLOVE:
+        document = registerGloveAction;
+        break;
+      case ActionName.CREATE_SESSION:
+        document = createSessionAction;
+        break;
+      case ActionName.CREATE_USER:
+        document = createUserAction;
+        break;
+      default:
+        throw new Error(`Unknown action: ${actionName}`);
+    }
+
     const response = await request<Record<string, any>>(
       GRAPHQL_ENDPOINT,
-      mutation,
+      document,
       variables,
       {
         Authorization: `Bearer ${jwt}`
       }
     );
 
-    if (response[actionName]) {
-      const { transaction } = response[actionName];
-      if (transaction) {
-        const txId = await executeTransaction(transaction, this.address.toString());
-        await waitForTransaction(txId);
-        return { ...response[actionName], txId };
-      }
-    }
-
-    return response[actionName];
+    return response as T;
   }
 }
 
 export class SupabaseAccountCreator implements AccountCreator {
-  public readonly type = 'supabase';
+  public readonly type = AccountType.SUPABASE;
 
   private async fetchUserAddress(): Promise<string> {
     const jwt = await getSupabaseJWT();
@@ -67,7 +110,7 @@ export class SupabaseAccountCreator implements AccountCreator {
       throw new Error('No JWT token available');
     }
 
-    const response = await request<{ getUserAddress: string }>(
+    const response = await request<GetUserAddressResponse>(
       GRAPHQL_ENDPOINT,
       GET_USER_ADDRESS,
       {},
@@ -95,7 +138,7 @@ export class SupabaseAccountCreator implements AccountCreator {
     localStorage.setItem('supabase-user-id', user.id);
     localStorage.setItem('supabase-address', addressHex);
     
-    return new SupabaseAccount(address, this.type, user.id);
+    return new SupabaseAccount(address, user.id);
   }
 
   restore(): Account {
@@ -107,6 +150,6 @@ export class SupabaseAccountCreator implements AccountCreator {
     }
 
     const address = Address.fromHex(addressHex);
-    return new SupabaseAccount(address, this.type, userId);
+    return new SupabaseAccount(address, userId);
   }
 } 

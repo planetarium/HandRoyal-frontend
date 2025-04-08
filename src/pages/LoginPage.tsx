@@ -8,6 +8,7 @@ import StyledButton from '../components/StyledButton';
 import logo from '../assets/logo.png';
 import metamaskIcon from '../assets/MetaMask-icon-fox.svg';
 import { supabase, getSupabaseJWT } from '../lib/supabase';
+import { AccountType } from '../accounts/Account';
 
 const ENABLE_TEST_ACCOUNTS = false;
 const TEST_ACCOUNTS = [
@@ -32,7 +33,7 @@ const TEST_ACCOUNTS = [
     address: '0xE8F6027e487Ef52d261663099061dF9c6E159188'
   },
   {
-    name: 'test5',
+  name: 'test5',
     privateKey: '4ce92198f27d05f80a318f34ad9d0cd43ef7d2a138e022bc66770acdd53f716a',
     address: '0xfdc4eE76d810635eC932E57de386DC0ef3C9e7e9'
   },
@@ -42,8 +43,6 @@ const TEST_ACCOUNTS = [
     address: '0x17fB691ac6B3793871d3b1c06B806C75C60240d0'
   }
 ];
-
-type LoginType = 'raw' | 'metamask';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
@@ -61,6 +60,10 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (!account) return;
 
+    if (window.location.pathname === '/login') {
+      navigate('/');
+    }
+
     const unsubscribe = subscriptionClient.subscribe(
       {
         query: USER_SUBSCRIPTION,
@@ -71,15 +74,12 @@ const LoginPage: React.FC = () => {
           const data = result.data as { onUserChanged: { id: string } };
           if (data.onUserChanged.id) {
             setIsLoggingIn(false);
-            navigate('/');
           }
         },
         error: (err) => {
           console.error('Subscription error:', err);
         },
-        complete: () => {
-          console.error('Subscription completed');
-        },
+        complete: () => {}
       }
     );
 
@@ -88,7 +88,7 @@ const LoginPage: React.FC = () => {
     };
   }, [navigate, account]);
 
-  const handleLogin = useCallback(async (type: LoginType, param?: any) => {
+  const handleLogin = useCallback(async (type: AccountType, param?: any) => {
     setIsLoggingIn(true);
     try {
       await createAccount(type, param);
@@ -131,7 +131,7 @@ const LoginPage: React.FC = () => {
         throw new Error('Failed to get JWT');
       }
 
-      await handleLogin('raw', jwt);
+      await handleLogin(AccountType.SUPABASE, jwt);
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(t('ui:loginFailed'));
@@ -268,7 +268,7 @@ const LoginPage: React.FC = () => {
               />
               <StyledButton
                 disabled={isDisabled()}
-                onClick={() => handleLogin('raw', privateKeyInput)}
+                onClick={() => handleLogin(AccountType.RAW, privateKeyInput)}
               >
                 {isLoggingIn ? t('ui:loggingIn') : t('ui:loginWithPrivateKey')}
               </StyledButton>
@@ -281,7 +281,7 @@ const LoginPage: React.FC = () => {
             {/* Existing Metamask Login */}
             <StyledButton
               disabled={isDisabled()}
-              onClick={() => handleLogin('metamask')}
+              onClick={() => handleLogin(AccountType.METAMASK)}
             >
               <img 
                 alt="MetaMask" 
@@ -337,7 +337,7 @@ const LoginPage: React.FC = () => {
                       disabled={isDisabled()}
                       onClick={() => {
                         setPrivateKeyInput(account.privateKey);
-                        handleLogin('raw', account.privateKey);
+                        handleLogin(AccountType.RAW, account.privateKey);
                       }}
                     >
                       {isLoggingIn ? t('ui:login.loggingIn') : t('ui:login.loginButton')}

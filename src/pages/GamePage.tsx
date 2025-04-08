@@ -14,6 +14,7 @@ import StyledButton from '../components/StyledButton';
 import loading from '../assets/loading.webp';
 import win from '../assets/win.png';
 import lose from '../assets/lose.png';
+import { ActionName } from '../types/types';
 import type { GetUserScopedSessionQuery } from '../gql/graphql';
 
 export const GamePage: React.FC = () => {
@@ -23,6 +24,7 @@ export const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const { tip } = useTip();
   const [showNoSessionMessage] = useState(false);
+  const [error, setError] = useState('');
 
   const { data: sessionData, isLoading, refetch } = useQuery<GetUserScopedSessionQuery>({
     queryKey: ['getUserScopedSession', sessionId, account?.address],
@@ -45,6 +47,30 @@ export const GamePage: React.FC = () => {
   useEffect(() => {
     refetch();
   }, [tip, refetch]);
+
+  const handleSubmitMove = async (move: string) => {
+    if (!sessionId) {
+      setError(t('ui:invalidSessionId'));
+      return;
+    }
+
+    try {
+      const response = await account.executeAction(
+        ActionName.SUBMIT_MOVE,
+        {
+          sessionId,
+          move
+        }
+      );
+
+      if (response.txId) {
+        navigate(`/result/${sessionId}`);
+      }
+    } catch (error) {
+      console.error('Failed to submit move:', error);
+      setError(t('ui:failedToSubmitMove'));
+    }
+  };
 
   if (isLoading || !sessionData?.stateQuery?.userScopedSession) {
     return <p>{t('ui:loading')}</p>;

@@ -1,15 +1,22 @@
+import type { ActionName } from '../types/types';
 import type { Address } from '@planetarium/account';
 
+export enum AccountType {
+  RAW = 'raw',
+  METAMASK = 'metamask',
+  SUPABASE = 'supabase'
+}
+
 export interface Account {
-  address: Address;
-  type: string;
+  readonly address: Address;
+  readonly type: AccountType;
   disconnect(): void;
   sign(message: string): Promise<string>;
-  executeAction<T = any>(mutation: string, actionName: string, variables?: Record<string, any>): Promise<T>;
+  executeAction(actionName: ActionName, variables?: Record<string, any>): Promise<any>;
 }
 
 export interface AccountCreator {
-  type: string;
+  type: AccountType;
   create(param?: any): Promise<Account>;
   restore(): Account;
 }

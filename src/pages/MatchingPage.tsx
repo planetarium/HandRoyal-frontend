@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Loader, X } from 'lucide-react';
 import StyledButton from '../components/StyledButton';
 import { useRequiredAccount } from '../context/AccountContext';
 import { getLocalGloveImage } from '../fetches';
-import { GRAPHQL_ENDPOINT, getUserDocument, registerMatchingAction, cancelMatchingAction, MATCH_MADE_SUBSCRIPTION, getMatchPoolDocument } from '../queries';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
+import { GRAPHQL_ENDPOINT, getUserDocument, MATCH_MADE_SUBSCRIPTION, getMatchPoolDocument } from '../queries';
 import subscriptionClient from '../subscriptionClient';
 import GloveSelectionComponent, { type GloveSelection } from '../components/GloveSelectionComponent';
 import { useTip } from '../context/TipContext';
+import { ActionName } from '../types/types';
 import type { GloveInfo } from '../gql/graphql';
 
 // 매칭 상태를 표현하는 타입
@@ -109,57 +109,6 @@ export const MatchingPage: React.FC = () => {
     };
   }, [account, matchingStatus, navigate]);
 
-  // 매칭 등록 액션
-  const registerMatchingMutation = useMutation({
-    mutationFn: async (gloves: string[]) => {
-      const matchingResponse = await request(GRAPHQL_ENDPOINT, registerMatchingAction, {
-        gloves
-      });
-      
-      if (!matchingResponse.actionQuery?.registerMatching) {
-        throw new Error('Failed to register matching');
-      }
-
-      const plainValue = matchingResponse.actionQuery.registerMatching;
-      const newTxId = await executeTransaction(account, plainValue);
-      setTxId(newTxId);
-      await waitForTransaction(newTxId);
-      return newTxId;
-    },
-    onSuccess: () => {
-      setRegisteredHeight(tip?.height ?? 0);
-      setMatchingStatus('searching');
-    },
-    onError: (error) => {
-      console.error('Failed to register matching:', error);
-      setError(error instanceof Error ? error.message : '매칭 등록에 실패했습니다');
-      setMatchingStatus('failed');
-    }
-  });
-
-  // 매칭 취소 액션
-  const cancelMatchingMutation = useMutation({
-    mutationFn: async () => {
-      const cancelResponse = await request(GRAPHQL_ENDPOINT, cancelMatchingAction);
-      
-      if (!cancelResponse.actionQuery?.cancelMatching) {
-        throw new Error('Failed to cancel matching');
-      }
-
-      const plainValue = cancelResponse.actionQuery.cancelMatching;
-      const newTxId = await executeTransaction(account, plainValue);
-      await waitForTransaction(newTxId);
-      return newTxId;
-    },
-    onSuccess: () => {
-      navigate('/');
-    },
-    onError: (error) => {
-      console.error('Failed to cancel matching:', error);
-      setError(error instanceof Error ? error.message : '매칭 취소에 실패했습니다');
-    }
-  });
-
   // 매칭 등록 핸들러
   const handleRegisterMatching = async () => {
     if (totalSelected === 0) {
@@ -183,9 +132,20 @@ export const MatchingPage: React.FC = () => {
       );
       
       // 매칭 등록 요청
-      await registerMatchingMutation.mutateAsync(gloves);
-    } catch (err) {
-      // 오류는 mutation onError에서 처리됨
+      const response = await account.executeAction(
+        ActionName.REGISTER_MATCHING,
+        { gloves }
+      );
+
+      if (response.txId) {
+        setTxId(response.txId);
+        setRegisteredHeight(tip?.height ?? 0);
+        setMatchingStatus('searching');
+      }
+    } catch (error) {
+      console.error('Failed to register matching:', error);
+      setError(error instanceof Error ? error.message : '매칭 등록에 실패했습니다');
+      setMatchingStatus('failed');
       setIsProcessing(false);
     }
   };
@@ -198,11 +158,15 @@ export const MatchingPage: React.FC = () => {
       return;
     }
 
-    // 매칭 중인 경우 백엔드에 취소 요청
     try {
-      await cancelMatchingMutation.mutateAsync();
-    } catch (err) {
-      // 오류는 mutation onError에서 처리됨
+      const response = await account.executeAction(ActionName.CANCEL_MATCHING);
+
+      if (response.txId) {
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Failed to cancel matching:', error);
+      setError(error instanceof Error ? error.message : '매칭 취소에 실패했습니다');
     }
   };
 

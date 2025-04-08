@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { Users, Clock, Crown, Trophy } from 'lucide-react';
-import { GRAPHQL_ENDPOINT, getUserDocument, joinSessionAction, getSessionHeaderDocument } from '../queries';
+import { GRAPHQL_ENDPOINT, getUserDocument, getSessionHeaderDocument } from '../queries';
 import { useRequiredAccount } from '../context/AccountContext';
 import StyledButton from '../components/StyledButton';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
-import { useEquippedGlove } from '../context/EquippedGloveContext';
 import AddressDisplay from '../components/AddressDisplay';
 import { SessionState } from '../gql/graphql';
 import { useTip } from '../context/TipContext';
 import GloveSelectionComponent, { type GloveSelection } from '../components/GloveSelectionComponent';
+import { ActionName } from '../types/types';
 
 const JoinPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
   const account = useRequiredAccount();
-  const { equippedGlove } = useEquippedGlove();
   const [selectedGloves, setSelectedGloves] = useState<GloveSelection>({});
   const [totalSelected, setTotalSelected] = useState(0);
   const [error, setError] = useState('');
   const tip = useTip();
+  const [isJoining, setIsJoining] = useState(false);
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ['getUser', account?.address],
@@ -49,29 +48,6 @@ const JoinPage: React.FC = () => {
     }
   }, [tip, sessionRefetch]);
 
-  const joinSessionMutation = useMutation({
-    mutationFn: async (sessionId: string) => {
-      const joinSesisonResponse = await request(GRAPHQL_ENDPOINT, joinSessionAction, {
-        sessionId,
-        gloves: Object.entries(selectedGloves).flatMap(([key, count]) => Array(count).fill(key)),
-      });
-      if (!joinSesisonResponse.actionQuery?.joinSession) {
-        throw new Error('Failed to join session');
-      }
-      
-      const plainValue = joinSesisonResponse.actionQuery.joinSession;
-      const txId = await executeTransaction(account, plainValue);
-      await waitForTransaction(txId);
-    },
-    onSuccess: () => {
-    },
-    onError: (error) => {
-      console.error('Failed to join session:', error);
-    }
-  });
-
-  const MAX_SELECTIONS = sessionData?.metadata?.numberOfGloves ?? -1;
-
   const handleJoin = async () => {
     if (!sessionId) {
       setError(t('ui:invalidSessionId'));
@@ -79,13 +55,27 @@ const JoinPage: React.FC = () => {
     }
 
     try {
-      await joinSessionMutation.mutateAsync(sessionId);
-      navigate(`/game/${sessionId}`);
+      setIsJoining(true);
+      const response = await account.executeAction(
+        ActionName.JOIN_SESSION,
+        {
+          sessionId,
+          gloves: Object.entries(selectedGloves).flatMap(([key, count]) => Array(count).fill(key))
+        }
+      );
+
+      setIsJoining(false);
+
+      if (response) {
+        navigate(`/game/${sessionId}`);
+      }
     } catch (error) {
       console.error('Failed to join session:', error);
       setError(t('ui:failedToJoinSession'));
     }
   };
+
+  const MAX_SELECTIONS = sessionData?.metadata?.numberOfGloves ?? -1;
 
   const renderSessionInfo = () => {
     if (sessionLoading) {
@@ -231,11 +221,11 @@ const JoinPage: React.FC = () => {
             <div className="flex space-x-4 mt-4">
               <StyledButton 
                 bgColor = '#FFE55C'
-                disabled={totalSelected !== MAX_SELECTIONS}
+                disabled={totalSelected !== MAX_SELECTIONS || isJoining}
                 shadowColor = '#FF9F0A' 
                 onClick={handleJoin}
               >
-                {t('ui:join')}
+                {isJoining ? t('ui:joining') : t('ui:join')}
               </StyledButton>
               <StyledButton onClick={() => navigate('/')}>
                 {t('ui:cancel')}

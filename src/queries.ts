@@ -226,8 +226,8 @@ export const GLOVE_SUBSCRIPTION = `
 `;
 
 export const PICK_UP_RESULT_SUBSCRIPTION = `
-  subscription OnPickUpResult($txId: TxId!) {
-    onPickUpResult(txId: $txId) {
+  subscription OnPickUpResult($userId: Address!) {
+    onPickUpResult(userId: $userId) {
       gloves
     }
   }

@@ -1,8 +1,7 @@
 import { Address } from '@planetarium/account';
-import { request } from 'graphql-request';
-import { GRAPHQL_ENDPOINT } from '../queries';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
-import type { Account, AccountCreator } from './Account';
+import { AccountType, type Account, type AccountCreator } from './Account';
+import { executeAction } from '../utils/transaction';
+import type { ActionName } from '../types/types';
 
 type Ethereum = NonNullable<typeof window.ethereum>;
 
@@ -107,7 +106,7 @@ async function requestAccounts(ethereum: Ethereum): Promise<Address> {
 
 export class MetamaskAccount implements Account {
   public readonly address: Address;
-  public readonly type: string = 'metamask';
+  public readonly type: AccountType = AccountType.METAMASK;
   private connected: boolean;
 
   constructor(address: Address) {
@@ -117,6 +116,7 @@ export class MetamaskAccount implements Account {
 
   public disconnect() {
     this.connected = false;
+    localStorage.removeItem('account-type-address');
   }
 
   public async sign(message: string): Promise<string> {
@@ -133,39 +133,13 @@ export class MetamaskAccount implements Account {
     return signMessage(ethereum, message, this.address);
   }
 
-  async executeAction<T = any>(mutation: string, actionName: string, variables?: Record<string, any>): Promise<T> {
-    if (!this.connected) {
-      throw new Error('Account not connected');
-    }
-
-    const ethereum = window.ethereum;
-    if (!ethereum) {
-      throw new Error('Metamask is not installed');
-    }
-
-    await ensureCorrectChain(ethereum);
-
-    // mutation 실행
-    const response = await request<T>(
-      GRAPHQL_ENDPOINT,
-      mutation,
-      variables
-    );
-
-    // 트랜잭션 실행이 필요한 경우
-    if ((response as any)[actionName]) {
-      const plainValue = (response as any)[actionName];
-      const txId = await executeTransaction(this, plainValue);
-      await waitForTransaction(txId);
-      return { ...response, txId };
-    }
-
-    return response;
+  async executeAction(actionName: ActionName, variables?: Record<string, any>): Promise<any> {
+    return await executeAction(this, actionName, variables);
   }
 }
 
 export class MetamaskAccountCreator implements AccountCreator {
-  public readonly type: string = 'metamask';
+  public readonly type = AccountType.METAMASK;
 
   public async create(): Promise<Account> {
     const ethereum = window.ethereum;

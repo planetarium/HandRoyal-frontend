@@ -1,10 +1,5 @@
-import { request } from 'graphql-request';
 import { type Account } from "../accounts/Account";
-import {
-  GRAPHQL_ENDPOINT,
-  createSessionAction,
-} from '../queries';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
+import { ActionName } from './types';
 
 export interface GameRule {
   type: GameRuleType;
@@ -45,7 +40,7 @@ export class CustomGameRule implements GameRule {
       }
     }
 
-    const createSessionResponse = await request(GRAPHQL_ENDPOINT, createSessionAction, {
+    const response = await account.executeAction(ActionName.CREATE_SESSION, {
       sessionId: sessionId,
       prize: prize,
       maximumUser: this.maximumUsers,
@@ -58,13 +53,9 @@ export class CustomGameRule implements GameRule {
       initialHealthPoint: this.initialHealthPoint,
       users: this.users
     });
-    if (!createSessionResponse.actionQuery?.createSession) {
+    if (!response.txId) {
       throw new Error('Failed to create session');
     }
-
-    const txId = await executeTransaction(account, createSessionResponse.actionQuery.createSession);
-    console.error(txId);
-    await waitForTransaction(txId);
   }
 }
 
@@ -87,7 +78,7 @@ export class SoloGameRule implements GameRule {
       }
     }
 
-    const createSessionResponse = await request(GRAPHQL_ENDPOINT, createSessionAction, {
+    const response = await account.executeAction(ActionName.CREATE_SESSION, {
       sessionId: sessionId,
       prize: prize,
       maximumUser: this.maximumUsers,
@@ -100,14 +91,10 @@ export class SoloGameRule implements GameRule {
       initialHealthPoint: 100,
       users: this.users
     });
-    if (!createSessionResponse.actionQuery?.createSession) {
+    if (!response.txId) {
       throw new Error('Failed to create session');
     }
-
-    const txId = await executeTransaction(account, createSessionResponse.actionQuery.createSession);
-    console.error(txId);
-    await waitForTransaction(txId);
   }
 }
 
-export type GameRuleType = 'custom' | 'solo'; 
+export type GameRuleType = 'custom' | 'solo';
