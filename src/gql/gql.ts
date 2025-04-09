@@ -34,6 +34,16 @@ type Documents = {
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": typeof types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": typeof types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": typeof types.TransactionResultDocument,
+    "\n  query GetUserAddress {\n    getUserAddress\n  }\n": typeof types.GetUserAddressDocument,
+    "\n  mutation CreateUserByWallet($name: String!) {\n    createUserByWallet(name: $name)\n  }\n": typeof types.CreateUserByWalletDocument,
+    "\n  mutation CreateSessionByWallet(\n    $sessionId: Address!,\n    $prize: Address!,\n    $maximumUser: Int!,\n    $minimumUser: Int!,\n    $remainingUser: Int!,\n    $startAfter: Long!,\n    $maxRounds: Int!,\n    $roundLength: Long!,\n    $roundInterval: Long!,\n    $initialHealthPoint: Int!,\n    $users: [Address!]!\n  ) {\n    createSessionByWallet(\n      sessionId: $sessionId,\n      prize: $prize,\n      maximumUser: $maximumUser,\n      minimumUser: $minimumUser,\n      remainingUser: $remainingUser,\n      startAfter: $startAfter,\n      maxRounds: $maxRounds,\n      roundLength: $roundLength,\n      roundInterval: $roundInterval,\n      initialHealthPoint: $initialHealthPoint,\n      users: $users\n    )\n  }\n": typeof types.CreateSessionByWalletDocument,
+    "\n  mutation JoinSessionByWallet($sessionId: Address!, $gloves: [Address!]!) {\n    joinSessionByWallet(sessionId: $sessionId, gloves: $gloves)\n  }\n": typeof types.JoinSessionByWalletDocument,
+    "\n  mutation SubmitMoveByWallet($sessionId: Address!, $gloveIndex: Int!) {\n    submitMoveByWallet(sessionId: $sessionId, gloveIndex: $gloveIndex)\n  }\n": typeof types.SubmitMoveByWalletDocument,
+    "\n  mutation RegisterGloveByWallet($gloveId: Address!) {\n    registerGloveByWallet(gloveId: $gloveId)\n  }\n": typeof types.RegisterGloveByWalletDocument,
+    "\n  mutation pickUpByWallet {\n    pickUpByWallet\n  }\n": typeof types.PickUpByWalletDocument,
+    "\n  mutation pickUpManyByWallet {\n    pickUpManyByWallet\n  }\n": typeof types.PickUpManyByWalletDocument,
+    "\n  mutation RegisterMatchingByWallet($gloves: [Address!]!) {\n    registerMatchingByWallet(gloves: $gloves)\n  }\n": typeof types.RegisterMatchingByWalletDocument,
+    "\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n": typeof types.CancelMatchingByWalletDocument,
 };
 const documents: Documents = {
     "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n": types.GetUserDocument,
@@ -56,6 +66,16 @@ const documents: Documents = {
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": types.TransactionResultDocument,
+    "\n  query GetUserAddress {\n    getUserAddress\n  }\n": types.GetUserAddressDocument,
+    "\n  mutation CreateUserByWallet($name: String!) {\n    createUserByWallet(name: $name)\n  }\n": types.CreateUserByWalletDocument,
+    "\n  mutation CreateSessionByWallet(\n    $sessionId: Address!,\n    $prize: Address!,\n    $maximumUser: Int!,\n    $minimumUser: Int!,\n    $remainingUser: Int!,\n    $startAfter: Long!,\n    $maxRounds: Int!,\n    $roundLength: Long!,\n    $roundInterval: Long!,\n    $initialHealthPoint: Int!,\n    $users: [Address!]!\n  ) {\n    createSessionByWallet(\n      sessionId: $sessionId,\n      prize: $prize,\n      maximumUser: $maximumUser,\n      minimumUser: $minimumUser,\n      remainingUser: $remainingUser,\n      startAfter: $startAfter,\n      maxRounds: $maxRounds,\n      roundLength: $roundLength,\n      roundInterval: $roundInterval,\n      initialHealthPoint: $initialHealthPoint,\n      users: $users\n    )\n  }\n": types.CreateSessionByWalletDocument,
+    "\n  mutation JoinSessionByWallet($sessionId: Address!, $gloves: [Address!]!) {\n    joinSessionByWallet(sessionId: $sessionId, gloves: $gloves)\n  }\n": types.JoinSessionByWalletDocument,
+    "\n  mutation SubmitMoveByWallet($sessionId: Address!, $gloveIndex: Int!) {\n    submitMoveByWallet(sessionId: $sessionId, gloveIndex: $gloveIndex)\n  }\n": types.SubmitMoveByWalletDocument,
+    "\n  mutation RegisterGloveByWallet($gloveId: Address!) {\n    registerGloveByWallet(gloveId: $gloveId)\n  }\n": types.RegisterGloveByWalletDocument,
+    "\n  mutation pickUpByWallet {\n    pickUpByWallet\n  }\n": types.PickUpByWalletDocument,
+    "\n  mutation pickUpManyByWallet {\n    pickUpManyByWallet\n  }\n": types.PickUpManyByWalletDocument,
+    "\n  mutation RegisterMatchingByWallet($gloves: [Address!]!) {\n    registerMatchingByWallet(gloves: $gloves)\n  }\n": types.RegisterMatchingByWalletDocument,
+    "\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n": types.CancelMatchingByWalletDocument,
 };
 
 /**
@@ -152,6 +172,46 @@ export function graphql(source: "  \n  mutation StageTransaction($unsignedTransa
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n"): (typeof documents)["\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetUserAddress {\n    getUserAddress\n  }\n"): (typeof documents)["\n  query GetUserAddress {\n    getUserAddress\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateUserByWallet($name: String!) {\n    createUserByWallet(name: $name)\n  }\n"): (typeof documents)["\n  mutation CreateUserByWallet($name: String!) {\n    createUserByWallet(name: $name)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateSessionByWallet(\n    $sessionId: Address!,\n    $prize: Address!,\n    $maximumUser: Int!,\n    $minimumUser: Int!,\n    $remainingUser: Int!,\n    $startAfter: Long!,\n    $maxRounds: Int!,\n    $roundLength: Long!,\n    $roundInterval: Long!,\n    $initialHealthPoint: Int!,\n    $users: [Address!]!\n  ) {\n    createSessionByWallet(\n      sessionId: $sessionId,\n      prize: $prize,\n      maximumUser: $maximumUser,\n      minimumUser: $minimumUser,\n      remainingUser: $remainingUser,\n      startAfter: $startAfter,\n      maxRounds: $maxRounds,\n      roundLength: $roundLength,\n      roundInterval: $roundInterval,\n      initialHealthPoint: $initialHealthPoint,\n      users: $users\n    )\n  }\n"): (typeof documents)["\n  mutation CreateSessionByWallet(\n    $sessionId: Address!,\n    $prize: Address!,\n    $maximumUser: Int!,\n    $minimumUser: Int!,\n    $remainingUser: Int!,\n    $startAfter: Long!,\n    $maxRounds: Int!,\n    $roundLength: Long!,\n    $roundInterval: Long!,\n    $initialHealthPoint: Int!,\n    $users: [Address!]!\n  ) {\n    createSessionByWallet(\n      sessionId: $sessionId,\n      prize: $prize,\n      maximumUser: $maximumUser,\n      minimumUser: $minimumUser,\n      remainingUser: $remainingUser,\n      startAfter: $startAfter,\n      maxRounds: $maxRounds,\n      roundLength: $roundLength,\n      roundInterval: $roundInterval,\n      initialHealthPoint: $initialHealthPoint,\n      users: $users\n    )\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation JoinSessionByWallet($sessionId: Address!, $gloves: [Address!]!) {\n    joinSessionByWallet(sessionId: $sessionId, gloves: $gloves)\n  }\n"): (typeof documents)["\n  mutation JoinSessionByWallet($sessionId: Address!, $gloves: [Address!]!) {\n    joinSessionByWallet(sessionId: $sessionId, gloves: $gloves)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation SubmitMoveByWallet($sessionId: Address!, $gloveIndex: Int!) {\n    submitMoveByWallet(sessionId: $sessionId, gloveIndex: $gloveIndex)\n  }\n"): (typeof documents)["\n  mutation SubmitMoveByWallet($sessionId: Address!, $gloveIndex: Int!) {\n    submitMoveByWallet(sessionId: $sessionId, gloveIndex: $gloveIndex)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RegisterGloveByWallet($gloveId: Address!) {\n    registerGloveByWallet(gloveId: $gloveId)\n  }\n"): (typeof documents)["\n  mutation RegisterGloveByWallet($gloveId: Address!) {\n    registerGloveByWallet(gloveId: $gloveId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation pickUpByWallet {\n    pickUpByWallet\n  }\n"): (typeof documents)["\n  mutation pickUpByWallet {\n    pickUpByWallet\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation pickUpManyByWallet {\n    pickUpManyByWallet\n  }\n"): (typeof documents)["\n  mutation pickUpManyByWallet {\n    pickUpManyByWallet\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RegisterMatchingByWallet($gloves: [Address!]!) {\n    registerMatchingByWallet(gloves: $gloves)\n  }\n"): (typeof documents)["\n  mutation RegisterMatchingByWallet($gloves: [Address!]!) {\n    registerMatchingByWallet(gloves: $gloves)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n"): (typeof documents)["\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

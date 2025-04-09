@@ -1,32 +1,21 @@
 import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
 import { supabase, getSupabaseJWT } from '../lib/supabase';
-import { GRAPHQL_ENDPOINT } from '../queries';
 import { AccountType, type Account, type AccountCreator } from './Account';
 import { ActionName } from '../types/types';
 import {
-  pickUpAction,
-  pickUpManyAction,
-  registerMatchingAction,
-  cancelMatchingAction,
-  joinSessionAction,
-  submitMoveAction,
-  registerGloveAction,
-  createSessionAction,
-  createUserAction
+  GRAPHQL_ENDPOINT,
+  pickUpByWallet,
+  pickUpManyByWallet,
+  registerMatchingByWallet,
+  cancelMatchingByWallet,
+  joinSessionByWallet,
+  submitMoveByWallet,
+  registerGloveByWallet,
+  createSessionByWallet,
+  createUserByWallet,
+  getUserAddress
 } from '../queries';
-
-// GraphQL 쿼리 정의
-const GET_USER_ADDRESS = `
-  query GetUserAddress {
-    getUserAddress
-  }
-`;
-
-// GraphQL 응답 타입 정의
-interface GetUserAddressResponse {
-  getUserAddress: string;
-}
 
 class SupabaseAccount implements Account {
   constructor(
@@ -49,7 +38,7 @@ class SupabaseAccount implements Account {
     return this.userId;
   }
 
-  async executeAction<T = any>(actionName: ActionName, variables?: Record<string, any>): Promise<T> {
+  async executeAction(actionName: ActionName, variables?: Record<string, any>): Promise<any> {
     const jwt = await getSupabaseJWT();
     if (!jwt) {
       throw new Error('No JWT token available');
@@ -58,37 +47,37 @@ class SupabaseAccount implements Account {
     let document;
     switch (actionName) {
       case ActionName.PICK_UP:
-        document = pickUpAction;
+        document = pickUpByWallet;
         break;
       case ActionName.PICK_UP_MANY:
-        document = pickUpManyAction;
+        document = pickUpManyByWallet;
         break;
       case ActionName.REGISTER_MATCHING:
-        document = registerMatchingAction;
+        document = registerMatchingByWallet;
         break;
       case ActionName.CANCEL_MATCHING:
-        document = cancelMatchingAction;
+        document = cancelMatchingByWallet;
         break;
       case ActionName.JOIN_SESSION:
-        document = joinSessionAction;
+        document = joinSessionByWallet;
         break;
       case ActionName.SUBMIT_MOVE:
-        document = submitMoveAction;
+        document = submitMoveByWallet;
         break;
       case ActionName.REGISTER_GLOVE:
-        document = registerGloveAction;
+        document = registerGloveByWallet;
         break;
       case ActionName.CREATE_SESSION:
-        document = createSessionAction;
+        document = createSessionByWallet;
         break;
       case ActionName.CREATE_USER:
-        document = createUserAction;
+        document = createUserByWallet;
         break;
       default:
         throw new Error(`Unknown action: ${actionName}`);
     }
 
-    const response = await request<Record<string, any>>(
+    const txId = await request<Record<string, any>>(
       GRAPHQL_ENDPOINT,
       document,
       variables,
@@ -97,7 +86,7 @@ class SupabaseAccount implements Account {
       }
     );
 
-    return response as T;
+    return txId;
   }
 }
 
@@ -110,20 +99,21 @@ export class SupabaseAccountCreator implements AccountCreator {
       throw new Error('No JWT token available');
     }
 
-    const response = await request<GetUserAddressResponse>(
+    const response = await request(
       GRAPHQL_ENDPOINT,
-      GET_USER_ADDRESS,
+      getUserAddress,
       {},
       {
         Authorization: `Bearer ${jwt}`
       }
     );
 
-    if (!response?.getUserAddress) {
+
+    if (response === undefined || response?.getUserAddress === "0x0000000000000000000000000000000000000000") {
       throw new Error('Failed to get user address');
     }
 
-    return response.getUserAddress;
+    return response?.getUserAddress as string;
   }
 
   async create(userId: string): Promise<Account> {

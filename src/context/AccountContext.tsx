@@ -4,7 +4,6 @@ import { GRAPHQL_ENDPOINT, getUserDocument } from '../queries';
 import { PrivateKeyAccountCreator } from '../accounts/PrivateKeyAccount';
 import { MetamaskAccountCreator } from '../accounts/MetamaskAccount';
 import { SupabaseAccountCreator } from '../accounts/SupabaseAccount';
-import { executeAction } from '../utils/transaction';
 import { ActionName } from '../types/types';
 import type { AccountType } from '../accounts/Account';
 import type { Account, AccountCreator } from '../accounts/Account';
@@ -92,9 +91,9 @@ export const AccountProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const createUser = async (account: Account, name: string): Promise<void> => {
-    await executeAction(account, ActionName.CREATE_USER, {
-      name: name
-    });
+    await account.executeAction(
+      ActionName.CREATE_USER,
+      { name: name });
   };
 
   const createAccount = async (type: AccountType, param?: any): Promise<Account> => {

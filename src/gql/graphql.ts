@@ -118,20 +118,34 @@ export type MatchingInfo = {
 export type Mutation = {
   __typename?: 'Mutation';
   cancelMatching: Scalars['TxId']['output'];
+  cancelMatchingByWallet: Scalars['TxId']['output'];
   createSession: Scalars['TxId']['output'];
+  createSessionByWallet: Scalars['TxId']['output'];
   createUser: Scalars['TxId']['output'];
+  createUserByWallet: Scalars['TxId']['output'];
   joinSession: Scalars['TxId']['output'];
+  joinSessionByWallet: Scalars['TxId']['output'];
   mintSinkAddress: Scalars['TxId']['output'];
   pickUp: Scalars['TxId']['output'];
+  pickUpByWallet: Scalars['TxId']['output'];
   pickUpMany: Scalars['TxId']['output'];
+  pickUpManyByWallet: Scalars['TxId']['output'];
   registerGlove: Scalars['TxId']['output'];
+  registerGloveByWallet: Scalars['TxId']['output'];
   registerMatching: Scalars['TxId']['output'];
+  registerMatchingByWallet: Scalars['TxId']['output'];
   stageTransaction: Scalars['TxId']['output'];
   submitMove: Scalars['TxId']['output'];
+  submitMoveByWallet: Scalars['TxId']['output'];
 };
 
 
 export type MutationCancelMatchingArgs = {
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
+export type MutationCancelMatchingByWalletArgs = {
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
@@ -152,13 +166,40 @@ export type MutationCreateSessionArgs = {
 };
 
 
+export type MutationCreateSessionByWalletArgs = {
+  initialHealthPoint: Scalars['Int']['input'];
+  maxRounds: Scalars['Int']['input'];
+  maximumUser: Scalars['Int']['input'];
+  minimumUser: Scalars['Int']['input'];
+  prize: Scalars['Address']['input'];
+  remainingUser: Scalars['Int']['input'];
+  roundInterval: Scalars['Long']['input'];
+  roundLength: Scalars['Long']['input'];
+  sessionId: Scalars['Address']['input'];
+  startAfter: Scalars['Long']['input'];
+  users?: InputMaybe<Array<Scalars['Address']['input']>>;
+};
+
+
 export type MutationCreateUserArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
 
+export type MutationCreateUserByWalletArgs = {
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type MutationJoinSessionArgs = {
+  gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+  sessionId: Scalars['Address']['input'];
+};
+
+
+export type MutationJoinSessionByWalletArgs = {
   gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
   sessionId: Scalars['Address']['input'];
@@ -176,7 +217,17 @@ export type MutationPickUpArgs = {
 };
 
 
+export type MutationPickUpByWalletArgs = {
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
 export type MutationPickUpManyArgs = {
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
+export type MutationPickUpManyByWalletArgs = {
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
@@ -187,7 +238,19 @@ export type MutationRegisterGloveArgs = {
 };
 
 
+export type MutationRegisterGloveByWalletArgs = {
+  gloveId: Scalars['Address']['input'];
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
 export type MutationRegisterMatchingArgs = {
+  gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+};
+
+
+export type MutationRegisterMatchingByWalletArgs = {
   gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
@@ -205,6 +268,13 @@ export type MutationSubmitMoveArgs = {
   sessionId: Scalars['Address']['input'];
 };
 
+
+export type MutationSubmitMoveByWalletArgs = {
+  gloveIndex: Scalars['Int']['input'];
+  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
+  sessionId: Scalars['Address']['input'];
+};
+
 export type Phase = {
   __typename?: 'Phase';
   height: Scalars['Long']['output'];
@@ -215,7 +285,6 @@ export type PickUpResultEventData = {
   __typename?: 'PickUpResultEventData';
   gloves?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   txId: Scalars['TxId']['output'];
-  userId: Scalars['Address']['output'];
 };
 
 export type Player = {
@@ -236,6 +305,7 @@ export type Query = {
   __typename?: 'Query';
   actionQuery?: Maybe<Query_ActionQuery>;
   getBalance: Scalars['Long']['output'];
+  getUserAddress: Scalars['Address']['output'];
   isGloveRegistered: Scalars['Boolean']['output'];
   isValidSessionId: Scalars['Boolean']['output'];
   nextTxNonce: Scalars['Long']['output'];
@@ -483,7 +553,7 @@ export type SubscriptionOnMoveChangedArgs = {
 
 
 export type SubscriptionOnPickUpResultArgs = {
-  userId: Scalars['Address']['input'];
+  txId: Scalars['TxId']['input'];
 };
 
 
@@ -695,6 +765,80 @@ export type TransactionResultQueryVariables = Exact<{
 
 export type TransactionResultQuery = { __typename?: 'Query', transaction?: { __typename?: 'Query_Transaction', transactionResult?: { __typename?: 'TxResultValue', txStatus: TxStatus, blockIndex?: any | null, exceptionNames?: Array<string | null> | null } | null } | null };
 
+export type GetUserAddressQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUserAddressQuery = { __typename?: 'Query', getUserAddress: any };
+
+export type CreateUserByWalletMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CreateUserByWalletMutation = { __typename?: 'Mutation', createUserByWallet: any };
+
+export type CreateSessionByWalletMutationVariables = Exact<{
+  sessionId: Scalars['Address']['input'];
+  prize: Scalars['Address']['input'];
+  maximumUser: Scalars['Int']['input'];
+  minimumUser: Scalars['Int']['input'];
+  remainingUser: Scalars['Int']['input'];
+  startAfter: Scalars['Long']['input'];
+  maxRounds: Scalars['Int']['input'];
+  roundLength: Scalars['Long']['input'];
+  roundInterval: Scalars['Long']['input'];
+  initialHealthPoint: Scalars['Int']['input'];
+  users: Array<Scalars['Address']['input']> | Scalars['Address']['input'];
+}>;
+
+
+export type CreateSessionByWalletMutation = { __typename?: 'Mutation', createSessionByWallet: any };
+
+export type JoinSessionByWalletMutationVariables = Exact<{
+  sessionId: Scalars['Address']['input'];
+  gloves: Array<Scalars['Address']['input']> | Scalars['Address']['input'];
+}>;
+
+
+export type JoinSessionByWalletMutation = { __typename?: 'Mutation', joinSessionByWallet: any };
+
+export type SubmitMoveByWalletMutationVariables = Exact<{
+  sessionId: Scalars['Address']['input'];
+  gloveIndex: Scalars['Int']['input'];
+}>;
+
+
+export type SubmitMoveByWalletMutation = { __typename?: 'Mutation', submitMoveByWallet: any };
+
+export type RegisterGloveByWalletMutationVariables = Exact<{
+  gloveId: Scalars['Address']['input'];
+}>;
+
+
+export type RegisterGloveByWalletMutation = { __typename?: 'Mutation', registerGloveByWallet: any };
+
+export type PickUpByWalletMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PickUpByWalletMutation = { __typename?: 'Mutation', pickUpByWallet: any };
+
+export type PickUpManyByWalletMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PickUpManyByWalletMutation = { __typename?: 'Mutation', pickUpManyByWallet: any };
+
+export type RegisterMatchingByWalletMutationVariables = Exact<{
+  gloves: Array<Scalars['Address']['input']> | Scalars['Address']['input'];
+}>;
+
+
+export type RegisterMatchingByWalletMutation = { __typename?: 'Mutation', registerMatchingByWallet: any };
+
+export type CancelMatchingByWalletMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CancelMatchingByWalletMutation = { __typename?: 'Mutation', cancelMatchingByWallet: any };
+
 
 export const GetUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"registeredGloves"}},{"kind":"Field","name":{"kind":"Name","value":"ownedGloves"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"Field","name":{"kind":"Name","value":"equippedGlove"}},{"kind":"Field","name":{"kind":"Name","value":"sessionId"}},{"kind":"Field","name":{"kind":"Name","value":"balance"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
 export const GetMatchPoolDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMatchPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stateQuery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getMatchPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"gloves"}},{"kind":"Field","name":{"kind":"Name","value":"registeredHeight"}}]}}]}}]}}]} as unknown as DocumentNode<GetMatchPoolQuery, GetMatchPoolQueryVariables>;
@@ -716,3 +860,13 @@ export const CancelMatchingActionDocument = {"kind":"Document","definitions":[{"
 export const UnsignedTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"UnsignedTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"unsignedTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"address"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}},{"kind":"Argument","name":{"kind":"Name","value":"plainValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"plainValue"}}}]}]}}]}}]} as unknown as DocumentNode<UnsignedTransactionQuery, UnsignedTransactionQueryVariables>;
 export const StageTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"StageTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"signature"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Hex"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stageTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"unsignedTransaction"},"value":{"kind":"Variable","name":{"kind":"Name","value":"unsignedTransaction"}}},{"kind":"Argument","name":{"kind":"Name","value":"signature"},"value":{"kind":"Variable","name":{"kind":"Name","value":"signature"}}}]}]}}]} as unknown as DocumentNode<StageTransactionMutation, StageTransactionMutationVariables>;
 export const TransactionResultDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TransactionResult"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"txId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TxId"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transactionResult"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"txId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"txId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"txStatus"}},{"kind":"Field","name":{"kind":"Name","value":"blockIndex"}},{"kind":"Field","name":{"kind":"Name","value":"exceptionNames"}}]}}]}}]}}]} as unknown as DocumentNode<TransactionResultQuery, TransactionResultQueryVariables>;
+export const GetUserAddressDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserAddress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserAddress"}}]}}]} as unknown as DocumentNode<GetUserAddressQuery, GetUserAddressQueryVariables>;
+export const CreateUserByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateUserByWallet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createUserByWallet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}}]}]}}]} as unknown as DocumentNode<CreateUserByWalletMutation, CreateUserByWalletMutationVariables>;
+export const CreateSessionByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateSessionByWallet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"prize"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"maximumUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"minimumUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"remainingUser"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"startAfter"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"maxRounds"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roundLength"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roundInterval"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"initialHealthPoint"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"users"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSessionByWallet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"prize"},"value":{"kind":"Variable","name":{"kind":"Name","value":"prize"}}},{"kind":"Argument","name":{"kind":"Name","value":"maximumUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"maximumUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"minimumUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"minimumUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"remainingUser"},"value":{"kind":"Variable","name":{"kind":"Name","value":"remainingUser"}}},{"kind":"Argument","name":{"kind":"Name","value":"startAfter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"startAfter"}}},{"kind":"Argument","name":{"kind":"Name","value":"maxRounds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"maxRounds"}}},{"kind":"Argument","name":{"kind":"Name","value":"roundLength"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roundLength"}}},{"kind":"Argument","name":{"kind":"Name","value":"roundInterval"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roundInterval"}}},{"kind":"Argument","name":{"kind":"Name","value":"initialHealthPoint"},"value":{"kind":"Variable","name":{"kind":"Name","value":"initialHealthPoint"}}},{"kind":"Argument","name":{"kind":"Name","value":"users"},"value":{"kind":"Variable","name":{"kind":"Name","value":"users"}}}]}]}}]} as unknown as DocumentNode<CreateSessionByWalletMutation, CreateSessionByWalletMutationVariables>;
+export const JoinSessionByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"JoinSessionByWallet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"joinSessionByWallet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"gloves"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}}}]}]}}]} as unknown as DocumentNode<JoinSessionByWalletMutation, JoinSessionByWalletMutationVariables>;
+export const SubmitMoveByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SubmitMoveByWallet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveIndex"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"submitMoveByWallet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}},{"kind":"Argument","name":{"kind":"Name","value":"gloveIndex"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveIndex"}}}]}]}}]} as unknown as DocumentNode<SubmitMoveByWalletMutation, SubmitMoveByWalletMutationVariables>;
+export const RegisterGloveByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RegisterGloveByWallet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerGloveByWallet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloveId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloveId"}}}]}]}}]} as unknown as DocumentNode<RegisterGloveByWalletMutation, RegisterGloveByWalletMutationVariables>;
+export const PickUpByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"pickUpByWallet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pickUpByWallet"}}]}}]} as unknown as DocumentNode<PickUpByWalletMutation, PickUpByWalletMutationVariables>;
+export const PickUpManyByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"pickUpManyByWallet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pickUpManyByWallet"}}]}}]} as unknown as DocumentNode<PickUpManyByWalletMutation, PickUpManyByWalletMutationVariables>;
+export const RegisterMatchingByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RegisterMatchingByWallet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerMatchingByWallet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gloves"},"value":{"kind":"Variable","name":{"kind":"Name","value":"gloves"}}}]}]}}]} as unknown as DocumentNode<RegisterMatchingByWalletMutation, RegisterMatchingByWalletMutationVariables>;
+export const CancelMatchingByWalletDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"cancelMatchingByWallet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelMatchingByWallet"}}]}}]} as unknown as DocumentNode<CancelMatchingByWalletMutation, CancelMatchingByWalletMutationVariables>;

@@ -197,7 +197,7 @@ const LoginPage: React.FC = () => {
           </div>
           <div className="mb-4">
             <input
-              className="w-full p-3 border border-black bg-gray-100 rounded-lg"
+              className="w-full p-3 border border-black bg-gray-100 rounded-lg font-sans-serif"
               disabled={isDisabled()}
               placeholder={t('ui:password')}
               type="password"
