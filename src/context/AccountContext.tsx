@@ -102,12 +102,13 @@ export const AccountProvider: React.FC<{ children: ReactNode }> = ({
       throw new Error('Creator not found');
     }
 
-    const newAccount = await creator.create(param);
+    let newAccount = await creator.create(param);
     const address = newAccount.address.toString();
 
     try {
       if (!await checkUser(address)) {
         await createUser(newAccount, address);
+        newAccount = await creator.create(param);
       }
     } catch (error) {
       newAccount.disconnect();
