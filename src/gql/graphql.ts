@@ -38,7 +38,6 @@ export type BlockHeaderValue = {
 export type Condition = {
   __typename?: 'Condition';
   activeEffectData?: Maybe<Array<Maybe<EffectData>>>;
-  activeEffects?: Maybe<Array<Maybe<IEffect>>>;
   gloveUsed?: Maybe<Array<Scalars['Boolean']['output']>>;
   healthPoint: Scalars['Int']['output'];
   submission: Scalars['Int']['output'];
@@ -73,11 +72,6 @@ export enum GloveType {
   Scissors = 'SCISSORS',
   Special = 'SPECIAL'
 }
-
-export type IEffect = {
-  duration: Scalars['Int']['output'];
-  effectType: EffectType;
-};
 
 export type Input_FavValue = {
   decimalPlaces: Scalars['Byte']['input'];
@@ -145,11 +139,6 @@ export type MutationCancelMatchingArgs = {
 };
 
 
-export type MutationCancelMatchingByWalletArgs = {
-  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
-};
-
-
 export type MutationCreateSessionArgs = {
   initialHealthPoint: Scalars['Int']['input'];
   maxRounds: Scalars['Int']['input'];
@@ -201,7 +190,6 @@ export type MutationJoinSessionArgs = {
 
 export type MutationJoinSessionByWalletArgs = {
   gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
-  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
   sessionId: Scalars['Address']['input'];
 };
 
@@ -217,17 +205,7 @@ export type MutationPickUpArgs = {
 };
 
 
-export type MutationPickUpByWalletArgs = {
-  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
-};
-
-
 export type MutationPickUpManyArgs = {
-  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
-};
-
-
-export type MutationPickUpManyByWalletArgs = {
   privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
@@ -240,7 +218,6 @@ export type MutationRegisterGloveArgs = {
 
 export type MutationRegisterGloveByWalletArgs = {
   gloveId: Scalars['Address']['input'];
-  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
 
@@ -252,7 +229,6 @@ export type MutationRegisterMatchingArgs = {
 
 export type MutationRegisterMatchingByWalletArgs = {
   gloves?: InputMaybe<Array<Scalars['Address']['input']>>;
-  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
 };
 
 
@@ -271,7 +247,6 @@ export type MutationSubmitMoveArgs = {
 
 export type MutationSubmitMoveByWalletArgs = {
   gloveIndex: Scalars['Int']['input'];
-  privateKey?: InputMaybe<Scalars['PrivateKey']['input']>;
   sessionId: Scalars['Address']['input'];
 };
 
@@ -285,6 +260,7 @@ export type PickUpResultEventData = {
   __typename?: 'PickUpResultEventData';
   gloves?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   txId: Scalars['TxId']['output'];
+  userId: Scalars['Address']['output'];
 };
 
 export type Player = {
@@ -553,7 +529,7 @@ export type SubscriptionOnMoveChangedArgs = {
 
 
 export type SubscriptionOnPickUpResultArgs = {
-  txId: Scalars['TxId']['input'];
+  userId: Scalars['Address']['input'];
 };
 
 

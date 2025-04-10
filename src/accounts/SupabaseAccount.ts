@@ -3,6 +3,7 @@ import { request } from 'graphql-request';
 import { supabase, getSupabaseJWT } from '../lib/supabase';
 import { AccountType, type Account, type AccountCreator } from './Account';
 import { ActionName } from '../types/types';
+import { waitForTransaction } from '../utils/transaction';
 import {
   GRAPHQL_ENDPOINT,
   pickUpByWallet,
@@ -77,7 +78,7 @@ class SupabaseAccount implements Account {
         throw new Error(`Unknown action: ${actionName}`);
     }
 
-    const txId = await request<Record<string, any>>(
+    const response = await request<Record<string, any>>(
       GRAPHQL_ENDPOINT,
       document,
       variables,
@@ -85,7 +86,9 @@ class SupabaseAccount implements Account {
         Authorization: `Bearer ${jwt}`
       }
     );
-
+    
+    const txId = response?.[actionName + 'ByWallet'];
+    await waitForTransaction(txId);
     return txId;
   }
 }

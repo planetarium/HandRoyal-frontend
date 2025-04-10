@@ -93,7 +93,7 @@ async function executeTransaction(
   return response.stageTransaction;
 }
 
-async function waitForTransaction(txId: string, timeout: number = 30000): Promise<void> {
+export async function waitForTransaction(txId: string, timeout: number = 30000): Promise<void> {
   return new Promise((resolve, reject) => {
     const unsubscribe = subscriptionClient.subscribe({
       query: onTransactionChangedSubscription, // Define this query in your queries file
