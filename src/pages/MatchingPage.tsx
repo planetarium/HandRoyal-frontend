@@ -38,7 +38,6 @@ export const MatchingPage: React.FC = () => {
   const [selectedGloves, setSelectedGloves] = useState<GloveSelection>({});
   const [totalSelected, setTotalSelected] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [txId, setTxId] = useState<string | null>(null);
   const [registeredHeight, setRegisteredHeight] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -132,13 +131,12 @@ export const MatchingPage: React.FC = () => {
       );
       
       // 매칭 등록 요청
-      const response = await account.executeAction(
+      const txId = await account.executeAction(
         ActionName.REGISTER_MATCHING,
         { gloves }
       );
 
-      if (response.txId) {
-        setTxId(response.txId);
+      if (txId) {
         setRegisteredHeight(tip?.height ?? 0);
         setMatchingStatus('searching');
       }
@@ -146,6 +144,7 @@ export const MatchingPage: React.FC = () => {
       console.error('Failed to register matching:', error);
       setError(error instanceof Error ? error.message : '매칭 등록에 실패했습니다');
       setMatchingStatus('failed');
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -158,15 +157,18 @@ export const MatchingPage: React.FC = () => {
       return;
     }
 
+    setIsProcessing(true);
     try {
-      const response = await account.executeAction(ActionName.CANCEL_MATCHING);
+      const txId = await account.executeAction(ActionName.CANCEL_MATCHING);
 
-      if (response.txId) {
-        navigate('/');
+      if (txId) {
+        setMatchingStatus('confirming');
       }
     } catch (error) {
       console.error('Failed to cancel matching:', error);
       setError(error instanceof Error ? error.message : '매칭 취소에 실패했습니다');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -309,10 +311,11 @@ export const MatchingPage: React.FC = () => {
       
       <StyledButton
         bgColor="#FF3366"
+        disabled={isProcessing}
         shadowColor="#CC0033"
         onClick={handleCancelMatching}
       >
-        {t('ui:cancel')}
+        {isProcessing ? t('ui:processing') : t('ui:cancel')}
       </StyledButton>
     </div>
   );
