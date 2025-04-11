@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import { useRequiredAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument, registerGloveAction } from '../queries';
-import { executeTransaction, waitForTransaction } from '../utils/transaction';
+import { GRAPHQL_ENDPOINT, isGloveRegisteredDocument } from '../queries';
 import { registerGlove } from '../fetches';
 import { useTip } from '../context/TipContext';
+import { ActionName } from '../types/types';
 import type { RequestDocument } from 'graphql-request';
 
 const RegisterGlove: React.FC = () => {
@@ -29,19 +29,8 @@ const RegisterGlove: React.FC = () => {
       }
 
       // Call the mutation
-      const registerGloveResponse = await request(GRAPHQL_ENDPOINT, registerGloveAction, {
-        gloveId: gloveAddress,
-      });
-
-      if (!registerGloveResponse.actionQuery?.registerGlove) {
-        throw new Error('Failed to register glove');
-      }
-
-      const plainValue = registerGloveResponse.actionQuery.registerGlove;
-      const txId = await executeTransaction(account, plainValue);
-      await waitForTransaction(txId);
-
-      return txId;
+      const response = await account.executeAction(ActionName.REGISTER_GLOVE, { gloveId: gloveAddress });
+      return response.txId;
     },
     onSuccess: async () => {
       try {

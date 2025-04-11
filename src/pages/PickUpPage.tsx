@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { request } from 'graphql-request';
 import StyledButton from '../components/StyledButton';
 import { useRequiredAccount } from '../context/AccountContext';
-import { GRAPHQL_ENDPOINT, pickUpAction, pickUpManyAction, PICK_UP_RESULT_SUBSCRIPTION, getUserDocument } from '../queries';
-import { executeTransaction } from '../utils/transaction';
+import { GRAPHQL_ENDPOINT, PICK_UP_RESULT_SUBSCRIPTION, getUserDocument } from '../queries';
 import GloveCard from '../components/GloveCard';
 import subscriptionClient from '../subscriptionClient';
 import { GetGloveRarity } from '../utils/gloveUtils';
 import royal from '../assets/royal.png';
+import { ActionName } from '../types/types';
 import type { GloveRarity } from '../types/types';
 
 // 애니메이션 스타일 정의
@@ -101,17 +101,18 @@ const PickUpPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [pickedGloves, setPickedGloves] = useState<string[]>([]);
-  const [txId, setTxId] = useState<string | null>(null);
   const [revealedCards, setRevealedCards] = useState<boolean[]>([]);
   const [allRevealed, setAllRevealed] = useState(false);
   const [animatingCards, setAnimatingCards] = useState<boolean[]>([]);
+
+  const address = account.address.toString();
 
   // 유저 데이터 가져오기
   const { data: userData, refetch: refetchUserData } = useQuery({
     queryKey: ['getUserData', account],
     queryFn: async () => {
       const response = await request(GRAPHQL_ENDPOINT, getUserDocument, { 
-        address: account.address.toString() 
+        address: address 
       });
       return response?.stateQuery?.getUserData;
     }
@@ -123,12 +124,12 @@ const PickUpPage: React.FC = () => {
 
   // 구독 설정
   useEffect(() => {
-    if (!txId) return;
+    if (!address) return;
 
     const unsubscribe = subscriptionClient.subscribe(
       {
         query: PICK_UP_RESULT_SUBSCRIPTION,
-        variables: { txId },
+        variables: { userId: address },
       },
       {
         next: (result) => {
@@ -157,55 +158,12 @@ const PickUpPage: React.FC = () => {
     return () => {
       unsubscribe();
     };
-  }, [txId, refetchUserData]);
-
-  // 카드 뽑기 액션
-  const pickUpMutation = useMutation({
-    mutationFn: async () => {
-      const pickUpResponse = await request(GRAPHQL_ENDPOINT, pickUpAction);
-      
-      if (!pickUpResponse.actionQuery?.pickUp) {
-        throw new Error('Failed to get pick up response');
-      }
-
-      const plainValue = pickUpResponse.actionQuery.pickUp;
-      const newTxId = await executeTransaction(account, plainValue);
-      setTxId(newTxId);
-      return newTxId;
-    },
-    onError: (error) => {
-      console.error('Failed to pick up glove:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error occurred');
-      setIsLoading(false);
-    }
-  });
-
-  // 10개 카드 한번에 뽑기 액션
-  const pickUpManyMutation = useMutation({
-    mutationFn: async () => {
-      const pickUpManyResponse = await request(GRAPHQL_ENDPOINT, pickUpManyAction);
-      
-      if (!pickUpManyResponse.actionQuery?.pickUpMany) {
-        throw new Error('Failed to get pick up many response');
-      }
-
-      const plainValue = pickUpManyResponse.actionQuery.pickUpMany;
-      const newTxId = await executeTransaction(account, plainValue);
-      setTxId(newTxId);
-      return newTxId;
-    },
-    onError: (error) => {
-      console.error('Failed to pick up many gloves:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error occurred');
-      setIsLoading(false);
-    }
-  });
+  }, [address, refetchUserData]);
 
   const resetCardState = () => {
     setError(null);
     setSuccess(false);
     setPickedGloves([]);
-    setTxId(null);
     setRevealedCards([]);
     setAllRevealed(false);
     setAnimatingCards([]);
@@ -216,20 +174,23 @@ const PickUpPage: React.FC = () => {
     if (isLoading) return;
     resetCardState();
     try {
-      await pickUpMutation.mutateAsync();
-    } catch (err) {
-      // 오류는 mutation onError에서 처리됨
+      await account.executeAction(ActionName.PICK_UP);
+    } catch (error) {
+      console.error('Failed to pick up glove:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      setIsLoading(false);
     }
-  };  
+  };
 
-  // 한번에 10개 카드 뽑기 핸들러 추가
   const handlePickUpManyCards = async () => {
     if (isLoading) return;
     resetCardState();
     try {
-      await pickUpManyMutation.mutateAsync();
-    } catch (err) {
-      // 오류는 mutation onError에서 처리됨
+      await account.executeAction(ActionName.PICK_UP_MANY);
+    } catch (error) {
+      console.error('Failed to pick up many gloves:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      setIsLoading(false);
     }
   };
 

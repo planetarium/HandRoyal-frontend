@@ -63,7 +63,7 @@ const Navbar: React.FC = () => {
               className="bg-gray-600 text-white py-1 px-2 text-xs rounded border border-gray-500 hover:bg-gray-500 ml-2 cursor-pointer"
               onClick={handleLogout}
             >
-              {t('ui:login.logoutButton')}
+              {t('ui:logoutButton')}
             </button>
           </div>
         )}

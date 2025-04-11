@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 
 interface StyledButtonProps {
-  onClick: () => void;
+  onClick?: () => void;
   children: React.ReactNode;
   disabled?: boolean;
   textColor?: string;
   bgColor?: string;
   shadowColor?: string;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 const StyledButton: React.FC<StyledButtonProps> = ({
@@ -17,7 +18,8 @@ const StyledButton: React.FC<StyledButtonProps> = ({
   textColor = '#000000',
   bgColor = '#40C4FF',
   shadowColor = '#0288D1',
-  className = ''
+  className = '',
+  type = 'button'
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -25,6 +27,7 @@ const StyledButton: React.FC<StyledButtonProps> = ({
     <button
       className={className}
       disabled={disabled}
+      type={type}
       style={{
         display: 'flex',
         justifyContent: 'center',

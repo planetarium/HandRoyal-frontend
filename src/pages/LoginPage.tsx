@@ -7,6 +7,8 @@ import { USER_SUBSCRIPTION } from '../queries';
 import StyledButton from '../components/StyledButton';
 import logo from '../assets/logo.png';
 import metamaskIcon from '../assets/MetaMask-icon-fox.svg';
+import { supabase, getSupabaseJWT } from '../lib/supabase';
+import { AccountType } from '../accounts/Account';
 
 const ENABLE_TEST_ACCOUNTS = false;
 const TEST_ACCOUNTS = [
@@ -31,7 +33,7 @@ const TEST_ACCOUNTS = [
     address: '0xE8F6027e487Ef52d261663099061dF9c6E159188'
   },
   {
-    name: 'test5',
+  name: 'test5',
     privateKey: '4ce92198f27d05f80a318f34ad9d0cd43ef7d2a138e022bc66770acdd53f716a',
     address: '0xfdc4eE76d810635eC932E57de386DC0ef3C9e7e9'
   },
@@ -42,18 +44,25 @@ const TEST_ACCOUNTS = [
   }
 ];
 
-type LoginType = 'raw' | 'metamask';
-
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const { account, createAccount } = useAccountContext();
   const [privateKeyInput, setPrivateKeyInput] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isSignUpMode, setIsSignUpMode] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!account) return;
+
+    if (window.location.pathname === '/login') {
+      navigate('/');
+    }
 
     const unsubscribe = subscriptionClient.subscribe(
       {
@@ -65,15 +74,12 @@ const LoginPage: React.FC = () => {
           const data = result.data as { onUserChanged: { id: string } };
           if (data.onUserChanged.id) {
             setIsLoggingIn(false);
-            navigate('/');
           }
         },
         error: (err) => {
           console.error('Subscription error:', err);
         },
-        complete: () => {
-          console.error('Subscription completed');
-        },
+        complete: () => {}
       }
     );
 
@@ -82,7 +88,7 @@ const LoginPage: React.FC = () => {
     };
   }, [navigate, account]);
 
-  const handleLogin = useCallback(async (type: LoginType, param?: any) => {
+  const handleLogin = useCallback(async (type: AccountType, param?: any) => {
     setIsLoggingIn(true);
     try {
       await createAccount(type, param);
@@ -101,6 +107,74 @@ const LoginPage: React.FC = () => {
     }
   }, [navigate, createAccount, t]);
 
+  const handleSupabaseLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setIsLoggingIn(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user) {
+        throw new Error('No user data returned');
+      }
+
+      const jwt = await getSupabaseJWT();
+      if (!jwt) {
+        throw new Error('Failed to get JWT');
+      }
+
+      await handleLogin(AccountType.SUPABASE, jwt);
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrorMessage(t('ui:loginFailed'));
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleSupabaseSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setIsSigningUp(true);
+
+    if (password !== confirmPassword) {
+      setErrorMessage(t('ui:passwordsDoNotMatch'));
+      setIsSigningUp(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user) {
+        throw new Error('No user data returned');
+      }
+
+      setErrorMessage(t('ui:emailVerificationSent'));
+      setIsSignUpMode(false);
+    } catch (error) {
+      console.error('Sign up error:', error);
+      setErrorMessage(t('ui:signUpFailed'));
+    } finally {
+      setIsSigningUp(false);
+    }
+  };
+
   const isDisabled = () => {
     return isLoggingIn;
   }
@@ -109,36 +183,116 @@ const LoginPage: React.FC = () => {
     <div className="flex flex-col items-center justify-center">
       <img alt="logo" className="w-120 h-auto object-contain mb-4" src={logo} />
       <div className="flex flex-col w-full">
-        <div className="flex items-center gap-2">
-          <input
-            className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
-            disabled={isDisabled()}
-            placeholder={t('ui:enterPrivateKey')}
-            type="password"
-            value={privateKeyInput}
-            onChange={(e) => setPrivateKeyInput(e.target.value)}
-          />
+        {/* Supabase Login/Signup Form */}
+        <form className="mb-8" onSubmit={isSignUpMode ? handleSupabaseSignUp : handleSupabaseLogin}>
+          <div className="mb-4">
+            <input
+              className="w-full p-3 border border-black bg-gray-100 rounded-lg"
+              disabled={isDisabled()}
+              placeholder={t('ui:email')}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <input
+              className="w-full p-3 border border-black bg-gray-100 rounded-lg font-sans-serif"
+              disabled={isDisabled()}
+              placeholder={t('ui:password')}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          {isSignUpMode && (
+            <div className="mb-4">
+              <input
+                className="w-full p-3 border border-black bg-gray-100 rounded-lg"
+                disabled={isDisabled()}
+                placeholder={t('ui:confirmPassword')}
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          )}
           <StyledButton
+            className="w-full"
             disabled={isDisabled()}
-            onClick={() => handleLogin('raw', privateKeyInput)}
+            type="submit"
           >
-            {isLoggingIn ? 'Logging in...' : t('ui:login.loginButton')}
+            {isLoggingIn ? t('ui:loggingIn') : isSigningUp ? t('ui:signingUp') : isSignUpMode ? t('ui:signUp') : t('ui:login')}
           </StyledButton>
+        </form>
+
+        <div className="text-center my-4">
+          {isSignUpMode ? (
+            <p>
+              {t('ui:haveAccount')}{' '}
+              <button
+                className="text-blue-500 hover:underline cursor-pointer"
+                onClick={() => setIsSignUpMode(false)}
+              >
+                {t('ui:signInHere')}
+              </button>
+            </p>
+          ) : (
+            <p>
+              {t('ui:noAccount')}{' '}
+              <button
+                className="text-blue-500 hover:underline cursor-pointer"
+                onClick={() => setIsSignUpMode(true)}
+              >
+                {t('ui:signUpHere')}
+              </button>
+            </p>
+          )}
         </div>
-        <div className="text-center my-4 text-gray-500 flex items-center justify-center">
-          <span className="mx-4">{t('ui:or')}</span>
-        </div>
-        <StyledButton
-          disabled={isDisabled()}
-          onClick={() => handleLogin('metamask')}
-        >
-          <img 
-            alt="MetaMask" 
-            className="w-6 h-6 mr-2"
-            src={metamaskIcon}
-          />
-          {isLoggingIn ? 'Logging in...' : t('ui:connectWithMetamask')}
-        </StyledButton>
+
+        {!isSignUpMode && (
+          <>
+            <div className="text-center my-4 text-gray-500 flex items-center justify-center">
+              <span className="mx-4">{t('ui:or')}</span>
+            </div>
+
+            {/* Existing Private Key Login */}
+            <div className="flex items-center gap-2">
+              <input
+                className={`font-sans-serif flex-grow p-3 border border-black bg-gray-100 rounded-lg ${(isDisabled()) ? 'bg-gray-300 text-gray-500' : ''}`}
+                disabled={isDisabled()}
+                placeholder={t('ui:enterPrivateKey')}
+                type="password"
+                value={privateKeyInput}
+                onChange={(e) => setPrivateKeyInput(e.target.value)}
+              />
+              <StyledButton
+                disabled={isDisabled()}
+                onClick={() => handleLogin(AccountType.RAW, privateKeyInput)}
+              >
+                {isLoggingIn ? t('ui:loggingIn') : t('ui:loginWithPrivateKey')}
+              </StyledButton>
+            </div>
+
+            <div className="text-center my-4 text-gray-500 flex items-center justify-center">
+              <span className="mx-4">{t('ui:or')}</span>
+            </div>
+
+            {/* Existing Metamask Login */}
+            <StyledButton
+              disabled={isDisabled()}
+              onClick={() => handleLogin(AccountType.METAMASK)}
+            >
+              <img 
+                alt="MetaMask" 
+                className="w-6 h-6 mr-2"
+                src={metamaskIcon}
+              />
+              {isLoggingIn ? t('ui:loggingIn') : t('ui:connectWithMetamask')}
+            </StyledButton>
+          </>
+        )}
+
         {errorMessage && (
           <div className="text-red-500 italic mt-4 text-center">
             {errorMessage}
@@ -156,7 +310,7 @@ const LoginPage: React.FC = () => {
                 <th className="px-4 py-3 border-b text-left">{t('ui:name')}</th>
                 <th className="px-4 py-3 border-b text-left">{t('ui:privateKey')}</th>
                 <th className="px-4 py-3 border-b text-left">{t('ui:address')}</th>
-                <th className="px-4 py-3 border-b text-left w-32">{t('ui:login.loginButton')}</th>
+                <th className="px-4 py-3 border-b text-left w-32">{t('ui:loginWithPrivateKey')}</th>
               </tr>
             </thead>
             <tbody>
@@ -183,7 +337,7 @@ const LoginPage: React.FC = () => {
                       disabled={isDisabled()}
                       onClick={() => {
                         setPrivateKeyInput(account.privateKey);
-                        handleLogin('raw', account.privateKey);
+                        handleLogin(AccountType.RAW, account.privateKey);
                       }}
                     >
                       {isLoggingIn ? t('ui:login.loggingIn') : t('ui:login.loginButton')}

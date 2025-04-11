@@ -4,11 +4,71 @@ import {
   unsignedTransactionQuery,
   stageTransactionMutation,
   onTransactionChangedSubscription,
+  createSessionAction,
+  createUserAction,
+  pickUpAction,
+  pickUpManyAction,
+  registerMatchingAction,
+  cancelMatchingAction,
+  joinSessionAction,
+  submitMoveAction,
+  registerGloveAction
 } from '../queries';
 import subscriptionClient from '../subscriptionClient';
+import { ActionName } from '../types/types';
 import type { Account } from '../accounts/Account';
 
-export async function executeTransaction(
+export async function executeAction(account: Account, actionName: ActionName, variables?: Record<string, any>) {
+  let document;
+  switch (actionName) {
+    case ActionName.PICK_UP:
+      document = pickUpAction;
+      break;
+    case ActionName.PICK_UP_MANY:
+      document = pickUpManyAction;
+      break;
+    case ActionName.REGISTER_MATCHING:
+      document = registerMatchingAction;
+      break;
+    case ActionName.CANCEL_MATCHING:
+      document = cancelMatchingAction;
+      break;
+    case ActionName.JOIN_SESSION:
+      document = joinSessionAction;
+      break;
+    case ActionName.SUBMIT_MOVE:
+      document = submitMoveAction;
+      break;
+    case ActionName.REGISTER_GLOVE:
+      document = registerGloveAction;
+      break;
+    case ActionName.CREATE_SESSION:
+      document = createSessionAction;
+      break;
+    case ActionName.CREATE_USER:
+      document = createUserAction;
+      break;
+    default:
+      throw new Error(`Unknown action: ${actionName}`);
+  }
+
+  const response = await request<Record<string, any>>(
+    GRAPHQL_ENDPOINT,
+    document,
+    variables
+  );
+
+  const plainValue = response.actionQuery?.[actionName];
+  if (plainValue) {
+    const txId = await executeTransaction(account, plainValue);
+    await waitForTransaction(txId);
+    return txId;
+  }
+
+  return undefined;
+}
+
+async function executeTransaction(
   account: Account, plainValue: string) {
   const unsignedTransactionResponse = await request(GRAPHQL_ENDPOINT, unsignedTransactionQuery, {
     address: account.address.toString(),

@@ -1,5 +1,7 @@
 import { Address } from '@planetarium/account';
-import type { Account, AccountCreator } from './Account';
+import { AccountType, type Account, type AccountCreator } from './Account';
+import { executeAction } from '../utils/transaction';
+import type { ActionName } from '../types/types';
 
 type Ethereum = NonNullable<typeof window.ethereum>;
 
@@ -104,7 +106,7 @@ async function requestAccounts(ethereum: Ethereum): Promise<Address> {
 
 export class MetamaskAccount implements Account {
   public readonly address: Address;
-  public readonly type: string = 'metamask';
+  public readonly type: AccountType = AccountType.METAMASK;
   private connected: boolean;
 
   constructor(address: Address) {
@@ -114,6 +116,7 @@ export class MetamaskAccount implements Account {
 
   public disconnect() {
     this.connected = false;
+    localStorage.removeItem('account-type-address');
   }
 
   public async sign(message: string): Promise<string> {
@@ -129,10 +132,14 @@ export class MetamaskAccount implements Account {
     await ensureCorrectChain(ethereum);
     return signMessage(ethereum, message, this.address);
   }
+
+  async executeAction(actionName: ActionName, variables?: Record<string, any>): Promise<any> {
+    return await executeAction(this, actionName, variables);
+  }
 }
 
 export class MetamaskAccountCreator implements AccountCreator {
-  public readonly type: string = 'metamask';
+  public readonly type = AccountType.METAMASK;
 
   public async create(): Promise<Account> {
     const ethereum = window.ethereum;

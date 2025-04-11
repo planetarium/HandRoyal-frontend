@@ -226,8 +226,8 @@ export const GLOVE_SUBSCRIPTION = `
 `;
 
 export const PICK_UP_RESULT_SUBSCRIPTION = `
-  subscription OnPickUpResult($txId: TxId!) {
-    onPickUpResult(txId: $txId) {
+  subscription OnPickUpResult($userId: Address!) {
+    onPickUpResult(userId: $userId) {
       gloves
     }
   }
@@ -371,3 +371,88 @@ export const onTransactionChangedSubscription = `
     }
   }
 `;
+
+/* Query for email-based action mutations */
+export const getUserAddress = graphql(/* GraphQL */ `
+  query GetUserAddress {
+    getUserAddress
+  }
+`);
+
+export const createUserByWallet = graphql(/* GraphQL */ `
+  mutation CreateUserByWallet($name: String!) {
+    createUserByWallet(name: $name)
+  }
+`);
+
+export const createSessionByWallet = graphql(/* GraphQL */ `
+  mutation CreateSessionByWallet(
+    $sessionId: Address!,
+    $prize: Address!,
+    $maximumUser: Int!,
+    $minimumUser: Int!,
+    $remainingUser: Int!,
+    $startAfter: Long!,
+    $maxRounds: Int!,
+    $roundLength: Long!,
+    $roundInterval: Long!,
+    $initialHealthPoint: Int!,
+    $users: [Address!]!
+  ) {
+    createSessionByWallet(
+      sessionId: $sessionId,
+      prize: $prize,
+      maximumUser: $maximumUser,
+      minimumUser: $minimumUser,
+      remainingUser: $remainingUser,
+      startAfter: $startAfter,
+      maxRounds: $maxRounds,
+      roundLength: $roundLength,
+      roundInterval: $roundInterval,
+      initialHealthPoint: $initialHealthPoint,
+      users: $users
+    )
+  }
+`);
+
+export const joinSessionByWallet = graphql(/* GraphQL */ `
+  mutation JoinSessionByWallet($sessionId: Address!, $gloves: [Address!]!) {
+    joinSessionByWallet(sessionId: $sessionId, gloves: $gloves)
+  }
+`);
+
+export const submitMoveByWallet = graphql(/* GraphQL */ `
+  mutation SubmitMoveByWallet($sessionId: Address!, $gloveIndex: Int!) {
+    submitMoveByWallet(sessionId: $sessionId, gloveIndex: $gloveIndex)
+  }
+`);
+
+export const registerGloveByWallet = graphql(/* GraphQL */ `
+  mutation RegisterGloveByWallet($gloveId: Address!) {
+    registerGloveByWallet(gloveId: $gloveId)
+  }
+`);
+
+export const pickUpByWallet = graphql(/* GraphQL */ `
+  mutation pickUpByWallet {
+    pickUpByWallet
+  }
+`);
+
+export const pickUpManyByWallet = graphql(/* GraphQL */ `
+  mutation pickUpManyByWallet {
+    pickUpManyByWallet
+  }
+`);
+
+export const registerMatchingByWallet = graphql(/* GraphQL */ `
+  mutation RegisterMatchingByWallet($gloves: [Address!]!) {
+    registerMatchingByWallet(gloves: $gloves)
+  }
+`);
+
+export const cancelMatchingByWallet = graphql(/* GraphQL */ `
+  mutation cancelMatchingByWallet {
+    cancelMatchingByWallet
+  }
+`);

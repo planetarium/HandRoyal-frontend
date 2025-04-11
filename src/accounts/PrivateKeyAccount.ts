@@ -2,7 +2,9 @@ import { secp256k1 } from 'ethereum-cryptography/secp256k1';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import { utf8ToBytes, hexToBytes } from 'ethereum-cryptography/utils';
 import { Address, RawPrivateKey } from '@planetarium/account';
-import type { Account, AccountCreator } from './Account';
+import { executeAction } from '../utils/transaction';
+import { AccountType, type Account, type AccountCreator } from './Account';
+import type { ActionName } from '../types/types';
 
 export class PrivateKeyAccount implements Account {
   privateKey: RawPrivateKey | null = null;
@@ -16,17 +18,13 @@ export class PrivateKeyAccount implements Account {
     return this.addressInternal;
   }
 
-  public get type(): string {
-    return 'raw';
+  public get type(): AccountType {
+    return AccountType.RAW;
   }
 
-  public disconnect() {
-    if (!this.address) {
-      throw new Error('Account not connected');
-    }
-
-    this.addressInternal = null;
-    localStorage.removeItem('account-type-param');
+  public disconnect(): void {
+    localStorage.removeItem('private-key-address');
+    localStorage.removeItem('private-key');
   }
 
   public async sign(message: string): Promise<string> {
@@ -51,10 +49,14 @@ export class PrivateKeyAccount implements Account {
       throw new Error('Failed to sign message');
     }
   }
+
+  async executeAction(actionName: ActionName, variables?: Record<string, any>): Promise<any> {
+    return await executeAction(this, actionName, variables);
+  }
 }
 
 export class PrivateKeyAccountCreator implements AccountCreator {
-  public type = 'raw';
+  public readonly type = AccountType.RAW;
 
   public async create(param?: any): Promise<Account> {
     if (typeof param === 'string') {
@@ -62,8 +64,8 @@ export class PrivateKeyAccountCreator implements AccountCreator {
       const account = new PrivateKeyAccount();
       account.privateKey = privateKey;
       account.addressInternal = await privateKey.getAddress();
-      localStorage.setItem('account-type-key', param);
-      localStorage.setItem('account-type-address', account.addressInternal.toString());
+      localStorage.setItem('private-key-address', account.addressInternal.toString());
+      localStorage.setItem('private-key', param);
       return account;
     }
 
@@ -71,14 +73,17 @@ export class PrivateKeyAccountCreator implements AccountCreator {
   }
 
   public restore(): Account {
-    const key = localStorage.getItem('account-type-key');
-    const address = localStorage.getItem('account-type-address');
-    if (!key || !address) {
-      throw new Error('No parameter found');
+    const address = localStorage.getItem('private-key-address');
+    const privateKey = localStorage.getItem('private-key');
+    if (!address) {
+      throw new Error('No stored private key address');
+    }
+    if (!privateKey) {
+      throw new Error('No stored private key');
     }
 
     const account = new PrivateKeyAccount();
-    account.privateKey = RawPrivateKey.fromHex(key);
+    account.privateKey = RawPrivateKey.fromHex(privateKey);
     account.addressInternal = Address.fromHex(address, true);
     return account;
   }
