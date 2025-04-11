@@ -15,7 +15,8 @@ import {
   registerGloveByWallet,
   createSessionByWallet,
   createUserByWallet,
-  getUserAddress
+  getUserAddress,
+  refillActionPointByWallet
 } from '../queries';
 
 class SupabaseAccount implements Account {
@@ -73,6 +74,9 @@ class SupabaseAccount implements Account {
         break;
       case ActionName.CREATE_USER:
         document = createUserByWallet;
+        break;
+      case ActionName.REFILL_ACTION_POINT:
+        document = refillActionPointByWallet;
         break;
       default:
         throw new Error(`Unknown action: ${actionName}`);

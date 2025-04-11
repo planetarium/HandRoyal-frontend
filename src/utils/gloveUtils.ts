@@ -1,3 +1,4 @@
+import { ParseAddress } from './addressUtils';
 import type { HandType, GloveRarity } from '../types/types';
 
 export const GetGloveType = (gloveId: string): HandType | 'special' | 'unknown' => {
@@ -23,7 +24,7 @@ export const GetGloveType = (gloveId: string): HandType | 'special' | 'unknown' 
 
 export const GetGloveRarity = (gloveId: string): GloveRarity => {
     // 0x로 시작하면 앞 두 글자 제거
-    const processedId = gloveId.startsWith('0x') ? gloveId.substring(2) : gloveId;
+    const processedId = ParseAddress(gloveId);
     
     // 두 번째 글자로 희귀도 결정
     const rarityChar = processedId.charAt(1);

@@ -12,7 +12,8 @@ import {
   cancelMatchingAction,
   joinSessionAction,
   submitMoveAction,
-  registerGloveAction
+  registerGloveAction,
+  refillActionPointAction
 } from '../queries';
 import subscriptionClient from '../subscriptionClient';
 import { ActionName } from '../types/types';
@@ -47,6 +48,9 @@ export async function executeAction(account: Account, actionName: ActionName, va
       break;
     case ActionName.CREATE_USER:
       document = createUserAction;
+      break;
+    case ActionName.REFILL_ACTION_POINT:
+      document = refillActionPointAction;
       break;
     default:
       throw new Error(`Unknown action: ${actionName}`);

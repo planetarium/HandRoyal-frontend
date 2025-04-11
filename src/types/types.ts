@@ -12,7 +12,8 @@ export enum ActionName {
   SUBMIT_MOVE = 'submitMove',
   REGISTER_GLOVE = 'registerGlove',
   CREATE_SESSION = 'createSession',
-  CREATE_USER = 'createUser'
+  CREATE_USER = 'createUser',
+  REFILL_ACTION_POINT = 'refillActionPoint'
 }
 
 export type GloveRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'unknown';

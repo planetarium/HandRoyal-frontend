@@ -6,6 +6,7 @@ import { GetGloveType, GetGloveRarity } from '../utils/gloveUtils';
 import type_rock from '../assets/type_rock.png';
 import type_paper from '../assets/type_paper.png';
 import type_scissors from '../assets/type_scissors.png';
+import { ParseAddress } from '../utils/addressUtils';
 
 interface GloveCardProps {
   gloveId: string;
@@ -18,7 +19,7 @@ const GloveCard: React.FC<GloveCardProps> = ({ gloveId, count = 1, disableClick 
   const navigate = useNavigate();
 
   // 0x로 시작하는 경우 앞 두 글자 제거
-  const processedGloveId = gloveId.startsWith('0x') ? gloveId.substring(2) : gloveId;
+  const processedGloveId = ParseAddress(gloveId);
 
   // 기본 이미지 경로
   const imagePath = getLocalGloveImage(processedGloveId);

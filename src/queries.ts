@@ -16,6 +16,8 @@ export const getUserDocument = graphql(/* GraphQL */ `
         equippedGlove
         sessionId
         balance
+        actionPoint
+        lastClaimedAt
       }
     }
   }
@@ -338,6 +340,14 @@ export const cancelMatchingAction = graphql(/* GraphQL */ `
   }
 `);
 
+export const refillActionPointAction = graphql(/* GraphQL */ `
+  query RefillActionPointAction {
+    actionQuery {
+      refillActionPoint
+    }
+  }
+`);
+
 export const unsignedTransactionQuery = graphql(/* GraphQL */ `  
   query UnsignedTransaction($address: Address!, $plainValue: Hex!) {
     transaction {
@@ -454,5 +464,11 @@ export const registerMatchingByWallet = graphql(/* GraphQL */ `
 export const cancelMatchingByWallet = graphql(/* GraphQL */ `
   mutation cancelMatchingByWallet {
     cancelMatchingByWallet
+  }
+`);
+
+export const refillActionPointByWallet = graphql(/* GraphQL */ `
+  mutation RefillActionPointByWallet {
+    refillActionPointByWallet
   }
 `);
