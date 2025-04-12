@@ -275,9 +275,10 @@ export const MatchingPage: React.FC = () => {
           {isProcessing ? t('ui:processing') : t('ui:back')}
         </StyledButton>
         
+        {((userData?.actionPoint ?? 0) <= 0) ? <p className="text-md text-red-500">{t('ui:notEnoughActionPoint')}: {userData?.actionPoint}</p> : null}
         <StyledButton
           bgColor="#4FD1C5"
-          disabled={isProcessing}
+          disabled={userData?.actionPoint === 0 || isProcessing}
           shadowColor="#319795"
           onClick={handleConfirmMatching}
         >

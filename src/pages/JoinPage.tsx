@@ -219,9 +219,10 @@ const JoinPage: React.FC = () => {
             </div>
             
             <div className="flex space-x-4 mt-4">
+              {((userData?.actionPoint ?? 0) <= 0) ? <p className="text-md text-red-500">{t('ui:notEnoughActionPoint')}: {userData?.actionPoint}</p> : null}
               <StyledButton 
                 bgColor = '#FFE55C'
-                disabled={totalSelected !== MAX_SELECTIONS || isJoining}
+                disabled={totalSelected !== MAX_SELECTIONS || isJoining || userData?.actionPoint === 0}
                 shadowColor = '#FF9F0A' 
                 onClick={handleJoin}
               >
