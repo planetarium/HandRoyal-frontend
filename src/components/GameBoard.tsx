@@ -438,7 +438,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
             <div className="flex flex-col items-center p-4">
               <StyledButton 
                 bgColor='#FFE55C' 
-                disabled={submitting}
+                disabled={submitting || selectedHand === -1}
                 shadowColor='#FF9F0A'
                 onClick={handleSubmit}
               >
@@ -635,7 +635,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
           <div className="flex flex-col items-center p-4">
             <StyledButton 
               bgColor='#FFE55C' 
-              disabled={submitting}
+              disabled={submitting || selectedHand === -1}
               shadowColor='#FF9F0A'
               onClick={handleSubmit}
             >

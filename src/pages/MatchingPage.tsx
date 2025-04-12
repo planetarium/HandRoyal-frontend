@@ -14,6 +14,8 @@ import { useTip } from '../context/TipContext';
 import { ActionName } from '../types/types';
 import type { GloveInfo } from '../gql/graphql';
 
+const GLOVE_SELECTION_LIMIT: number = 8;
+
 // 매칭 상태를 표현하는 타입
 type MatchingStatus = 'selecting' | 'confirming' | 'searching' | 'matched' | 'failed';
 
@@ -195,7 +197,7 @@ export const MatchingPage: React.FC = () => {
       
       {userData?.ownedGloves && (
         <GloveSelectionComponent
-          maxSelections={5} // 무제한 선택 가능
+          maxSelections={GLOVE_SELECTION_LIMIT}
           ownedGloves={userData.ownedGloves.filter((g: GloveInfo | null | undefined) => g !== null && g !== undefined) ?? []}
           selectedGloves={selectedGloves}
           setSelectedGloves={setSelectedGloves}
@@ -215,7 +217,7 @@ export const MatchingPage: React.FC = () => {
         
         <StyledButton
           bgColor="#4FD1C5"
-          disabled={totalSelected !== 5}
+          disabled={totalSelected !== GLOVE_SELECTION_LIMIT}
           shadowColor="#319795"
           onClick={handleRegisterMatching}
         >
