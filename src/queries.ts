@@ -51,7 +51,8 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
         state
         players {
           id
-          gloves
+          initialGloves
+          activeGloves
         }
         creationHeight
         startHeight
@@ -121,12 +122,14 @@ export const getSessionHeaderDocument = graphql(/* GraphQL */ `
           roundLength
           roundInterval
           initialHealthPoint
-          numberOfGloves
+          numberOfInitialGloves
+          numberOfActiveGloves
         }
         state
         players {
           id
-          gloves
+          initialGloves
+          activeGloves
         }
         creationHeight
         startHeight
@@ -157,13 +160,15 @@ export const getSessionDocument = graphql(/* GraphQL */ `
           roundLength
           roundInterval
           initialHealthPoint
-          numberOfGloves
+          numberOfInitialGloves
+          numberOfActiveGloves
           users
         }
         state
         players {
           id
-          gloves
+          initialGloves
+          activeGloves
           state
         }
         phases {
@@ -256,6 +261,8 @@ export const createSessionAction = graphql(/* GraphQL */ `
     $roundLength: Long!,
     $roundInterval: Long!,
     $initialHealthPoint: Int!,
+    $numberOfInitialGloves: Int!,
+    $numberOfActiveGloves: Int!,
     $users: [Address!]!
   ) {
     actionQuery {
@@ -270,6 +277,8 @@ export const createSessionAction = graphql(/* GraphQL */ `
         roundLength: $roundLength,
         roundInterval: $roundInterval,
         initialHealthPoint: $initialHealthPoint,
+        numberOfInitialGloves: $numberOfInitialGloves,
+        numberOfActiveGloves: $numberOfActiveGloves,
         users: $users
       )
     }
@@ -407,6 +416,8 @@ export const createSessionByWallet = graphql(/* GraphQL */ `
     $roundLength: Long!,
     $roundInterval: Long!,
     $initialHealthPoint: Int!,
+    $numberOfInitialGloves: Int!,
+    $numberOfActiveGloves: Int!,
     $users: [Address!]!
   ) {
     createSessionByWallet(
@@ -420,6 +431,8 @@ export const createSessionByWallet = graphql(/* GraphQL */ `
       roundLength: $roundLength,
       roundInterval: $roundInterval,
       initialHealthPoint: $initialHealthPoint,
+      numberOfInitialGloves: $numberOfInitialGloves,
+      numberOfActiveGloves: $numberOfActiveGloves,
       users: $users
     )
   }
