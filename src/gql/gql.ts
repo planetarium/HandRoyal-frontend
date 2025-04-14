@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n": typeof types.GetUserDocument,
+    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n        actionPoint\n        lastClaimedAt\n      }\n    }\n  }\n": typeof types.GetUserDocument,
     "\n  query GetMatchPool {\n    stateQuery {\n      getMatchPool {\n        userId\n        gloves\n        registeredHeight\n      }\n    }\n  }\n": typeof types.GetMatchPoolDocument,
     "\n  query GetSessions {\n    stateQuery {\n      sessions {\n        metadata {\n          id\n          organizer\n          prize\n          maximumUser\n          minimumUser\n          remainingUser\n          users\n        }\n        state\n        players {\n          id\n          gloves\n        }\n        creationHeight\n        startHeight\n      }\n    }\n  }\n": typeof types.GetSessionsDocument,
     "\n  query GetUserScopedSession($sessionId: Address!, $userId: Address!) {\n    stateQuery {\n      userScopedSession(sessionId: $sessionId, userId: $userId) {\n        sessionId\n        height\n        sessionState\n        organizerAddress\n        opponentAddress\n        currentInterval\n        isPlayer\n        myGloves\n        opponentGloves\n        playersLeft\n        currentPhaseIndex\n        currentUserRoundIndex\n        myCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        opponentCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        lastRoundWinner\n        currentUserMatchState\n        playerState\n        intervalEndHeight\n      }\n    }\n  }\n": typeof types.GetUserScopedSessionDocument,
@@ -31,6 +31,7 @@ type Documents = {
     "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n": typeof types.PickUpManyActionDocument,
     "\n  query RegisterMatchingAction($gloves: [Address!]!) {\n    actionQuery {\n      registerMatching(gloves: $gloves)\n    }\n  }\n": typeof types.RegisterMatchingActionDocument,
     "\n  query CancelMatchingAction {\n    actionQuery {\n      cancelMatching\n    }\n  }\n": typeof types.CancelMatchingActionDocument,
+    "\n  query RefillActionPointAction {\n    actionQuery {\n      refillActionPoint\n    }\n  }\n": typeof types.RefillActionPointActionDocument,
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": typeof types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": typeof types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": typeof types.TransactionResultDocument,
@@ -44,9 +45,10 @@ type Documents = {
     "\n  mutation pickUpManyByWallet {\n    pickUpManyByWallet\n  }\n": typeof types.PickUpManyByWalletDocument,
     "\n  mutation RegisterMatchingByWallet($gloves: [Address!]!) {\n    registerMatchingByWallet(gloves: $gloves)\n  }\n": typeof types.RegisterMatchingByWalletDocument,
     "\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n": typeof types.CancelMatchingByWalletDocument,
+    "\n  mutation RefillActionPointByWallet {\n    refillActionPointByWallet\n  }\n": typeof types.RefillActionPointByWalletDocument,
 };
 const documents: Documents = {
-    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n": types.GetUserDocument,
+    "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n        actionPoint\n        lastClaimedAt\n      }\n    }\n  }\n": types.GetUserDocument,
     "\n  query GetMatchPool {\n    stateQuery {\n      getMatchPool {\n        userId\n        gloves\n        registeredHeight\n      }\n    }\n  }\n": types.GetMatchPoolDocument,
     "\n  query GetSessions {\n    stateQuery {\n      sessions {\n        metadata {\n          id\n          organizer\n          prize\n          maximumUser\n          minimumUser\n          remainingUser\n          users\n        }\n        state\n        players {\n          id\n          gloves\n        }\n        creationHeight\n        startHeight\n      }\n    }\n  }\n": types.GetSessionsDocument,
     "\n  query GetUserScopedSession($sessionId: Address!, $userId: Address!) {\n    stateQuery {\n      userScopedSession(sessionId: $sessionId, userId: $userId) {\n        sessionId\n        height\n        sessionState\n        organizerAddress\n        opponentAddress\n        currentInterval\n        isPlayer\n        myGloves\n        opponentGloves\n        playersLeft\n        currentPhaseIndex\n        currentUserRoundIndex\n        myCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        opponentCondition {\n          healthPoint\n          gloveUsed\n          submission\n          activeEffectData {\n            type\n            duration\n            parameters\n          }\n        }\n        lastRoundWinner\n        currentUserMatchState\n        playerState\n        intervalEndHeight\n      }\n    }\n  }\n": types.GetUserScopedSessionDocument,
@@ -63,6 +65,7 @@ const documents: Documents = {
     "\n  query PickUpManyAction {\n    actionQuery {\n      pickUpMany\n    }\n  }\n": types.PickUpManyActionDocument,
     "\n  query RegisterMatchingAction($gloves: [Address!]!) {\n    actionQuery {\n      registerMatching(gloves: $gloves)\n    }\n  }\n": types.RegisterMatchingActionDocument,
     "\n  query CancelMatchingAction {\n    actionQuery {\n      cancelMatching\n    }\n  }\n": types.CancelMatchingActionDocument,
+    "\n  query RefillActionPointAction {\n    actionQuery {\n      refillActionPoint\n    }\n  }\n": types.RefillActionPointActionDocument,
     "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n": types.UnsignedTransactionDocument,
     "  \n  mutation StageTransaction($unsignedTransaction: Hex!, $signature: Hex!) {\n    stageTransaction(unsignedTransaction: $unsignedTransaction, signature: $signature)\n  }\n": types.StageTransactionDocument,
     "\n  query TransactionResult($txId: TxId!) {\n    transaction {\n      transactionResult(txId: $txId) {\n        txStatus\n        blockIndex\n        exceptionNames\n      }\n    }\n  }\n": types.TransactionResultDocument,
@@ -76,6 +79,7 @@ const documents: Documents = {
     "\n  mutation pickUpManyByWallet {\n    pickUpManyByWallet\n  }\n": types.PickUpManyByWalletDocument,
     "\n  mutation RegisterMatchingByWallet($gloves: [Address!]!) {\n    registerMatchingByWallet(gloves: $gloves)\n  }\n": types.RegisterMatchingByWalletDocument,
     "\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n": types.CancelMatchingByWalletDocument,
+    "\n  mutation RefillActionPointByWallet {\n    refillActionPointByWallet\n  }\n": types.RefillActionPointByWalletDocument,
 };
 
 /**
@@ -95,7 +99,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n        actionPoint\n        lastClaimedAt\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetUser($address: Address!) {\n    stateQuery {\n      getUserData(userId: $address) {\n        id\n        name\n        registeredGloves\n        ownedGloves {\n          id\n          count\n        }\n        equippedGlove\n        sessionId\n        balance\n        actionPoint\n        lastClaimedAt\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -163,6 +167,10 @@ export function graphql(source: "\n  query CancelMatchingAction {\n    actionQue
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query RefillActionPointAction {\n    actionQuery {\n      refillActionPoint\n    }\n  }\n"): (typeof documents)["\n  query RefillActionPointAction {\n    actionQuery {\n      refillActionPoint\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n"): (typeof documents)["  \n  query UnsignedTransaction($address: Address!, $plainValue: Hex!) {\n    transaction {\n      unsignedTransaction(address: $address, plainValue: $plainValue)\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -212,6 +220,10 @@ export function graphql(source: "\n  mutation RegisterMatchingByWallet($gloves: 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n"): (typeof documents)["\n  mutation cancelMatchingByWallet {\n    cancelMatchingByWallet\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RefillActionPointByWallet {\n    refillActionPointByWallet\n  }\n"): (typeof documents)["\n  mutation RefillActionPointByWallet {\n    refillActionPointByWallet\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

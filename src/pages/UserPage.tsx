@@ -7,13 +7,19 @@ import { getUserDocument } from '../queries';
 import StyledButton from '../components/StyledButton';
 import GloveCard from '../components/GloveCard';
 import royal from '../assets/royal.png';
-
+import { useTip } from '../context/TipContext';
+import { useAccount } from '../context/AccountContext';
+import { ActionName } from '../types/types';
+import { AddressEquals } from '../utils/addressUtils';
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT;
 
 const UserPage: React.FC = () => {
   const { t } = useTranslation();
+  const { tip } = useTip();
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const account = useAccount();
+  const [refilling, setRefilling] = React.useState(false);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['getUserData', userId],
@@ -59,6 +65,14 @@ const UserPage: React.FC = () => {
     }
   }
 
+  const handleRefill = async () => {
+    setRefilling(true);
+    await account?.executeAction(ActionName.REFILL_ACTION_POINT, {});
+    setRefilling(false);
+  }
+
+  const blockIndex = tip?.height ?? 0;
+
   return (
     <div className="flex flex-col items-center justify-center w-full mx-auto bg-gray-700 border-2 border-black rounded-lg text-white">
       <div className="w-full flex flex-col items-center bg-gray-900 p-4 rounded-t-lg border-b border-black">
@@ -73,6 +87,17 @@ const UserPage: React.FC = () => {
             <p className="text-md">{t('ui:userId')}: {data.id}</p>
             <p className="text-md">{t('ui:userName')}: {data.name}</p>
             <p className="text-md"><img alt="royal" className="w-6 h-6 inline-block mr-2" src={royal} />{data.balance}</p>
+            <p className="text-md">{t('ui:actionPoint')}: {data.actionPoint}</p>
+            <p className="text-md">{t('ui:lastClaimedAt')}: {data.lastClaimedAt}</p>
+            {AddressEquals(account?.address.toString() ?? '', userId ?? '') ? 
+              <>
+                <StyledButton
+                  disabled={refilling || (blockIndex - (blockIndex % 10_000) <= (data.lastClaimedAt ?? 0))}
+                  onClick={handleRefill}>{t('ui:refill')}
+                </StyledButton>
+                <p className="text-md">{t('ui:youCanRefillAfter')}&nbsp;:&nbsp;{data.lastClaimedAt - (data.lastClaimedAt % 10_000) + 10_000 - blockIndex}</p>
+              </>
+               : null}
             <div className="w-full">
               {/* 소유한 글러브 */}
               <div className="bg-gray-600 p-4 rounded shadow mb-4">

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { ParseAddress } from "../utils/addressUtils";
 
 interface AddressDisplayProps {
   className?: string;
@@ -26,7 +27,7 @@ const AddressDisplay: React.FC<AddressDisplayProps> = ({ type, address, classNam
     return shorten ? '0x' + address.slice(0, 6) : address;
   };
 
-  const processedAddress = address ? (address.startsWith('0x') ? address.slice(2) : address) : undefined;
+  const processedAddress = address ? ParseAddress(address) : undefined;
 
   const displayAddress = (address: string | undefined) => {
     if (address) {
