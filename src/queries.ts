@@ -52,7 +52,7 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
         players {
           id
           initialGloves
-          activeGloves
+          playerIndex
         }
         creationHeight
         startHeight
@@ -129,7 +129,7 @@ export const getSessionHeaderDocument = graphql(/* GraphQL */ `
         players {
           id
           initialGloves
-          activeGloves
+          playerIndex
         }
         creationHeight
         startHeight
@@ -168,14 +168,17 @@ export const getSessionDocument = graphql(/* GraphQL */ `
         players {
           id
           initialGloves
-          activeGloves
+          playerIndex
           state
         }
         phases {
           height
           matches {
             startHeight
-            players
+            matchPlayers {
+              playerIndex
+              activeGloves
+            }
             state
             rounds {
               condition1 {
