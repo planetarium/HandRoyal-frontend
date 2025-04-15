@@ -192,29 +192,16 @@ export const CreateSession: React.FC = () => {
     }
   };
 
-  const isValidAddress = useCallback((address: string): boolean => {
-    return /^0x[0-9a-fA-F]{40}$/.test(address);
-  }, []);
-
-  const formatAddress = useCallback((address: string): string => {
-    if (address.startsWith('0x')) {
-      return address;
-    }
-    return `0x${address}`;
-  }, []);
-
   const validateUserAddress = useCallback(
     (address: string) => {
       const isAddressInputValid = (addr: string): boolean => {
         if (!addr) return true;
 
-        const formattedAddr = addr.startsWith('0x') ? addr : `0x${addr}`;
+        const parsedAddress = ParseAddress(addr);
 
-        if (formattedAddr.length === 42) {
+        if (parsedAddress.length === 40) {
           return isValidAddress(formattedAddr);
         }
-
-        return /^0x[0-9a-fA-F]{40}$/.test(formattedAddr);
       };
 
       if (!address) {
