@@ -71,8 +71,6 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         opponentAddress
         currentInterval
         isPlayer
-        myGloves
-        opponentGloves
         playersLeft
         currentPhaseIndex
         currentUserRoundIndex
@@ -104,7 +102,7 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         }
         lastRoundWinner
         currentUserMatchState
-        playerState
+        userEntryState
         intervalEndHeight
       }
     }

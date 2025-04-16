@@ -7,7 +7,7 @@ import { Address } from '@planetarium/account';
 import { request } from 'graphql-request';
 import { useRequiredAccount } from '../context/AccountContext';
 import { useTip } from '../context/TipContext';
-import { SessionState, PlayerState } from '../gql/graphql';
+import { SessionState, UserEntryState } from '../gql/graphql';
 import { GRAPHQL_ENDPOINT, getUserScopedSessionDocument } from '../queries';
 import GameBoard from '../components/GameBoard';
 import StyledButton from '../components/StyledButton';
@@ -88,7 +88,7 @@ export const GamePage: React.FC = () => {
       return <p className="text-red-500 text-center mb-4">{t('ui:noSessionFound')}</p>;
     }
 
-    if (session.playerState === PlayerState.Won) {
+    if (session.userEntryState === UserEntryState.Won) {
       return (
         <div className="flex flex-col items-center justify-between h-full">
           <p> </p>
@@ -111,7 +111,7 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (session.playerState === PlayerState.Lose) {
+    if (session.userEntryState === UserEntryState.Lose) {
       return (
         <div className="flex flex-col items-center justify-between h-full">
           <p> </p>

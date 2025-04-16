@@ -75,7 +75,7 @@ const JoinPage: React.FC = () => {
     }
   };
 
-  const MAX_SELECTIONS = sessionData?.metadata?.numberOfGloves ?? -1;
+  const MAX_SELECTIONS = sessionData?.metadata?.numberOfInitialGloves ?? -1;
 
   const renderSessionInfo = () => {
     if (sessionLoading) {
@@ -86,7 +86,7 @@ const JoinPage: React.FC = () => {
       return <p className="text-center text-red-500">{t('ui:sessionNotFound')}</p>;
     }
 
-    const { metadata, creationHeight, players, state } = sessionData;
+    const { metadata, creationHeight, userEntries, state } = sessionData;
 
     // 세션이 Ready 상태가 아닐 때 표시할 UI
     if (state !== SessionState.Ready) {
@@ -140,7 +140,7 @@ const JoinPage: React.FC = () => {
             <div className="flex items-center mb-2">
               <Users className="mr-2 h-5 w-5" />
               <span className="font-semibold">{t('ui:players')}:</span>
-              <span className="ml-2">{players?.length || 0} / {metadata?.maximumUser || 0}</span>
+              <span className="ml-2">{userEntries?.length || 0} / {metadata?.maximumUser || 0}</span>
             </div>
             
             <div className="flex items-center mb-2">
@@ -174,7 +174,7 @@ const JoinPage: React.FC = () => {
 
             <div className="flex items-center mb-2">
               <span className="font-semibold">{t('ui:selectableGloves')}:</span>
-              <span className="ml-2">{metadata?.numberOfGloves} {t('ui:gloves')}</span>
+              <span className="ml-2">{metadata?.numberOfInitialGloves} {t('ui:gloves')}</span>
             </div>
           </div>
         </div>
