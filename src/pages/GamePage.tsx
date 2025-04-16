@@ -165,23 +165,6 @@ export const GamePage: React.FC = () => {
       );
     }
 
-    if (account.address.equals(Address.fromHex(session.organizerAddress)) && !session.isPlayer) {
-      return (
-        <div>
-          <p className="text-2xl">{t('ui:youAreTheSessionOrganizer')}</p>
-          <StyledButton 
-            bgColor = '#FFE55C'
-            shadowColor = '#FF9F0A'
-            onClick={() => navigate(`/result/${sessionId}`)}>
-            {t('ui:spectate')}
-          </StyledButton>
-          <StyledButton onClick={() => navigate('/')} >
-            {t('ui:backToMain')}
-          </StyledButton>
-        </div>
-      )
-    }
-
     return (
       <GameBoard blockIndex={tip?.height || 0} data={session} />
     );
