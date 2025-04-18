@@ -1,0 +1,22 @@
+{
+  "BANGLOVETYPE": {
+    "name": "Ban Glove Type",
+    "description": "Cannot use {{type}} type gloves"
+  },
+  "DAMAGEAMPLIFICATION": {
+    "name": "Damage Amplification",
+    "description": "All damage increased (or decreased) by {{multiplier}}%"
+  },
+  "HEALTH_REGEN": {
+    "name": "Health Regeneration",
+    "description": "Restore {{amount}} health at round end"
+  },
+  "GLOVE_DAMAGE_MULTIPLIER": {
+    "name": "Specific Glove Damage Increase",
+    "description": "{{type}} type glove damage increased by {{multiplier}}%"
+  },
+  "HEALTH_DRAIN": {
+    "name": "Health Drain",
+    "description": "Lose {{amount}} health at round end"
+  }
+} 

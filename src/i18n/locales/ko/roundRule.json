@@ -1,0 +1,22 @@
+{
+  "BANGLOVETYPE": {
+    "name": "장갑 타입 제한",
+    "description": "{{type}} 타입 장갑 사용 불가"
+  },
+  "DAMAGEAMPLIFICATION": {
+    "name": "대미지 증폭",
+    "description": "모든 대미지 {{multiplier}}% 증가 (혹은 감소)"
+  },
+  "HEALTH_REGEN": {
+    "name": "체력 회복",
+    "description": "라운드 종료 시 체력 {{amount}} 회복"
+  },
+  "GLOVE_DAMAGE_MULTIPLIER": {
+    "name": "특정 장갑 대미지 증가",
+    "description": "{{type}} 타입 장갑 대미지 {{multiplier}}% 증가"
+  },
+  "HEALTH_DRAIN": {
+    "name": "체력 감소",
+    "description": "라운드 종료 시 체력 {{amount}} 감소"
+  }
+} 

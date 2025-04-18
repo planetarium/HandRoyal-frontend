@@ -87,6 +87,7 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
             parameters
           }
         }
+        myDisabledGloves
         opponentPlayer {
           address
           initialGloves
@@ -100,10 +101,16 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
             parameters
           }
         }
+        opponentDisabledGloves
         lastRoundWinner
         currentUserMatchState
         userEntryState
         intervalEndHeight
+        roundRules {
+          type
+          parameters
+          appliedAt
+        }
       }
     }
   }
