@@ -173,7 +173,7 @@ export const MainPage: React.FC = () => {
                       key={sessionMetadata.id}
                       blocksLeft={session.startHeight - (tip?.height ?? 0)}
                       canJoin={isUserAllowed}
-                      currentPlayers={session.players?.length ?? 0}
+                      currentPlayers={session.userEntries?.length ?? 0}
                       handleJoin={handleJoin}
                       handleSpectate={handleSpectate}
                       host={sessionMetadata.organizer}

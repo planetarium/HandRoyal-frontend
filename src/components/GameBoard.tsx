@@ -94,21 +94,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
       opponentAddress: data.opponentAddress || null,
       opponentName: opponentData?.name || null,
       myGloveAddress:
-        (data.myGloves !== null &&
-          data.myGloves !== undefined &&
-          data.myCondition?.submission !== undefined) ?
-            data.myGloves?.[data.myCondition?.submission] :
+        (data.myPlayer?.initialGloves !== null &&
+          data.myPlayer?.initialGloves !== undefined &&
+          data.myPlayer?.submission !== undefined) ?
+            data.myPlayer?.initialGloves?.[data.myPlayer?.submission] :
             null,
       opponentGloveAddress:
-        (data.opponentGloves !== null &&
-          data.opponentGloves !== undefined &&
-          data.opponentCondition?.submission !== undefined) ?
-            data.opponentGloves?.[data.opponentCondition?.submission] :
+        (data.opponentPlayer?.initialGloves !== null &&
+          data.opponentPlayer?.initialGloves !== undefined &&
+          data.opponentPlayer?.submission !== undefined) ?
+            data.opponentPlayer?.initialGloves?.[data.opponentPlayer?.submission] :
             null,
-      myHealthPoint: data.myCondition?.healthPoint ?? 100,
-      opponentHealthPoint: data.opponentCondition?.healthPoint ?? 100,
-      myEffects: data.myCondition?.activeEffectData?.map(effect => effect?.type).filter(effect => effect !== undefined) ?? [],
-      opponentEffects: data.opponentCondition?.activeEffectData?.map(effect => effect?.type).filter(effect => effect !== undefined) ?? [],
+      myHealthPoint: data.myPlayer?.healthPoint ?? 100,
+      opponentHealthPoint: data.opponentPlayer?.healthPoint ?? 100,
+      myEffects: data.myPlayer?.activeEffectData?.map(effect => effect?.type).filter(effect => effect !== undefined) ?? [],
+      opponentEffects: data.opponentPlayer?.activeEffectData?.map(effect => effect?.type).filter(effect => effect !== undefined) ?? [],
       maxHealthPoint: 100
     };
 
@@ -146,14 +146,24 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
   };
   
   // 사용 가능한 글러브만 필터링하되, 원본 인덱스 정보 유지
-  const availableGloves = data?.myGloves?.map((gloveId, index) => ({
+  const myGloves = data.myPlayer?.initialGloves?.map((gloveId, index) => ({
     gloveId,
     originalIndex: index,
-    isUsed: data?.myCondition?.gloveUsed?.[index] === true
-  })).filter(glove => !glove.isUsed) ?? [];
+    isInactive: data?.myPlayer?.gloveInactive?.[index] === true,
+    isUsed: data?.myPlayer?.gloveUsed?.[index] === true
+  }));
+
+  const myActiveGloves = myGloves?.filter(glove => !glove.isInactive && !glove.isUsed);
+
+  const opponentGloves = data.opponentPlayer?.initialGloves?.map((gloveId, index) => ({
+    gloveId,
+    originalIndex: index,
+    isInactive: data?.opponentPlayer?.gloveInactive?.[index] === true,
+    isUsed: data?.opponentPlayer?.gloveUsed?.[index] === true
+  }));
 
   const calculateSpacing = () => {
-    const totalCards = availableGloves.length;
+    const totalCards = myGloves?.filter(glove => !glove.isInactive).length ?? 0;
     const cardWidth = 100; // w-25 = 100px
     const containerWidth = 672; // max-w-3xl = 42rem = 672px
     const totalPadding = 24;
@@ -220,25 +230,25 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
 
       {/* 상대 보유 글러브 표시 영역 */}
       <div className="flex flex-wrap justify-center gap-2 p-4 w-full">
-        {data?.opponentGloves?.map((gloveId, index) => (
+        {opponentGloves?.filter(glove => !glove.isInactive).map((glove, index) => (
           <div
             key={index}
             className="group/glove relative"
           >
             <div
               className={`w-12 h-14 rounded-lg overflow-hidden border-2 border-black bg-gray-100 relative ${
-                data?.opponentCondition?.gloveUsed?.[index] ? 'opacity-50' : ''
+                glove.isUsed ? 'opacity-50' : ''
               }`}
             >
               <div className="flex flex-col h-full">
                 <div className="h-full">
                   <img
-                    alt={gloveId}
+                    alt={glove.gloveId}
                     className="w-full h-full object-cover"
-                    src={getLocalGloveImage(gloveId)}
+                    src={getLocalGloveImage(glove.gloveId)}
                   />
                 </div>
-                {data?.opponentCondition?.gloveUsed?.[index] && (
+                {glove.isUsed && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                     <span className="text-white text-xl">✗</span>
                   </div>
@@ -251,18 +261,18 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                 <div className="flex gap-3 items-start mb-2">
                   <div className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20">
                     <img
-                      alt={gloveId}
+                      alt={glove.gloveId}
                       className="w-full h-full object-cover"
-                      src={getLocalGloveImage(gloveId)}
+                      src={getLocalGloveImage(glove.gloveId)}
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-sm mb-1">{t(`glove:${gloveId}.name`)}</h3>
-                    <p className="text-xs text-slate-300">{GetGloveType(gloveId)}</p>
-                    <p className="text-xs text-yellow-400">{t(`glove:${gloveId}.damage`)}</p>
+                    <h3 className="font-bold text-sm mb-1">{t(`glove:${glove.gloveId}.name`)}</h3>
+                    <p className="text-xs text-slate-300">{GetGloveType(glove.gloveId)}</p>
+                    <p className="text-xs text-yellow-400">{t(`glove:${glove.gloveId}.damage`)}</p>
                   </div>
                 </div>
-                <p className="text-xs text-slate-400">{t(`glove:${gloveId}.description`)}</p>
+                <p className="text-xs text-slate-400">{t(`glove:${glove.gloveId}.description`)}</p>
               </div>
               <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-black/90 rotate-45" />
             </div>
@@ -339,7 +349,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
               const opponentGloveType = gameBoardState.opponentGloveAddress ? AddressToGloveType(gameBoardState.opponentGloveAddress) : null;
               const { winningType, losingType } = opponentGloveType ? JudgeGloveWinLose(opponentGloveType) : { winningType: null, losingType: null };
 
-              return availableGloves.map((glove, displayIndex) => {
+              return myActiveGloves?.map((glove, displayIndex) => {
                 const isSelected = selectedHand === glove.originalIndex;
                 const gloveImage = getLocalGloveImage(glove.gloveId);
                 const spacing = calculateSpacing();
@@ -370,7 +380,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                       height: '100px',
                       minWidth: '100px',
                       minHeight: '100px',
-                      marginRight: displayIndex < availableGloves.length - 1 ? `${spacing}px` : '0'
+                      marginRight: displayIndex < myActiveGloves.length - 1 ? `${spacing}px` : '0'
                     }}
                     onClick={() => isBreak ? null : setSelectedHand(isSelected ? -1 : glove.originalIndex)}
                   >

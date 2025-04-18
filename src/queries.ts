@@ -49,10 +49,9 @@ export const getSessionsDocument = graphql(/* GraphQL */ `
           users
         }
         state
-        players {
+        userEntries {
           id
           initialGloves
-          playerIndex
         }
         creationHeight
         startHeight
@@ -72,14 +71,15 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         opponentAddress
         currentInterval
         isPlayer
-        myGloves
-        opponentGloves
         playersLeft
         currentPhaseIndex
         currentUserRoundIndex
-        myCondition {
-          healthPoint
+        myPlayer {
+          address
+          initialGloves
+          gloveInactive
           gloveUsed
+          healthPoint
           submission
           activeEffectData {
             type
@@ -87,9 +87,12 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
             parameters
           }
         }
-        opponentCondition {
-          healthPoint
+        opponentPlayer {
+          address
+          initialGloves
+          gloveInactive
           gloveUsed
+          healthPoint
           submission
           activeEffectData {
             type
@@ -99,7 +102,7 @@ export const getUserScopedSessionDocument = graphql(/* GraphQL */ `
         }
         lastRoundWinner
         currentUserMatchState
-        playerState
+        userEntryState
         intervalEndHeight
       }
     }
@@ -126,10 +129,9 @@ export const getSessionHeaderDocument = graphql(/* GraphQL */ `
           numberOfActiveGloves
         }
         state
-        players {
+        userEntries {
           id
           initialGloves
-          playerIndex
         }
         creationHeight
         startHeight
@@ -165,31 +167,42 @@ export const getSessionDocument = graphql(/* GraphQL */ `
           users
         }
         state
-        players {
+        userEntries {
           id
           initialGloves
-          playerIndex
           state
         }
         phases {
           height
           matches {
             startHeight
-            matchPlayers {
-              playerIndex
-              activeGloves
-            }
             state
             rounds {
-              condition1 {
-                healthPoint
+              player1 {
+                address
+                initialGloves
+                gloveInactive
                 gloveUsed
+                healthPoint
                 submission
+                activeEffectData {
+                  type
+                  duration
+                  parameters
+                }
               }
-              condition2 {
-                healthPoint
+              player2 {
+                address
+                initialGloves
+                gloveInactive
                 gloveUsed
+                healthPoint
                 submission
+                activeEffectData {
+                  type
+                  duration
+                  parameters
+                }
               }
               winner
             }
