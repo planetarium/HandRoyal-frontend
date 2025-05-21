@@ -150,6 +150,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     gloveId,
     originalIndex: index,
     isInactive: data?.myPlayer?.gloveInactive?.[index] === true,
+    isDisabled: data?.myDisabledGloves?.[index] === true,
     isUsed: data?.myPlayer?.gloveUsed?.[index] === true
   }));
 
@@ -159,6 +160,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
     gloveId,
     originalIndex: index,
     isInactive: data?.opponentPlayer?.gloveInactive?.[index] === true,
+    isDisabled: data?.opponentDisabledGloves?.[index] === true,
     isUsed: data?.opponentPlayer?.gloveUsed?.[index] === true
   }));
 
@@ -211,6 +213,31 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
         </div>
       )}
 
+      {/* 라운드 룰 표시 영역 */}
+      <div className="flex flex-wrap justify-center gap-2 px-3 py-1.5 bg-slate-900/50 border-y border-slate-700">
+        {data?.roundRules?.map((rule, index) => {
+          // 현재 라운드가 발동 라운드 이후인 경우에만 표시
+          if (data?.currentUserRoundIndex !== null && data?.currentUserRoundIndex !== undefined && rule && data.currentUserRoundIndex >= rule.appliedAt) {
+            return (
+              <div 
+                key={index}
+                className="flex items-center gap-1 px-2 py-1 bg-slate-800 rounded-full"
+              >
+                <span className="text-xs text-slate-400">{t('ui:roundRule')}</span>
+                <span className="text-sm font-medium text-yellow-400">
+                  {t(`roundRule:${rule.type}.description`, { 
+                    type: rule.parameters?.[0] ?? '',
+                    multiplier: rule.parameters?.[0] ?? '',
+                    amount: rule.parameters?.[0] ?? ''
+                  })}
+                </span>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
+
       {/* 타이머 퓨즈 - 슬림한 디자인 */}
       <div className="relative h-1.5 w-full bg-slate-700">
         <div
@@ -251,6 +278,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                 {glove.isUsed && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                     <span className="text-white text-xl">✗</span>
+                  </div>
+                )}
+                {!glove.isUsed && glove.isDisabled && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-red-500/50">
+                    <span className="text-red-500 text-xl">✗</span>
                   </div>
                 )}
               </div>
@@ -354,6 +386,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                 const gloveImage = getLocalGloveImage(glove.gloveId);
                 const spacing = calculateSpacing();
                 const gloveType = AddressToGloveType(glove.gloveId);
+                const isDisabled = glove.isDisabled;
                 const gloveStatus = opponentGloveType ? 
                   (gloveType === winningType ? GloveStatus.Winning : 
                   gloveType === losingType ? GloveStatus.Losing : 
@@ -382,11 +415,19 @@ const GameBoard: React.FC<GameBoardProps> = ({ blockIndex, data }) => {
                       minHeight: '100px',
                       marginRight: displayIndex < myActiveGloves.length - 1 ? `${spacing}px` : '0'
                     }}
-                    onClick={() => isBreak ? null : setSelectedHand(isSelected ? -1 : glove.originalIndex)}
+                    onClick={() => {
+                      if (isBreak || isDisabled) return;
+                      setSelectedHand(isSelected ? -1 : glove.originalIndex);
+                    }}
                   >
                     {gloveStatus === GloveStatus.Winning && (
                       <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 animate-bounce">
                         <div className="text-green-500 text-2xl">↑</div>
+                      </div>
+                    )}
+                    {isDisabled && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <div className="text-red-500 text-4xl font-bold">✕</div>
                       </div>
                     )}
                     <div className="w-full h-full overflow-hidden rounded-lg">
